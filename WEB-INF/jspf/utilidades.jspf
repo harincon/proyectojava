@@ -1,4 +1,4 @@
-<%@ page import="java.io.File,java.math.BigDecimal,java.math.RoundingMode,java.nio.charset.StandardCharsets,java.security.GeneralSecurityException,java.security.MessageDigest,java.security.SecureRandom,java.sql.SQLException,java.text.NumberFormat,java.time.LocalDateTime,java.time.ZoneId,java.time.format.DateTimeFormatter,java.time.format.DateTimeParseException,java.util.Base64,java.util.Locale,javax.crypto.SecretKeyFactory,javax.crypto.spec.PBEKeySpec" %>
+<%@ page import="java.io.File,java.math.BigDecimal,java.math.RoundingMode,java.nio.charset.StandardCharsets,java.security.GeneralSecurityException,java.security.MessageDigest,java.security.SecureRandom,java.sql.SQLException,java.text.NumberFormat,java.time.LocalDateTime,java.time.ZoneId,java.time.format.DateTimeFormatter,java.time.format.DateTimeParseException,java.util.Base64,java.util.Locale,java.util.Map,javax.crypto.SecretKeyFactory,javax.crypto.spec.PBEKeySpec" %>
 <%-- Incluir antes de leer parámetros: fija UTF-8 en la petición. --%>
 <%
     if (request.getCharacterEncoding() == null) {
@@ -179,6 +179,22 @@
             return "Uno de los valores no es válido.";
         }
         return "No fue posible completar la operación. Intente nuevamente.";
+    }
+
+    // Formularios: leen los atributos de petición "valores" y "errores" (Map<String,String>).
+    private String valorFormulario(HttpServletRequest peticion, String campo) {
+        Object valores = peticion.getAttribute("valores");
+        return valores instanceof Map ? escapar(((Map<?, ?>) valores).get(campo)) : "";
+    }
+
+    private String errorFormulario(HttpServletRequest peticion, String campo) {
+        Object errores = peticion.getAttribute("errores");
+        return errores instanceof Map ? escapar(((Map<?, ?>) errores).get(campo)) : "";
+    }
+
+    // Devuelve " is-invalid" para agregar a la clase del campo con error.
+    private String invalido(HttpServletRequest peticion, String campo) {
+        return errorFormulario(peticion, campo).isEmpty() ? "" : " is-invalid";
     }
 
     // Carpeta privada para archivos subidos; se configura en web.xml (rutaArchivos).

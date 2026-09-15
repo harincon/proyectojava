@@ -87,7 +87,7 @@ Solicitudes: radicar documentos PDF privados, consultar estados/observaciones, r
 - Documentos y fotos de perfil: validar tamaño/tipo y nombres generados. Descargar documentos mediante una JSP autorizada. Verificar primero el soporte de carga multipart con JSP y web.xml, sin añadir clases propias por sorpresa.
 - La auditoría se implementará al final, cuando los módulos principales estén terminados, con su modelo, controlador y vista. Entonces se incorporará registro real de accesos y cambios. No hacerla dependencia de B0–B6.
 
-Estas comprobaciones siguen pendientes de implementación. No existe actualmente una protección de acceso de usuarios terminada.
+seguridad.jspf, el token, el hash y la subida de fotos están implementados desde B2. La pertenencia de cada registro, las transacciones de empresa, reservas y cierres, y la descarga de documentos se comprueban al implementar B3–B6.
 
 ## 7. Ajustes visuales respecto a Figma
 

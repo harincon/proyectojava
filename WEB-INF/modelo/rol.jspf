@@ -1,0 +1,25 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Roles con la cantidad de cuentas activas e inactivas que los tienen.
+    private List<Map<String, Object>> listarRolesConUsuarios(Connection conexion) throws SQLException {
+        String sql = "SELECT r.id_rol, r.nombre, "
+                + "count(u.id_usuario) FILTER (WHERE u.activo) AS activos, "
+                + "count(u.id_usuario) FILTER (WHERE NOT u.activo) AS inactivos "
+                + "FROM rol r LEFT JOIN usuario_rol ur ON ur.id_rol = r.id_rol "
+                + "LEFT JOIN usuario u ON u.id_usuario = ur.id_usuario "
+                + "GROUP BY r.id_rol, r.nombre ORDER BY r.id_rol";
+        List<Map<String, Object>> roles = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                Map<String, Object> rol = new LinkedHashMap<String, Object>();
+                rol.put("idRol", fila.getInt("id_rol"));
+                rol.put("nombre", fila.getString("nombre"));
+                rol.put("activos", fila.getInt("activos"));
+                rol.put("inactivos", fila.getInt("inactivos"));
+                roles.add(rol);
+            }
+        }
+        return roles;
+    }
+%>

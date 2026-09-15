@@ -9,7 +9,8 @@ Aplicación académica para publicar inmuebles, buscar propiedades, agendar visi
 - Driver JDBC conservado en WEB-INF/lib.
 - B0 (base común en JSP/JSPF) terminado y verificado en Tomcat 8.5.96: conexión, utilidades, subida de archivos y pruebas de diagnóstico.
 - B1 (diseño) terminado: **Habita**, paleta azul y turquesa, Bootstrap en local, cabecera, pie, menú por roles y páginas de error. Muestra: `http://localhost:8080/proyectojava/controlador/prueba_diseno.jsp`.
-- Ya se pueden delegar B2 y B8.
+- B2 (acceso, usuarios, roles y perfil) terminado: ingreso y registro, panel por roles, perfil con foto y administración de usuarios. Entrada: `http://localhost:8080/proyectojava/controlador/acceso.jsp?accion=ingresar` (desarrollo: `admin@habita.com` / `Admin123`).
+- B8 entregó los datos de prueba en la rama bloque/B8-datos; falta integrarlos. Después sigue B3.
 - En otro equipo, copiar `WEB-INF/jspf/conexion.jspf.ejemplo` como `conexion.jspf` y completar la contraseña. Diagnóstico local: `http://localhost:8080/proyectojava/controlador/prueba_conexion.jsp`.
 
 ## Forma de trabajo elegida
@@ -18,7 +19,7 @@ Páginas .jsp, fragmentos .jspf, JDBC, HTML5, CSS3, JavaScript, Bootstrap, Tomca
 
 Priorizar JSP/JSPF para toda función que pueda resolverse en servidor: formularios, búsquedas, filtros, paginación, validación, permisos y cambios de estado. JavaScript se limita al uso obligatorio del parcial y a interacciones de navegador que lo necesiten; no duplicar la lógica de negocio en archivos .js.
 
-Se adopta una separación MVC con JSP/JSPF: controlador recibe peticiones, modelo opera los datos y vista presenta. La lógica aún no está implementada. El requisito de Filter sigue pendiente; no se considera resuelto por esta estructura.
+Se adopta una separación MVC con JSP/JSPF: controlador recibe peticiones, modelo opera los datos y vista presenta. Los controladores privados incluyen seguridad.jspf, que comprueba sesión, cuenta activa y roles. El requisito de Filter sigue pendiente; no se considera resuelto por esta estructura.
 
 ## Organización
 

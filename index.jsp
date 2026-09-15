@@ -15,7 +15,20 @@
 </section>
 
 <div class="container py-4">
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body d-flex flex-column">
+          <span class="estado estado-FINALIZADA align-self-start mb-2">B2 · Acceso</span>
+          <h2 class="h5 titulo-pagina">Cuentas y perfil</h2>
+          <p class="text-suave flex-grow-1">Ingreso, registro, panel por roles, perfil con foto y administración de usuarios.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" href="<%= ctx %>/controlador/acceso.jsp?accion=ingresar">Iniciar sesión</a>
+            <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/acceso.jsp?accion=registro">Registrarse</a>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="col">
       <div class="card h-100 border-0 shadow-sm">
         <div class="card-body d-flex flex-column">

@@ -1,0 +1,143 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Datos para iniciar sesión; null si el correo no existe.
+    private Map<String, Object> buscarCuentaPorCorreo(Connection conexion, String correo) throws SQLException {
+        String sql = "SELECT id_usuario, correo, contraseña_hash AS contrasena_hash, activo "
+                + "FROM usuario WHERE lower(correo) = lower(?)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, correo);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (!fila.next()) {
+                    return null;
+                }
+                Map<String, Object> cuenta = new LinkedHashMap<String, Object>();
+                cuenta.put("idUsuario", fila.getInt("id_usuario"));
+                cuenta.put("correo", fila.getString("correo"));
+                cuenta.put("contrasenaHash", fila.getString("contrasena_hash"));
+                cuenta.put("activo", fila.getBoolean("activo"));
+                return cuenta;
+            }
+        }
+    }
+
+    // Usuario con nombres y apellidos de su perfil; null si no existe.
+    private Map<String, Object> buscarUsuario(Connection conexion, int idUsuario) throws SQLException {
+        String sql = "SELECT u.id_usuario, u.correo, u.activo, p.nombres, p.apellidos "
+                + "FROM usuario u LEFT JOIN perfil p ON p.id_usuario = u.id_usuario WHERE u.id_usuario = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaUsuario(fila) : null;
+            }
+        }
+    }
+
+    private int crearUsuario(Connection conexion, String correo, String contrasenaHash) throws SQLException {
+        String sql = "INSERT INTO usuario (correo, contraseña_hash) VALUES (?, ?) RETURNING id_usuario";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, correo);
+            sentencia.setString(2, contrasenaHash);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private void actualizarCorreo(Connection conexion, int idUsuario, String correo) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE usuario SET correo = ? WHERE id_usuario = ?")) {
+            sentencia.setString(1, correo);
+            sentencia.setInt(2, idUsuario);
+            sentencia.executeUpdate();
+        }
+    }
+
+    private void actualizarClave(Connection conexion, int idUsuario, String contrasenaHash) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE usuario SET contraseña_hash = ? WHERE id_usuario = ?")) {
+            sentencia.setString(1, contrasenaHash);
+            sentencia.setInt(2, idUsuario);
+            sentencia.executeUpdate();
+        }
+    }
+
+    private boolean cambiarEstadoUsuario(Connection conexion, int idUsuario, boolean activo) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE usuario SET activo = ? WHERE id_usuario = ?")) {
+            sentencia.setBoolean(1, activo);
+            sentencia.setInt(2, idUsuario);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // Búsqueda por correo, nombres o apellidos; null = sin filtro.
+    private List<Map<String, Object>> listarUsuarios(Connection conexion, String busqueda, int limite, int desplazamiento)
+            throws SQLException {
+        String sql = "SELECT u.id_usuario, u.correo, u.activo, p.nombres, p.apellidos, "
+                + "COALESCE(string_agg(r.nombre, ',' ORDER BY r.id_rol), '') AS roles "
+                + "FROM usuario u LEFT JOIN perfil p ON p.id_usuario = u.id_usuario "
+                + "LEFT JOIN usuario_rol ur ON ur.id_usuario = u.id_usuario "
+                + "LEFT JOIN rol r ON r.id_rol = ur.id_rol "
+                + (busqueda == null ? "" : "WHERE u.correo ILIKE ? OR p.nombres ILIKE ? OR p.apellidos ILIKE ? ")
+                + "GROUP BY u.id_usuario, u.correo, u.activo, p.nombres, p.apellidos "
+                + "ORDER BY u.id_usuario LIMIT ? OFFSET ?";
+        List<Map<String, Object>> usuarios = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            int indice = 1;
+            if (busqueda != null) {
+                String patron = patronBusqueda(busqueda);
+                sentencia.setString(indice++, patron);
+                sentencia.setString(indice++, patron);
+                sentencia.setString(indice++, patron);
+            }
+            sentencia.setInt(indice++, limite);
+            sentencia.setInt(indice, desplazamiento);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    Map<String, Object> usuario = filaUsuario(fila);
+                    usuario.put("roles", fila.getString("roles"));
+                    usuarios.add(usuario);
+                }
+            }
+        }
+        return usuarios;
+    }
+
+    private int contarUsuarios(Connection conexion, String busqueda) throws SQLException {
+        String sql = "SELECT count(*) FROM usuario u LEFT JOIN perfil p ON p.id_usuario = u.id_usuario"
+                + (busqueda == null ? "" : " WHERE u.correo ILIKE ? OR p.nombres ILIKE ? OR p.apellidos ILIKE ?");
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (busqueda != null) {
+                String patron = patronBusqueda(busqueda);
+                sentencia.setString(1, patron);
+                sentencia.setString(2, patron);
+                sentencia.setString(3, patron);
+            }
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // Nombre para mostrar: nombres y apellidos, o el correo si están vacíos.
+    private String nombreCompleto(Map<String, Object> usuario) {
+        String nombres = usuario.get("nombres") == null ? "" : usuario.get("nombres").toString();
+        String apellidos = usuario.get("apellidos") == null ? "" : usuario.get("apellidos").toString();
+        String completo = (nombres + " " + apellidos).trim();
+        return completo.isEmpty() ? String.valueOf(usuario.get("correo")) : completo;
+    }
+
+    private Map<String, Object> filaUsuario(ResultSet fila) throws SQLException {
+        Map<String, Object> usuario = new LinkedHashMap<String, Object>();
+        usuario.put("idUsuario", fila.getInt("id_usuario"));
+        usuario.put("correo", fila.getString("correo"));
+        usuario.put("activo", fila.getBoolean("activo"));
+        usuario.put("nombres", fila.getString("nombres"));
+        usuario.put("apellidos", fila.getString("apellidos"));
+        return usuario;
+    }
+
+    // Evita que % y _ escritos por el usuario actúen como comodines.
+    private String patronBusqueda(String texto) {
+        return "%" + texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+    }
+%>

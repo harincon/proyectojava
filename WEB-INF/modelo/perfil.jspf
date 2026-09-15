@@ -1,0 +1,85 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.LinkedHashMap,java.util.Map" %>
+<%!
+    private void crearPerfil(Connection conexion, int idUsuario, String nombres, String apellidos) throws SQLException {
+        String sql = "INSERT INTO perfil (id_usuario, nombres, apellidos) VALUES (?, ?, ?)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            sentencia.setString(2, nombres);
+            sentencia.setString(3, apellidos);
+            sentencia.executeUpdate();
+        }
+    }
+
+    // Perfil con el correo de la cuenta; null si el usuario no existe.
+    private Map<String, Object> buscarPerfil(Connection conexion, int idUsuario) throws SQLException {
+        String sql = "SELECT u.id_usuario, u.correo, p.nombres, p.apellidos, p.documento, p.telefono, p.direccion, p.foto "
+                + "FROM usuario u LEFT JOIN perfil p ON p.id_usuario = u.id_usuario WHERE u.id_usuario = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (!fila.next()) {
+                    return null;
+                }
+                Map<String, Object> perfil = new LinkedHashMap<String, Object>();
+                perfil.put("idUsuario", fila.getInt("id_usuario"));
+                perfil.put("correo", fila.getString("correo"));
+                perfil.put("nombres", fila.getString("nombres"));
+                perfil.put("apellidos", fila.getString("apellidos"));
+                perfil.put("documento", fila.getString("documento"));
+                perfil.put("telefono", fila.getString("telefono"));
+                perfil.put("direccion", fila.getString("direccion"));
+                perfil.put("foto", fila.getString("foto"));
+                return perfil;
+            }
+        }
+    }
+
+    // Actualiza o crea el perfil si la cuenta aún no lo tiene.
+    private void guardarPerfil(Connection conexion, int idUsuario, String nombres, String apellidos,
+            String documento, String telefono, String direccion) throws SQLException {
+        String actualizar = "UPDATE perfil SET nombres = ?, apellidos = ?, documento = ?, telefono = ?, direccion = ? "
+                + "WHERE id_usuario = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(actualizar)) {
+            sentencia.setString(1, nombres);
+            sentencia.setString(2, apellidos);
+            sentencia.setString(3, documento);
+            sentencia.setString(4, telefono);
+            sentencia.setString(5, direccion);
+            sentencia.setInt(6, idUsuario);
+            if (sentencia.executeUpdate() > 0) {
+                return;
+            }
+        }
+        String insertar = "INSERT INTO perfil (id_usuario, nombres, apellidos, documento, telefono, direccion) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(insertar)) {
+            sentencia.setInt(1, idUsuario);
+            sentencia.setString(2, nombres);
+            sentencia.setString(3, apellidos);
+            sentencia.setString(4, documento);
+            sentencia.setString(5, telefono);
+            sentencia.setString(6, direccion);
+            sentencia.executeUpdate();
+        }
+    }
+
+    // Guarda la ruta relativa de la foto y devuelve la anterior (o null).
+    private String reemplazarFotoPerfil(Connection conexion, int idUsuario, String ruta) throws SQLException {
+        String anterior = null;
+        try (PreparedStatement sentencia = conexion.prepareStatement("SELECT foto FROM perfil WHERE id_usuario = ? FOR UPDATE")) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (!fila.next()) {
+                    throw new SQLException("La cuenta no tiene perfil.", "P0002");
+                }
+                anterior = fila.getString("foto");
+            }
+        }
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE perfil SET foto = ? WHERE id_usuario = ?")) {
+            sentencia.setString(1, ruta);
+            sentencia.setInt(2, idUsuario);
+            sentencia.executeUpdate();
+        }
+        return anterior;
+    }
+%>

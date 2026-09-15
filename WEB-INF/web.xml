@@ -27,6 +27,20 @@
         <url-pattern>/controlador/prueba_subida.jsp</url-pattern>
     </servlet-mapping>
 
+    <!-- B2: foto de perfil, JPG o PNG hasta 2 MB. -->
+    <servlet>
+        <servlet-name>perfil</servlet-name>
+        <jsp-file>/controlador/perfil.jsp</jsp-file>
+        <multipart-config>
+            <max-file-size>2097152</max-file-size>
+            <max-request-size>2621440</max-request-size>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>perfil</servlet-name>
+        <url-pattern>/controlador/perfil.jsp</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>

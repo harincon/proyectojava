@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). Quedan habilitados B2 y B8.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil) está implementado y verificado (15 de septiembre de 2026). Queda habilitado B3.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -45,6 +45,7 @@ utilidades.jspf va **primero**: al incluirse fija UTF-8 en la petición, y eso s
 | | `ahora()`, `aFechaHora(String fecha, String hora)`, `formatoFecha(LocalDateTime)` | Zona America/Bogota; formato `dd/MM/yyyy HH:mm` |
 | | `mensajeError(SQLException)` | Mensaje claro para 23505, 23503, 23001 y 23514 |
 | | `carpetaArchivos(ServletContext)` | Carpeta privada de archivos subidos (se crea si falta) |
+| | `valorFormulario(request, campo)` · `errorFormulario(request, campo)` · `invalido(request, campo)` | Para vistas (añadidas en B2): valor previo escapado de `valores`, mensaje escapado de `errores` y `" is-invalid"` si hay error |
 
 No crear funciones con los mismos nombres en otros fragmentos: la página no compilaría.
 
@@ -84,11 +85,59 @@ Roles: ADMINISTRADOR, INMOBILIARIA, CLIENTE. El visitante es anónimo.
 
 No borrar ni modificar estas filas en pruebas. Orden de ejecución de scripts: `01-esquema.sql` → `02-datos-base.sql` → `03-datos-prueba.sql` (B8) → `04-consultas.sql` (B7). Usuario multirrol mantiene todos los permisos, con panel inicial admin > inmobiliaria > cliente.
 
-Cada controlador privado define los roles permitidos como atributo de petición rolesPermitidos (Set<String>) antes de incluir seguridad.jspf. El fragmento comprobará sesión, cuenta activa y roles actuales; ante fallo hace forward a `/WEB-INF/vista/acceso_denegado.jsp` y termina la página con `return;`. No debe generar HTML antes de esa comprobación.
+### seguridad.jspf (B2, implementado)
+
+Controlador privado, en este orden:
+
+~~~jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.Arrays,java.util.HashSet" %>
+<%@ include file="/WEB-INF/jspf/utilidades.jspf" %>
+<%@ include file="/WEB-INF/jspf/conexion.jspf" %>
+<%@ include file="/WEB-INF/modelo/propiedad.jspf" %>
+<%
+    request.setAttribute("rolesPermitidos", new HashSet<String>(Arrays.asList("INMOBILIARIA")));
+%>
+<%@ include file="/WEB-INF/jspf/seguridad.jspf" %>
+<%
+    // idUsuarioSesion (Integer) y rolesUsuario (Set<String>) ya existen aquí.
+%>
+~~~
+
+En cada petición, el fragmento vuelve a leer de la base si la cuenta está activa y qué roles tiene. Por eso desactivar una cuenta o quitarle un rol surte efecto de inmediato, aunque la sesión siga abierta. ADMINISTRADOR entra a todo lo privado aunque no esté en `rolesPermitidos`. Si falla, hace forward a `acceso_denegado.jsp` y `return;`. Si la cuenta ya no existe o está desactivada, invalida la sesión. Actualiza `roles` en la sesión para que el menú coincida.
+
+Deja declaradas `idUsuarioSesion` y `rolesUsuario`: el controlador no debe volver a declararlas. No escribir HTML antes de incluirlo.
 
 Todas las acciones y descargas privadas también lo incluyen. El controlador comprueba pertenencia del registro, con validaciones del modelo antes de modificar datos. Administrador con acceso total conforme al parcial; empresa solo sus propiedades/trámites y cliente los suyos.
 
-Comprobar token en cada POST antes de modificar. Regenerar ID de sesión al ingresar e invalidar al salir. Registro público solo CLIENTE. seguridad.jspf aún no existe: no afirmar protección terminada.
+Comprobar token en cada POST antes de modificar. Al ingresar se renueva el ID de sesión (`request.changeSessionId()`); al salir se invalida. Registro público solo CLIENTE.
+
+### Funciones de B2 para otros bloques
+
+Todas reciben la `Connection` de quien llama, para compartir transacción.
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| usuario.jspf | `buscarUsuario(conexion, idUsuario)` | Map `idUsuario`, `correo`, `activo`, `nombres`, `apellidos`; `null` si no existe |
+| | `crearUsuario(conexion, correo, hash)` | `int` id nuevo (23505 si el correo existe) |
+| | `nombreCompleto(Map)` | Nombres y apellidos, o el correo si faltan |
+| perfil.jspf | `buscarPerfil(conexion, idUsuario)` | Map `correo`, `nombres`, `apellidos`, `documento`, `telefono`, `direccion`, `foto` |
+| usuario_rol.jspf | `rolesDeUsuario(conexion, idUsuario)` | `Set<String>` ordenado |
+| | `asignarRol(conexion, idUsuario, "INMOBILIARIA")` | `true` si lo agregó; `false` si ya lo tenía. B3 lo usa dentro de su transacción de empresa |
+| | `revocarRol(conexion, idUsuario, nombreRol)` | `true` si lo quitó |
+
+Rutas de B2:
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| acceso.jsp | GET/POST `ingresar` · GET/POST `registro` · POST `salir` | Público |
+| panel.jsp | Sin acción | Los tres |
+| perfil.jsp | GET `ver` · POST `guardar` · POST `subir_foto` · GET `foto[&id_usuario=N]` (otra cuenta solo admin) | Los tres |
+| usuario.jsp | GET `listar[&q&pagina]` · `nuevo` · `editar&id_usuario` · POST `crear` · `actualizar` · `cambiar_estado` | ADMINISTRADOR |
+| usuario_rol.jsp | POST `asignar` · `revocar` (id_usuario, rol) | ADMINISTRADOR |
+| rol.jsp | Sin acción | ADMINISTRADOR |
+
+INMOBILIARIA no se asigna desde usuario_rol.jsp: el botón «Empresa» de la edición de usuario lleva a `inmobiliaria.jsp?accion=vincular&id_usuario=N`, que implementa B3. El administrador no puede desactivarse ni quitarse su propio rol, y ninguna cuenta queda sin roles.
 
 ## 5. Rutas y parámetros
 
@@ -184,7 +233,7 @@ Subida de archivos (verificada por B0 con `controlador/prueba_subida.jsp`). En T
 </servlet-mapping>
 ~~~
 
-B2 y B6 piden ese registro al coordinador; no editan web.xml. En la JSP: `Part archivo = request.getPart("archivo")` dentro de `try/catch (IllegalStateException)`, que indica archivo demasiado grande. El token del formulario se lee con `tokenValido` como siempre. Comprobado: nombres con ñ, archivos de 3 MB y rechazo claro por encima del límite.
+Ya registrados: `pruebaSubida` y `perfil` (foto JPG/PNG, 2 MB; el tipo se comprueba por los primeros bytes, no por el nombre). B6 pide el suyo al coordinador; no edita web.xml. En la JSP: `Part archivo = request.getPart("archivo")` dentro de `try/catch (IllegalStateException)`, que indica archivo demasiado grande. El token del formulario se lee con `tokenValido` como siempre. Comprobado: nombres con ñ, archivos de 3 MB y rechazo claro por encima del límite.
 
 Los archivos se guardan con nombre generado en `carpetaArchivos(application)`. La ruta se configura en el `context-param rutaArchivos` de web.xml; vacío = `WEB-INF/archivos`, que no es accesible por URL y está excluida de Git. La descarga pasa siempre por un controlador autorizado.
 
@@ -218,4 +267,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0 y B1 están terminados; B2 y B8 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0, B1 y B2 están terminados; B8 entregó su script en la rama bloque/B8-datos. B3 puede iniciar cuando se autorice. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.

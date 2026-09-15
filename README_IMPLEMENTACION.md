@@ -19,7 +19,39 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Delegar B2 y B8 en paralelo. El coordinador integra B2 primero y después ejecuta el script de B8.
+Integrar B2 (confirmarlo en Git) y después ejecutar el script de B8 (`sql/03-datos-prueba.sql`, en la rama bloque/B8-datos). Luego delegar B3.
+
+## B2 — 15 de septiembre de 2026
+
+Acceso, usuarios, roles y perfil, con seguridad.jspf en lugar de Filter.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/jspf/seguridad.jspf | Comprueba en la base, en cada petición, la sesión, la cuenta activa y los roles vigentes. Administrador con acceso total; forward a acceso denegado |
+| WEB-INF/modelo/usuario.jspf, perfil.jspf, rol.jspf, usuario_rol.jspf | Consultas con PreparedStatement; reciben la Connection para compartir transacción |
+| controlador/acceso.jsp | Ingreso, registro transaccional (usuario + perfil + CLIENTE) y salida por POST |
+| controlador/panel.jsp | Panel inicial según roles |
+| controlador/perfil.jsp | Datos personales y foto JPG/PNG de hasta 2 MB, guardada fuera del acceso por URL |
+| controlador/usuario.jsp, usuario_rol.jsp, rol.jsp | Administración: búsqueda y paginación, crear, editar, activar o desactivar, asignar o revocar roles y resumen de roles |
+| WEB-INF/vista/login, registro, panel, perfil, usuarios, formulario_usuario y roles (.jsp) | Pantallas con el diseño de B1 |
+| WEB-INF/jspf/utilidades.jspf | Se agregaron `valorFormulario`, `errorFormulario` e `invalido` para las vistas |
+| WEB-INF/web.xml | Registro multipart de perfil.jsp |
+
+Verificado en Tomcat (49 comprobaciones por HTTP):
+
+- **Ingreso:** correcto e incorrecto, sin token, intento de inyección SQL, correo sin distinguir mayúsculas y cambio de ID de sesión.
+- **Registro:** transacción con ñ, correo duplicado y contraseña guardada como hash.
+- **Permisos:** un cliente recibe 403 al entrar por URL a páginas de administrador. Una cuenta desactivada pierde el acceso aunque tenga la sesión abierta, y los roles asignados o revocados se aplican de inmediato.
+- **Perfil:** validaciones. Foto: PNG válido aceptado; archivo falso con extensión .png rechazado; 3 MB rechazados; foto ajena solo visible para el administrador.
+- **Administración:** búsqueda con texto de ataque XSS escapado; creación sin roles rechazada; correo duplicado al editar; cambio de clave por el administrador.
+- **Reglas de roles:** INMOBILIARIA no se asigna desde aquí; el administrador no puede desactivarse ni quitarse su rol; ninguna cuenta queda sin roles.
+- **Cierre de sesión:** por GET no cierra y por POST sí. WEB-INF no es accesible por URL.
+
+Capturas revisadas a 1366 px: ingreso, panel, usuarios, edición y perfil. Las cuentas de prueba (@b2.test) y sus fotos se borraron; la base quedó solo con los datos base.
+
+Corregido durante la prueba: la foto se enviaba como `image/png;charset=UTF-8`; ahora se limpia la respuesta antes de fijar el tipo.
+
+Pendiente: B3 implementa `inmobiliaria.jsp?accion=vincular`, destino del botón «Empresa». Para B9: el requisito Filter del parcial sigue sin resolver (seguridad.jspf no es un Filter) y hay que decidirlo con el profesor.
 
 ## Datos base — 15 de septiembre de 2026
 

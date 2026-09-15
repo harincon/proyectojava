@@ -1,0 +1,68 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.Collection,java.util.LinkedHashSet,java.util.Set" %>
+<%--
+  Controla el acceso a un controlador privado. Se incluye después de
+  utilidades.jspf y conexion.jspf, y después de fijar el atributo de petición
+  rolesPermitidos (Set<String>). ADMINISTRADOR entra a todo lo privado.
+  Deja disponibles: idUsuarioSesion (Integer) y rolesUsuario (Set<String>).
+--%>
+<%!
+    // Roles actuales de una cuenta activa; null si no existe o está desactivada.
+    private Set<String> rolesVigentesDe(Connection conexion, int idUsuario) throws SQLException {
+        String sql = "SELECT u.activo, r.nombre FROM usuario u "
+                + "LEFT JOIN usuario_rol ur ON ur.id_usuario = u.id_usuario "
+                + "LEFT JOIN rol r ON r.id_rol = ur.id_rol "
+                + "WHERE u.id_usuario = ? ORDER BY r.id_rol";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                Set<String> roles = null;
+                while (fila.next()) {
+                    if (!fila.getBoolean("activo")) {
+                        return null;
+                    }
+                    if (roles == null) {
+                        roles = new LinkedHashSet<String>();
+                    }
+                    if (fila.getString("nombre") != null) {
+                        roles.add(fila.getString("nombre"));
+                    }
+                }
+                return roles;
+            }
+        }
+    }
+%>
+<%
+    Integer idUsuarioSesion = session.getAttribute("idUsuario") instanceof Integer
+            ? (Integer) session.getAttribute("idUsuario") : null;
+    Set<String> rolesUsuario = null;
+    if (idUsuarioSesion != null) {
+        try (Connection conexionSeguridad = abrirConexion()) {
+            rolesUsuario = rolesVigentesDe(conexionSeguridad, idUsuarioSesion);
+        }
+    }
+
+    boolean accesoPermitido = false;
+    if (rolesUsuario != null) {
+        session.setAttribute("roles", rolesUsuario);
+        Object permitidos = request.getAttribute("rolesPermitidos");
+        if (rolesUsuario.contains("ADMINISTRADOR")) {
+            accesoPermitido = true;
+        } else if (permitidos instanceof Collection) {
+            for (Object rolPermitido : (Collection<?>) permitidos) {
+                if (rolesUsuario.contains(String.valueOf(rolPermitido))) {
+                    accesoPermitido = true;
+                    break;
+                }
+            }
+        }
+    } else if (idUsuarioSesion != null) {
+        // La cuenta fue desactivada o eliminada con la sesión abierta.
+        session.invalidate();
+    }
+
+    if (!accesoPermitido) {
+        request.getRequestDispatcher("/WEB-INF/vista/acceso_denegado.jsp").forward(request, response);
+        return;
+    }
+%>

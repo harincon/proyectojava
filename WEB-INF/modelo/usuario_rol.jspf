@@ -1,0 +1,39 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.LinkedHashSet,java.util.Set" %>
+<%!
+    // Nombres de rol de la cuenta, en orden ADMINISTRADOR, INMOBILIARIA, CLIENTE.
+    private Set<String> rolesDeUsuario(Connection conexion, int idUsuario) throws SQLException {
+        String sql = "SELECT r.nombre FROM usuario_rol ur JOIN rol r ON r.id_rol = ur.id_rol "
+                + "WHERE ur.id_usuario = ? ORDER BY r.id_rol";
+        Set<String> roles = new LinkedHashSet<String>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    roles.add(fila.getString("nombre"));
+                }
+            }
+        }
+        return roles;
+    }
+
+    // true si se agregó; false si ya lo tenía o el rol no existe.
+    private boolean asignarRol(Connection conexion, int idUsuario, String nombreRol) throws SQLException {
+        String sql = "INSERT INTO usuario_rol (id_usuario, id_rol) SELECT ?, id_rol FROM rol WHERE nombre = ? "
+                + "ON CONFLICT DO NOTHING";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            sentencia.setString(2, nombreRol);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private boolean revocarRol(Connection conexion, int idUsuario, String nombreRol) throws SQLException {
+        String sql = "DELETE FROM usuario_rol WHERE id_usuario = ? "
+                + "AND id_rol = (SELECT id_rol FROM rol WHERE nombre = ?)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            sentencia.setString(2, nombreRol);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+%>
