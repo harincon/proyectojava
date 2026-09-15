@@ -32,7 +32,7 @@ FROM (VALUES
 INSERT INTO perfil (id_usuario, nombres, apellidos, documento, telefono, direccion, foto)
 SELECT (SELECT id_usuario FROM usuario WHERE correo = datos.correo),
        datos.nombres, datos.apellidos, datos.documento, datos.telefono, datos.direccion,
-       'img/sin_foto.svg'
+       NULL
 FROM (VALUES
     ('camila.rojas@habita.local', 'Camila', 'Rojas', '1098701001', '3004101001', 'Calle 34 # 18-20, Bucaramanga'),
     ('andres.gomez@habita.local', 'Andrés', 'Gómez', '1098701002', '3004101002', 'Carrera 27 # 45-18, Bucaramanga'),
@@ -97,7 +97,7 @@ SELECT (SELECT id_usuario FROM usuario WHERE correo = datos.correo),
        datos.nombre, datos.nit, datos.telefono, datos.contacto, datos.direccion
 FROM (VALUES
     ('camila.rojas@habita.local', 'Raíz Santandereana', 'NIT-901500101-1', '6076301001', 'contacto@raizsantandereana.co', 'Carrera 33 # 48-15, Bucaramanga'),
-    ('andres.gomez@habita.local', 'Horizonte Urbano', 'NIT-901500102-2', '6076301002', 'contacto@horizonteurbano.co', 'Calle 48 # 26-38, Bucaramanga'),
+    ('andres.gomez@habita.local', 'Horizonte Urbano', 'NIT-901500102-2', '6063401002', 'contacto@horizonteurbano.co', 'Carrera 13 # 15-28, Pereira'),
     ('valentina.torres@habita.local', 'Vivienda Cañaveral', 'NIT-901500103-3', '6076301003', 'contacto@viviendacanaveral.co', 'Carrera 26 # 30-55, Floridablanca'),
     ('santiago.perez@habita.local', 'Patrimonio Colonial', 'NIT-901500104-4', '6076301004', 'contacto@patrimoniocolonial.co', 'Calle 31 # 25-20, Girón'),
     ('natalia.ramirez@habita.local', 'Espacios del Valle', 'NIT-901500105-5', '6076301005', 'contacto@espaciosdelvalle.co', 'Carrera 8 # 12-40, Piedecuesta'),
@@ -123,24 +123,24 @@ SELECT datos.matricula,
 FROM (VALUES
     ('HAB-2026-001', 'NIT-901500101-1', 'Bucaramanga', 'Casa', 'Casa familiar en Cabecera', 'Casa amplia cerca de parques y comercio.', 'Calle 42 # 35-18', 680000000.00, 180.00, 4, 3, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
     ('HAB-2026-002', 'NIT-901500101-1', 'Bucaramanga', 'Apartamento', 'Apartamento con vista al parque', 'Apartamento iluminado en zona residencial.', 'Carrera 38 # 52-40', 390000000.00, 92.00, 3, 2, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-003', 'NIT-901500102-2', 'Floridablanca', 'Casa', 'Casa en conjunto de Cañaveral', 'Vivienda de dos niveles con zona social.', 'Calle 30 # 24-60', 2800000.00, 145.00, 3, 3, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-004', 'NIT-901500102-2', 'Floridablanca', 'Apartamento', 'Apartamento cerca de clínica', 'Ubicación central y transporte cercano.', 'Carrera 23 # 31-12', 1900000.00, 78.00, 2, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
-    ('HAB-2026-005', 'NIT-901500103-3', 'Girón', 'Local', 'Local sobre vía principal', 'Espacio comercial con alta circulación peatonal.', 'Carrera 26 # 32-18', 310000000.00, 64.00, 0, 1, 'VENTA', 'VENDIDA', TRUE, FALSE),
-    ('HAB-2026-006', 'NIT-901500103-3', 'Girón', 'Casa', 'Casa colonial remodelada', 'Conserva fachada tradicional y espacios renovados.', 'Calle 29 # 24-11', 450000000.00, 160.00, 3, 2, 'VENTA', 'DISPONIBLE', TRUE, FALSE),
-    ('HAB-2026-007', 'NIT-901500104-4', 'Piedecuesta', 'Terreno', 'Lote campestre en la mesa', 'Terreno plano con acceso vehicular.', 'Vereda La Mata, lote 18', 220000000.00, 950.00, 0, 0, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-008', 'NIT-901500104-4', 'Piedecuesta', 'Casa', 'Casa campestre amoblada', 'Casa rodeada de zonas verdes.', 'Kilómetro 4 vía Guatiguará', 3500000.00, 210.00, 4, 3, 'ARRIENDO', 'ARRENDADA', TRUE, FALSE),
-    ('HAB-2026-009', 'NIT-901500105-5', 'Bogotá', 'Apartamento', 'Apartamento en Cedritos', 'Edificio residencial con acceso controlado.', 'Calle 145 # 12-30', 520000000.00, 88.00, 3, 2, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-010', 'NIT-901500105-5', 'Bogotá', 'Oficina', 'Oficina en corredor empresarial', 'Planta abierta para equipo de trabajo.', 'Carrera 11 # 93-20', 4600000.00, 105.00, 0, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
-    ('HAB-2026-011', 'NIT-901500106-6', 'Medellín', 'Apartamento', 'Apartamento en Laureles', 'Sector tranquilo con rutas de transporte.', 'Circular 4 # 72-35', 2600000.00, 84.00, 3, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-012', 'NIT-901500106-6', 'Medellín', 'Local', 'Local comercial en El Poblado', 'Local en primer piso con vitrina exterior.', 'Calle 10 # 34-22', 780000000.00, 96.00, 0, 2, 'VENTA', 'VENDIDA', TRUE, FALSE),
-    ('HAB-2026-013', 'NIT-901500107-7', 'Cali', 'Casa', 'Casa amplia en Ciudad Jardín', 'Vivienda con patio interior y terraza.', 'Carrera 105 # 15-42', 890000000.00, 240.00, 4, 4, 'VENTA', 'DISPONIBLE', FALSE, FALSE),
-    ('HAB-2026-014', 'NIT-901500107-7', 'Cali', 'Oficina', 'Oficina cerca del centro financiero', 'Oficina dividida con sala de reuniones.', 'Avenida 6N # 28-16', 3200000.00, 90.00, 0, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
-    ('HAB-2026-015', 'NIT-901500108-8', 'Barranquilla', 'Apartamento', 'Apartamento en Alto Prado', 'Balcón amplio y zonas comunes.', 'Carrera 55 # 82-30', 610000000.00, 118.00, 3, 3, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-016', 'NIT-901500108-8', 'Barranquilla', 'Local', 'Local para restaurante', 'Área abierta con punto para cocina.', 'Calle 84 # 50-25', 5800000.00, 130.00, 0, 2, 'ARRIENDO', 'ARRENDADA', TRUE, FALSE),
-    ('HAB-2026-017', 'NIT-901500109-9', 'Cartagena', 'Casa', 'Casa en zona norte', 'Conjunto residencial próximo al mar.', 'Vía al Mar, kilómetro 8', 4800000.00, 175.00, 4, 3, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
-    ('HAB-2026-018', 'NIT-901500109-9', 'Cartagena', 'Terreno', 'Terreno para proyecto turístico', 'Lote con acceso desde vía secundaria.', 'Manzanillo del Mar, lote 7', 950000000.00, 1400.00, 0, 0, 'VENTA', 'DISPONIBLE', FALSE, FALSE),
-    ('HAB-2026-019', 'NIT-901500110-0', 'Pereira', 'Oficina', 'Oficina en Circunvalar', 'Espacio listo para consultorio o despacho.', 'Avenida Circunvalar # 12-18', 430000000.00, 82.00, 0, 2, 'VENTA', 'DISPONIBLE', TRUE, FALSE),
-    ('HAB-2026-020', 'NIT-901500110-0', 'Pereira', 'Apartamento', 'Apartamento en Pinares', 'Apartamento moderno con vista a la ciudad.', 'Carrera 17 # 9-44', 2300000.00, 86.00, 3, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE)
+    ('HAB-2026-003', 'NIT-901500103-3', 'Floridablanca', 'Casa', 'Casa en conjunto de Cañaveral', 'Vivienda de dos niveles con zona social.', 'Calle 30 # 24-60', 2800000.00, 145.00, 3, 3, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-004', 'NIT-901500103-3', 'Floridablanca', 'Apartamento', 'Apartamento cerca de clínica', 'Ubicación central y transporte cercano.', 'Carrera 23 # 31-12', 1900000.00, 78.00, 2, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
+    ('HAB-2026-005', 'NIT-901500104-4', 'Girón', 'Local', 'Local sobre vía principal', 'Espacio comercial con alta circulación peatonal.', 'Carrera 26 # 32-18', 310000000.00, 64.00, 0, 1, 'VENTA', 'VENDIDA', TRUE, FALSE),
+    ('HAB-2026-006', 'NIT-901500104-4', 'Girón', 'Casa', 'Casa colonial remodelada', 'Conserva fachada tradicional y espacios renovados.', 'Calle 29 # 24-11', 450000000.00, 160.00, 3, 2, 'VENTA', 'DISPONIBLE', TRUE, FALSE),
+    ('HAB-2026-007', 'NIT-901500105-5', 'Piedecuesta', 'Terreno', 'Lote campestre en la mesa', 'Terreno plano con acceso vehicular.', 'Vereda La Mata, lote 18', 220000000.00, 950.00, 0, 0, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-008', 'NIT-901500105-5', 'Piedecuesta', 'Casa', 'Casa campestre amoblada', 'Casa rodeada de zonas verdes.', 'Kilómetro 4 vía Guatiguará', 3500000.00, 210.00, 4, 3, 'ARRIENDO', 'ARRENDADA', TRUE, FALSE),
+    ('HAB-2026-009', 'NIT-901500106-6', 'Bogotá', 'Apartamento', 'Apartamento en Cedritos', 'Edificio residencial con acceso controlado.', 'Calle 145 # 12-30', 520000000.00, 88.00, 3, 2, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-010', 'NIT-901500106-6', 'Bogotá', 'Oficina', 'Oficina en corredor empresarial', 'Planta abierta para equipo de trabajo.', 'Carrera 11 # 93-20', 4600000.00, 105.00, 0, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
+    ('HAB-2026-011', 'NIT-901500107-7', 'Medellín', 'Apartamento', 'Apartamento en Laureles', 'Sector tranquilo con rutas de transporte.', 'Circular 4 # 72-35', 2600000.00, 84.00, 3, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-012', 'NIT-901500107-7', 'Medellín', 'Local', 'Local comercial en El Poblado', 'Local en primer piso con vitrina exterior.', 'Calle 10 # 34-22', 780000000.00, 96.00, 0, 2, 'VENTA', 'VENDIDA', TRUE, FALSE),
+    ('HAB-2026-013', 'NIT-901500108-8', 'Cali', 'Casa', 'Casa amplia en Ciudad Jardín', 'Vivienda con patio interior y terraza.', 'Carrera 105 # 15-42', 890000000.00, 240.00, 4, 4, 'VENTA', 'DISPONIBLE', FALSE, FALSE),
+    ('HAB-2026-014', 'NIT-901500108-8', 'Cali', 'Oficina', 'Oficina cerca del centro financiero', 'Oficina dividida con sala de reuniones.', 'Avenida 6N # 28-16', 3200000.00, 90.00, 0, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, FALSE),
+    ('HAB-2026-015', 'NIT-901500109-9', 'Barranquilla', 'Apartamento', 'Apartamento en Alto Prado', 'Balcón amplio y zonas comunes.', 'Carrera 55 # 82-30', 610000000.00, 118.00, 3, 3, 'VENTA', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-016', 'NIT-901500109-9', 'Barranquilla', 'Local', 'Local para restaurante', 'Área abierta con punto para cocina.', 'Calle 84 # 50-25', 5800000.00, 130.00, 0, 2, 'ARRIENDO', 'ARRENDADA', TRUE, FALSE),
+    ('HAB-2026-017', 'NIT-901500110-0', 'Cartagena', 'Casa', 'Casa en zona norte', 'Conjunto residencial próximo al mar.', 'Vía al Mar, kilómetro 8', 4800000.00, 175.00, 4, 3, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE),
+    ('HAB-2026-018', 'NIT-901500110-0', 'Cartagena', 'Terreno', 'Terreno para proyecto turístico', 'Lote con acceso desde vía secundaria.', 'Manzanillo del Mar, lote 7', 950000000.00, 1400.00, 0, 0, 'VENTA', 'DISPONIBLE', FALSE, FALSE),
+    ('HAB-2026-019', 'NIT-901500102-2', 'Pereira', 'Oficina', 'Oficina en Circunvalar', 'Espacio listo para consultorio o despacho.', 'Avenida Circunvalar # 12-18', 430000000.00, 82.00, 0, 2, 'VENTA', 'DISPONIBLE', TRUE, FALSE),
+    ('HAB-2026-020', 'NIT-901500102-2', 'Pereira', 'Apartamento', 'Apartamento en Pinares', 'Apartamento moderno con vista a la ciudad.', 'Carrera 17 # 9-44', 2300000.00, 86.00, 3, 2, 'ARRIENDO', 'DISPONIBLE', TRUE, TRUE)
 ) AS datos(matricula, nit, ciudad, tipo, titulo, descripcion, direccion, precio, area,
            habitaciones, banos, operacion, estado, activa, destacada);
 
@@ -203,21 +203,21 @@ SELECT (SELECT id_usuario FROM usuario WHERE correo = datos.correo),
        (SELECT id_propiedad FROM propiedad WHERE matricula_inmobiliaria = datos.matricula),
        datos.fecha_hora, datos.estado
 FROM (VALUES
-    ('daniela.moreno@habita.local', 'HAB-2026-001', CURRENT_TIMESTAMP + INTERVAL '10 days', 'PENDIENTE'),
-    ('carlos.ruiz@habita.local', 'HAB-2026-002', CURRENT_TIMESTAMP + INTERVAL '12 days', 'CONFIRMADA'),
-    ('paula.herrera@habita.local', 'HAB-2026-003', CURRENT_TIMESTAMP + INTERVAL '14 days', 'PENDIENTE'),
-    ('miguel.ortiz@habita.local', 'HAB-2026-004', CURRENT_TIMESTAMP + INTERVAL '16 days', 'CONFIRMADA'),
-    ('sofia.cardenas@habita.local', 'HAB-2026-006', CURRENT_TIMESTAMP + INTERVAL '18 days', 'PENDIENTE'),
-    ('diego.navarro@habita.local', 'HAB-2026-007', CURRENT_TIMESTAMP + INTERVAL '20 days', 'CONFIRMADA'),
-    ('isabella.reyes@habita.local', 'HAB-2026-005', CURRENT_TIMESTAMP - INTERVAL '40 days', 'REALIZADA'),
-    ('mateo.silva@habita.local', 'HAB-2026-008', CURRENT_TIMESTAMP - INTERVAL '35 days', 'REALIZADA'),
-    ('gabriela.acosta@habita.local', 'HAB-2026-009', CURRENT_TIMESTAMP - INTERVAL '30 days', 'REALIZADA'),
-    ('nicolas.parra@habita.local', 'HAB-2026-010', CURRENT_TIMESTAMP - INTERVAL '25 days', 'REALIZADA'),
-    ('daniela.moreno@habita.local', 'HAB-2026-011', CURRENT_TIMESTAMP - INTERVAL '8 days', 'CANCELADA'),
-    ('carlos.ruiz@habita.local', 'HAB-2026-012', CURRENT_TIMESTAMP - INTERVAL '6 days', 'RECHAZADA'),
-    ('paula.herrera@habita.local', 'HAB-2026-013', CURRENT_TIMESTAMP + INTERVAL '22 days', 'CANCELADA'),
-    ('miguel.ortiz@habita.local', 'HAB-2026-014', CURRENT_TIMESTAMP + INTERVAL '24 days', 'RECHAZADA'),
-    ('sofia.cardenas@habita.local', 'HAB-2026-015', CURRENT_TIMESTAMP - INTERVAL '4 days', 'CANCELADA')
+    ('daniela.moreno@habita.local', 'HAB-2026-001', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '10 days 9 hours', 'PENDIENTE'),
+    ('carlos.ruiz@habita.local', 'HAB-2026-002', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '12 days 10 hours', 'CONFIRMADA'),
+    ('paula.herrera@habita.local', 'HAB-2026-003', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '14 days 14 hours', 'PENDIENTE'),
+    ('miguel.ortiz@habita.local', 'HAB-2026-004', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '16 days 15 hours', 'CONFIRMADA'),
+    ('sofia.cardenas@habita.local', 'HAB-2026-006', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '18 days 11 hours', 'PENDIENTE'),
+    ('diego.navarro@habita.local', 'HAB-2026-007', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '20 days 16 hours', 'CONFIRMADA'),
+    ('isabella.reyes@habita.local', 'HAB-2026-005', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-40 days 9 hours', 'REALIZADA'),
+    ('mateo.silva@habita.local', 'HAB-2026-008', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-35 days 10 hours', 'REALIZADA'),
+    ('gabriela.acosta@habita.local', 'HAB-2026-009', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-30 days 14 hours', 'REALIZADA'),
+    ('nicolas.parra@habita.local', 'HAB-2026-010', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-25 days 15 hours', 'REALIZADA'),
+    ('daniela.moreno@habita.local', 'HAB-2026-011', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-8 days 11 hours', 'CANCELADA'),
+    ('carlos.ruiz@habita.local', 'HAB-2026-012', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-6 days 16 hours', 'RECHAZADA'),
+    ('paula.herrera@habita.local', 'HAB-2026-013', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '22 days 9 hours', 'CANCELADA'),
+    ('miguel.ortiz@habita.local', 'HAB-2026-014', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '24 days 10 hours', 'RECHAZADA'),
+    ('sofia.cardenas@habita.local', 'HAB-2026-015', date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '-4 days 14 hours', 'CANCELADA')
 ) AS datos(correo, matricula, fecha_hora, estado);
 
 INSERT INTO solicitud (id_cliente, id_propiedad, fecha, estado, observacion)

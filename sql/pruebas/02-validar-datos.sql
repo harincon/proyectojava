@@ -48,6 +48,15 @@ BEGIN
     END IF;
 
     SELECT count(*) INTO total
+    FROM perfil p
+    JOIN usuario u ON u.id_usuario = p.id_usuario
+    WHERE u.correo LIKE '%@habita.local'
+      AND p.foto IS NOT NULL;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'Hay % perfiles de prueba con una foto asignada.', total;
+    END IF;
+
+    SELECT count(*) INTO total
     FROM usuario u
     JOIN usuario_rol ur ON ur.id_usuario = u.id_usuario
     JOIN rol r ON r.id_rol = ur.id_rol
