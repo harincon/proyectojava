@@ -1,0 +1,39 @@
+# Proyecto Java: aplicación inmobiliaria
+
+Aplicación académica para publicar inmuebles, buscar propiedades, agendar visitas y tramitar solicitudes de compra o arriendo.
+
+## Estado actual
+
+- Base de datos: PostgreSQL, 16 tablas y 18 relaciones FK.
+- [SQL vigente](sql/01-esquema.sql): conserva contraseña_hash, baños e imagen_propiedad.ruta de tipo TEXT.
+- Driver JDBC conservado en WEB-INF/lib.
+- Por instrucción del estudiante, se retiró B0 basado en clases Java propias. Ya existe conexion.jspf con conexión JDBC comprobada; el resto de la base JSP/JSPF está pendiente.
+- No delegar los antiguos encargos de B0: sus contratos y estructura fueron sustituidos.
+
+## Forma de trabajo elegida
+
+Páginas .jsp, fragmentos .jspf, JDBC, HTML5, CSS3, JavaScript, Bootstrap, Tomcat y PostgreSQL. WEB-INF/web.xml configura la aplicación; los controladores comprobarán sesión, roles y pertenencia antes de ejecutar acciones.
+
+Priorizar JSP/JSPF para toda función que pueda resolverse en servidor: formularios, búsquedas, filtros, paginación, validación, permisos y cambios de estado. JavaScript se limita al uso obligatorio del parcial y a interacciones de navegador que lo necesiten; no duplicar la lógica de negocio en archivos .js.
+
+Se adopta una separación MVC con JSP/JSPF: controlador recibe peticiones, modelo opera los datos y vista presenta. La lógica aún no está implementada. El requisito de Filter sigue pendiente; no se considera resuelto por esta estructura.
+
+## Organización
+
+La carpeta proyectojava/ ya es la raíz pública de Tomcat. controlador/ contiene las acciones JSP; WEB-INF/modelo/ las operaciones de datos en JSPF; WEB-INF/vista/ las pantallas JSP. WEB-INF/jspf/ contiene los fragmentos comunes. Los roles son permisos, no carpetas. CSS, JavaScript e imágenes conservan sus directorios.
+
+El PDF de Figma se encuentra junto a los demás PDF en varios/referencias/. index.jsp es todavía una entrada temporal al plano. Las páginas funcionales se crearán al implementar cada bloque.
+
+La auditoría de la aplicación y la revisión global se dejan para el final. Durante el desarrollo se realizan comprobaciones breves del cambio y un resumen por bloque, sin un informe de auditoría por cada paso.
+
+## Documentos
+
+- [Plan de implementación JSP/JSPF](varios/planificacion/PLAN_IMPLEMENTACION.md).
+- [Plan de delegación revisado](varios/planificacion/PLAN_DELEGACION.md).
+- [Acuerdos para los bloques](varios/planificacion/CONTRATOS.md).
+- [Registro de cambios](README_IMPLEMENTACION.md).
+- [Plano y paletas](varios/planificacion/PLANO.html).
+
+Los PDF, diagramas y documentación se agrupan en varios/. La BD no se modifica por el cambio de organización de la aplicación.
+
+La conexión se configura en WEB-INF/jspf/conexion.jspf, sin archivos de propiedades. Se incluye una sola vez en la unidad JSP que lo necesite y se llama abrirConexion(); quien la abre debe cerrarla. Las vistas no abren conexiones. El fragmento está excluido de Git por sus credenciales: al compartir o desplegar el proyecto se debe suministrar una copia sin claves reales y completar los datos del ambiente de forma privada.

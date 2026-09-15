@@ -1,0 +1,14 @@
+# Credenciales reales: nunca al repositorio.
+WEB-INF/jspf/conexion.jspf
+
+# No versionar resultados generados por Tomcat.
+*.class
+
+# Archivos subidos por usuarios (documentos de solicitudes, fotos de perfil).
+WEB-INF/archivos/
+
+# Temporales del sistema y del editor.
+Thumbs.db
+desktop.ini
+*.log
+*.tmp

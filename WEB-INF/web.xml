@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>Proyecto inmobiliaria</display-name>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+            <trim-directive-whitespaces>true</trim-directive-whitespaces>
+        </jsp-property-group>
+    </jsp-config>
+
+    <!-- Material interno; el plano sigue accesible durante la planificación. -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Material no publico</web-resource-name>
+            <url-pattern>/sql/*</url-pattern>
+            <url-pattern>/varios/pruebas/*</url-pattern>
+            <url-pattern>/varios/evidencias/*</url-pattern>
+            <url-pattern>/varios/herramientas/*</url-pattern>
+            <url-pattern>/README.md</url-pattern>
+            <url-pattern>/README_IMPLEMENTACION.md</url-pattern>
+        </web-resource-collection>
+        <auth-constraint/>
+    </security-constraint>
+
+</web-app>

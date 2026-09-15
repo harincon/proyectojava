@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano del proyecto inmobiliario</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#223249;background:#f3f5f8;line-height:1.55}
+*{box-sizing:border-box}body{margin:0}a{color:#17496c}button,select{font:inherit}button{cursor:pointer}
+.shell{width:min(1180px,calc(100% - 40px));margin:auto}
+header.plan-header{padding:40px 0 24px;background:#fff;border-bottom:1px solid #dce2e9}
+.eyebrow{text-transform:uppercase;font-size:12px;letter-spacing:.13em;font-weight:bold;color:#52627b}
+h1{font-size:clamp(27px,4vw,42px);line-height:1.15;margin:12px 0}h2{font-size:26px;line-height:1.25;margin:0 0 10px}
+h3{font-size:18px;margin:0 0 10px}p{margin:8px 0}.muted{color:#52627b}.status{display:inline-block;padding:5px 10px;background:#fff3d2;color:#6a4a0a;border-radius:4px;font-size:13px}
+.plan-nav{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:20px}.plan-nav a{text-decoration:none;font-weight:bold;font-size:14px}
+main{padding:28px 0 40px}section.plan-section{margin-bottom:28px;background:#fff;border:1px solid #dce2e9;border-radius:10px;padding:28px}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:22px}.summary div{border-left:3px solid #357a82;padding-left:14px}
+.summary strong{display:block}.summary span{font-size:14px;color:#52627b}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}
+.flow div{padding:16px;background:#f3f6fa;border-top:3px solid #183b56}.flow b{display:block;margin-bottom:8px}.flow small{font-size:13px}
+.two{display:grid;grid-template-columns:1.1fr 1fr;gap:28px}.tree{margin:0;padding:20px;background:#f3f6fa;border-radius:6px;font:13px/1.65 Consolas,monospace;overflow:auto}
+ul{padding-left:20px}li{margin-bottom:7px}.note{font-size:14px;padding:12px 15px;background:#f6f8fb;border-left:3px solid #6a8095}
+.palette-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.palette{background:#fff;text-align:left;border:2px solid #dce2e9;border-radius:8px;padding:16px;color:#223249}
+.palette[aria-pressed=true]{border-color:#183b56;box-shadow:0 0 0 2px #e4edf5}.palette strong{display:block;font-size:16px}.palette .reason{display:block;font-size:13px;margin-top:9px;color:#52627b}
+.swatches{display:flex;height:42px;margin:14px 0 8px;border:1px solid #dce2e9;border-radius:4px;overflow:hidden}.swatches i{flex:1}
+.codes{font:11px/1.8 Consolas,monospace;display:block;color:#52627b;word-spacing:3px}
+.sample-button{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:4px;background:var(--sample);color:#fff;font-size:12px}
+#selection{font-size:14px;margin-bottom:16px}
+.preview{--brand:#183b56;--action:#0f766e;--paper:#f5f7fa;--ink:#172b4d;--line:#cbd5e1;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.preview[data-palette=b]{--brand:#214e3b;--action:#a65325;--paper:#f7f3ea;--ink:#25342b;--line:#d9d3c6}
+.preview[data-palette=c]{--brand:#3730a3;--action:#6d28d9;--paper:#f5f5fa;--ink:#24243b;--line:#d8d7e6}
+.site-header{background:var(--brand);color:#fff;padding:18px 25px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.site-header strong{font-size:20px}.site-header span{font-size:13px}.site-content{padding:28px}
+.site-hero{display:flex;align-items:center;justify-content:space-between;gap:25px;margin-bottom:24px}
+.site-hero h3{font-size:clamp(23px,3vw,32px);line-height:1.2;max-width:480px;margin:0 0 12px}
+.site-label{display:inline-block;color:var(--brand);font-size:12px;font-weight:bold;letter-spacing:.06em;margin-bottom:10px}
+.house{position:relative;width:170px;height:110px;background:var(--brand);border-radius:5px;flex-shrink:0;opacity:.85}
+.house:before{content:"";position:absolute;width:76px;height:62px;left:18px;top:22px;border:7px solid var(--paper)}
+.house:after{content:"";position:absolute;width:37px;height:72px;right:17px;bottom:0;background:var(--paper)}
+.search-example{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;background:#fff;padding:14px;border:1px solid var(--line);border-radius:7px}
+.sample-field{padding:8px 12px;border:1px solid var(--line);border-radius:5px}.sample-field small{display:block;font-size:11px}.sample-field b{font-size:14px;font-weight:normal}
+.site-button{border:0;padding:10px 22px;border-radius:5px;background:var(--action);color:#fff;font-weight:bold;font-size:14px;align-self:stretch}
+.property-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+.property{background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}.property-body{padding:17px}
+.property-top{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;padding:12px 17px;border-bottom:1px solid var(--line)}
+.operation{background:var(--brand);color:#fff;border-radius:3px;padding:3px 8px}.property h4{font-size:17px;margin:2px 0 8px}.property p{font-size:13px}.property .price{font-size:20px;color:var(--brand);font-weight:bold;margin:13px 0 2px}
+.preview-caption{font-size:12px;color:#52627b;margin-top:10px}.responsive-rule{font-size:14px;margin-top:18px}
+.sprints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:20px 0}.sprint{padding-left:16px;border-left:3px solid #357a82}.sprint small{color:#52627b}.sprint p{font-size:14px}
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:5px 30px}
+footer{font-size:13px;color:#52627b;padding:0 0 28px}
+body.only-palettes .plan-header,body.only-palettes .plan-section:not(#paletas),body.only-palettes footer{display:none}
+body.only-palettes main{padding-top:20px}
+@media(max-width:760px){.shell{width:calc(100% - 24px)}section.plan-section{padding:20px}.summary,.palette-options,.sprints,.two{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.house{display:none}.site-content{padding:18px}.checklist{grid-template-columns:1fr}.palette .codes{font-size:12px}}
+@media(max-width:440px){.flow,.property-grid,.search-example{grid-template-columns:1fr}.site-header{padding:16px}.site-header span{font-size:12px}.tree{font-size:12px;padding:12px}.site-button{min-height:44px}}
+@media print{header.plan-header{padding-top:0}.plan-nav,.palette .sample-button{display:none}section.plan-section{break-inside:avoid}.shell{width:100%}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="plan-header">
+<div class="shell">
+<div class="eyebrow">Proyecto Java · aplicación inmobiliaria</div>
+<h1>Plano de implementación</h1>
+<p class="muted">Alcance, carpetas y diseño para revisar antes de programar.</p>
+<span class="status">Modelo de datos aprobado · B0 pendiente de rehacer con JSP/JSPF</span>
+<nav class="plan-nav" aria-label="Secciones del plano">
+<a href="#alcance">Alcance</a><a href="#estructura">Estructura</a><a href="#paletas">Paletas</a><a href="#etapas">Etapas</a><a href="#indice">Índice de documentos</a>
+</nav>
+</div>
+</header>
+<main class="shell">
+<section id="indice" class="plan-section">
+<h2>Índice de documentos del proyecto</h2>
+<p class="muted">Todo lo escrito hasta ahora, en el orden en que conviene leerlo.</p>
+<ul>
+<li><a href="../../README.md">README.md</a> — punto de entrada: qué es el proyecto y estado actual del modelo.</li>
+<li><a href="../../README_IMPLEMENTACION.md">README_IMPLEMENTACION.md</a> — bitácora paso a paso de lo que ya se hizo y lo que falta.</li>
+<li><a href="PLAN_IMPLEMENTACION.md">PLAN_IMPLEMENTACION.md</a> — el plan completo: requisitos cruzados con el parcial, modelo de 16 tablas, pantallas, 13 historias, sprints y pruebas.</li>
+<li><a href="PLAN_DELEGACION.md">PLAN_DELEGACION.md</a> — encargos y archivos exclusivos, revisados para JSP/JSPF.</li>
+<li><a href="CONTRATOS.md">CONTRATOS.md</a> — acuerdos de la nueva base; sustituyen la entrega anterior de B0.</li>
+<li><a href="PLANO.html">PLANO.html</a> — esta página: resumen visual del plan y las tres paletas de color.</li>
+<li><a href="../../sql/01-esquema.sql">sql/01-esquema.sql</a> — DDL vigente, 16 tablas.</li>
+<li><a href="../../sql/pruebas/01-validar-esquema.sql">sql/pruebas/01-validar-esquema.sql</a> — casos de rechazo y pruebas de integridad sobre ese DDL.</li>
+<li><a href="../documentacion/base-datos/README.md">documentacion/base-datos/README.md</a> — imagen definitiva del modelo de 16 tablas.</li>
+</ul>
+</section>
+<section id="alcance" class="plan-section">
+<h2>Estructura MVC sencilla con JSP y JSPF</h2>
+<p>Se conservan JSP, JSPF y JDBC del preparcial, organizados por modelo, vista y controlador. Los roles se manejan como permisos, no como carpetas.</p>
+<div class="summary">
+<div><strong>16 tablas · aprobado</strong><span>Inmobiliaria separada de la cuenta; sin equipos de agentes.</span></div>
+<div><strong>4 formas de acceso</strong><span>Visitante, cliente, inmobiliaria y administrador.</span></div>
+<div><strong>3 sprints de 7 días</strong><span>Desarrollo por módulos; revisión global al final.</span></div>
+</div>
+<div class="flow" aria-label="Recorrido de una solicitud">
+<div><b>1. Pantallas</b><small>HTML5 + CSS3 + JavaScript + Bootstrap<br>JSP y fragmentos JSPF.</small></div>
+<div><b>2. Acceso y acciones</b><small>Controladores JSP<br>Petición, permisos y navegación.</small></div>
+<div><b>3. Consultas</b><small>Modelo en JSPF + conexion.jspf<br>JDBC y PreparedStatement.</small></div>
+<div><b>4. PostgreSQL</b><small>Relaciones, datos y reportes.<br>Configuración local y remota.</small></div>
+</div>
+<p class="note">El SQL y la BD se conservan. Las carpetas MVC están preparadas; la lógica y el requisito Filter siguen pendientes.</p>
+</section>
+<section id="estructura" class="plan-section">
+<h2>Dónde irá cada cosa</h2>
+<p class="muted">Carpetas por responsabilidad. Modelo y vista quedan protegidos dentro de WEB-INF. En esta fase se organiza la estructura; index.jsp sigue siendo una entrada temporal.</p>
+<div class="two" style="margin-top:20px">
+<pre class="tree" aria-label="Árbol de carpetas previsto">proyectojava/
+├── index.jsp
+├── controlador/                 acciones y navegación, en JSP
+├── css/
+├── js/
+├── img/
+├── WEB-INF/
+│   ├── web.xml
+│   ├── lib/
+│   │   └── postgresql-42.7.13.jar
+│   ├── modelo/                  operaciones de datos, en JSPF
+│   ├── vista/                   pantallas, en JSP
+│   └── jspf/                    fragmentos comunes
+│       └── conexion.jspf
+├── sql/
+└── varios/                      referencias y documentación</pre>
+<div>
+<h3>La parte que ejecuta Tomcat</h3>
+<ul>
+<li><b>WEB-INF/lib:</b> el driver JDBC de PostgreSQL ya está colocado.</li>
+<li><b>controlador:</b> recibe peticiones, valida permisos y selecciona la vista.</li>
+<li><b>WEB-INF/modelo:</b> funciones de datos en JSPF, sin HTML.</li>
+<li><b>WEB-INF/vista:</b> pantallas JSP, sin SQL; se muestran desde el controlador.</li>
+<li><b>WEB-INF/jspf:</b> conexión, utilidades, seguridad y fragmentos visuales compartidos.</li>
+<li><b>WEB-INF/web.xml:</b> configuración de sesión, entrada y restricciones. La conexión JDBC y sus datos se centralizan en conexion.jspf, sin archivos de propiedades.</li>
+<li><b>css, js e img:</b> recursos públicos. Bootstrap se guardará localmente.</li>
+</ul>
+<h3>Material que acompaña al proyecto</h3>
+<p>Prioridad JSP/JSPF: formularios, filtros, paginación y validaciones se resolverán en servidor. JavaScript se limita a las interacciones necesarias del navegador y al requisito del parcial.</p>
+<p><b>varios</b> reúne PDF, planificación, documentación, evidencias y herramientas. El SQL vigente mantiene su carpeta propia.</p>
+<p class="note">Al implementar se bloqueará por HTTP el acceso a SQL, varios y documentación. Los documentos privados de clientes usarán almacenamiento configurable y descarga controlada.</p>
+<p class="muted">La nueva B0 verificará las JSP/JSPF en Tomcat y la conexión JDBC. Tomcat compila las páginas internamente, sin un script de compilación propio.</p>
+</div>
+</div>
+</section>
+<section id="paletas" class="plan-section">
+<h2>Tres opciones de color</h2>
+<p>Seleccione una para verla aplicada al mismo catálogo. Puede pedir cambios en cualquiera.</p>
+<div class="palette-options" role="group" aria-label="Paletas propuestas">
+<button class="palette" type="button" data-choice="a" aria-pressed="true" style="--sample:#0f766e">
+<strong>A · Azul y turquesa</strong><span class="reason">Recomendada: sobria, clara y fácil de aplicar.</span>
+<span class="swatches" aria-hidden="true"><i style="background:#183b56"></i><i style="background:#0f766e"></i><i style="background:#f5f7fa"></i><i style="background:#172b4d"></i></span>
+<span class="codes">#183B56 #0F766E #F5F7FA #172B4D</span><span class="sample-button">Botón de ejemplo</span>
+</button>
+<button class="palette" type="button" data-choice="b" aria-pressed="false" style="--sample:#a65325">
+<strong>B · Verde y arena</strong><span class="reason">Más cálida; combina verde con tonos tierra.</span>
+<span class="swatches" aria-hidden="true"><i style="background:#214e3b"></i><i style="background:#a65325"></i><i style="background:#f7f3ea"></i><i style="background:#25342b"></i></span>
+<span class="codes">#214E3B #A65325 #F7F3EA #25342B</span><span class="sample-button">Botón de ejemplo</span>
+</button>
+<button class="palette" type="button" data-choice="c" aria-pressed="false" style="--sample:#6d28d9">
+<strong>C · Índigo y violeta</strong><span class="reason">Más intensa, con mayor presencia del color.</span>
+<span class="swatches" aria-hidden="true"><i style="background:#3730a3"></i><i style="background:#6d28d9"></i><i style="background:#f5f5fa"></i><i style="background:#24243b"></i></span>
+<span class="codes">#3730A3 #6D28D9 #F5F5FA #24243B</span><span class="sample-button">Botón de ejemplo</span>
+</button>
+</div>
+<p id="selection" aria-live="polite">Vista previa: A · Azul y turquesa. La elección aún no está aprobada.</p>
+<div id="preview" class="preview" data-palette="a" aria-label="Vista previa del catálogo">
+<div class="site-header"><strong>Inmobiliaria</strong><span>Propiedades &nbsp; · &nbsp; Iniciar sesión &nbsp; · &nbsp; Registrarse</span></div>
+<div class="site-content">
+<div class="site-hero"><div><span class="site-label">VENTA Y ARRIENDO</span><h3>Encuentre su próximo espacio.</h3><p>Consulte propiedades y programe una visita.</p></div><div class="house" aria-hidden="true"></div></div>
+<div class="search-example" aria-label="Ejemplo visual del buscador">
+<div class="sample-field"><small>Ciudad</small><b>Bucaramanga</b></div><div class="sample-field"><small>Operación</small><b>Venta y arriendo</b></div><button class="site-button" type="button" id="sample-search">Buscar propiedades</button>
+</div>
+<div class="property-grid">
+<article class="property"><div class="property-top"><span class="operation">VENTA</span><span>Bucaramanga</span></div><div class="property-body"><h4>Apartamento en Cabecera</h4><p>3 habitaciones · 2 baños · 85 m²</p><p class="price">$ 320.000.000</p><p>Disponible para visitar</p></div></article>
+<article class="property"><div class="property-top"><span class="operation">ARRIENDO</span><span>Floridablanca</span></div><div class="property-body"><h4>Casa en conjunto residencial</h4><p>3 habitaciones · 2 baños · 110 m²</p><p class="price">$ 1.800.000 / mes</p><p>Disponible para visitar</p></div></article>
+</div>
+</div>
+</div>
+<p class="preview-caption" id="preview-message" role="status">Datos ficticios para comparar colores. Esta vista no consulta la base de datos.</p>
+<p class="responsive-rule">Diseño previsto: catálogo de tres columnas en computador, dos en tableta y una en celular; formularios con etiquetas y mensajes claros. Estados acompañados por texto.</p>
+<p class="note">Cambiar de paleta solo modifica esta vista previa. La autorización para implementar debe darse en el chat.</p>
+</section>
+<section id="etapas" class="plan-section">
+<h2>Orden de trabajo después de aprobar</h2>
+<div class="sprints">
+<div class="sprint"><small>SPRINT 1 · 7 DÍAS</small><h3>Base y acceso</h3><p>Entorno, carpetas, driver, modelo de datos, DDL/DML, conexión, landing, registro, sesión y roles.</p></div>
+<div class="sprint"><small>SPRINT 2 · 7 DÍAS</small><h3>Catálogo y paneles</h3><p>Propiedades, imágenes, características, filtros, perfil y administración.</p></div>
+<div class="sprint"><small>SPRINT 3 · 7 DÍAS</small><h3>Trámites y entrega</h3><p>Favoritos, citas, solicitudes, documentos, reportes, auditoría, pruebas y evidencias.</p></div>
+</div>
+<h3>La entrega debe permitir demostrar</h3>
+<ul class="checklist">
+<li>Roles, sesiones y bloqueo de acceso por URL.</li><li>Relaciones 1:1, 1:N, N:M y UNIQUE.</li>
+<li>MER, modelo relacional, casos de uso y diccionario.</li><li>Diez datos por tabla principal y cinco consultas SQL.</li>
+<li>Pruebas unitarias y recorridos funcionales.</li><li>Tres sprints, Git público, tablero y evidencias Padlet.</li>
+</ul>
+<p class="note">La auditoría se implementará después de los módulos principales. Durante el desarrollo solo se comprueba cada cambio; la revisión global se hace al final.</p>
+<p class="note">La conexión remota se contempla por el requisito técnico. El enunciado presenta el despliegue público completo como extra.</p>
+<p><a href="PLAN_IMPLEMENTACION.md">Leer requisitos, pantallas, historias y criterios de aceptación completos →</a></p>
+</section>
+</main>
+<footer class="shell">Documento de planificación. La BD está aplicada; B0 se debe rehacer con JSP/JSPF antes de delegar los bloques siguientes.</footer>
+<script>
+const names={a:'A · Azul y turquesa',b:'B · Verde y arena',c:'C · Índigo y violeta'};
+const choices=Array.from(document.querySelectorAll('[data-choice]'));
+function choose(key){
+ if(!names[key]) return;
+ document.getElementById('preview').dataset.palette=key;
+ choices.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.choice===key)));
+ document.getElementById('selection').textContent='Vista previa: '+names[key]+'. La elección aún no está aprobada.';
+}
+choices.forEach(button=>button.addEventListener('click',()=>choose(button.dataset.choice)));
+document.getElementById('sample-search').addEventListener('click',()=>{
+ document.getElementById('preview-message').textContent='Este buscador es una muestra visual. Su funcionamiento se implementará después de la aprobación.';
+});
+const params=new URLSearchParams(location.search);
+if(params.get('vista')==='paletas') document.body.classList.add('only-palettes');
+choose(params.get('paleta')||'a');
+</script>
+</body>
+</html>
