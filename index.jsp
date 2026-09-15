@@ -32,6 +32,19 @@
     <div class="col">
       <div class="card h-100 border-0 shadow-sm">
         <div class="card-body d-flex flex-column">
+          <span class="estado estado-FINALIZADA align-self-start mb-2">B3 · Empresas</span>
+          <h2 class="h5 titulo-pagina">Inmobiliarias y catálogos</h2>
+          <p class="text-suave flex-grow-1">Empresas con su cuenta responsable, Mi empresa y catálogos de ciudades, tipos y características. Requiere iniciar sesión.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" href="<%= ctx %>/controlador/inmobiliaria.jsp">Inmobiliarias</a>
+            <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/ciudad.jsp?accion=listar">Catálogos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body d-flex flex-column">
           <span class="estado estado-FINALIZADA align-self-start mb-2">B1 · Diseño</span>
           <h2 class="h5 titulo-pagina">Muestra de componentes</h2>
           <p class="text-suave flex-grow-1">Colores, botones, estados, tarjetas, tablas, formularios y paginación de Habita.</p>

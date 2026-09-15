@@ -135,9 +135,4 @@
         usuario.put("apellidos", fila.getString("apellidos"));
         return usuario;
     }
-
-    // Evita que % y _ escritos por el usuario actúen como comodines.
-    private String patronBusqueda(String texto) {
-        return "%" + texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
-    }
 %>

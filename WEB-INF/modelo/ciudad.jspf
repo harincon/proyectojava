@@ -1,0 +1,58 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Claves: id, nombre y usos (propiedades en la ciudad).
+    private List<Map<String, Object>> listarCiudades(Connection conexion) throws SQLException {
+        String sql = "SELECT c.id_ciudad, c.nombre, count(p.id_propiedad) AS usos FROM ciudad c "
+                + "LEFT JOIN propiedad p ON p.id_ciudad = c.id_ciudad GROUP BY c.id_ciudad, c.nombre ORDER BY c.nombre";
+        List<Map<String, Object>> ciudades = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                Map<String, Object> ciudad = new LinkedHashMap<String, Object>();
+                ciudad.put("id", fila.getInt("id_ciudad"));
+                ciudad.put("nombre", fila.getString("nombre"));
+                ciudad.put("usos", fila.getInt("usos"));
+                ciudades.add(ciudad);
+            }
+        }
+        return ciudades;
+    }
+
+    // Compara sin distinguir mayúsculas; idExcluido = 0 al crear.
+    private boolean existeCiudad(Connection conexion, String nombre, int idExcluido) throws SQLException {
+        String sql = "SELECT 1 FROM ciudad WHERE lower(nombre) = lower(?) AND id_ciudad <> ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idExcluido);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private int crearCiudad(Connection conexion, String nombre) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("INSERT INTO ciudad (nombre) VALUES (?) RETURNING id_ciudad")) {
+            sentencia.setString(1, nombre);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private boolean actualizarCiudad(Connection conexion, int idCiudad, String nombre) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE ciudad SET nombre = ? WHERE id_ciudad = ?")) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idCiudad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // 23503 si hay propiedades en la ciudad (ON DELETE RESTRICT).
+    private boolean eliminarCiudad(Connection conexion, int idCiudad) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("DELETE FROM ciudad WHERE id_ciudad = ?")) {
+            sentencia.setInt(1, idCiudad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+%>

@@ -1,0 +1,61 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Claves: id, nombre y usos (propiedades de ese tipo).
+    private List<Map<String, Object>> listarTiposPropiedad(Connection conexion) throws SQLException {
+        String sql = "SELECT t.id_tipo_propiedad, t.nombre, count(p.id_propiedad) AS usos FROM tipo_propiedad t "
+                + "LEFT JOIN propiedad p ON p.id_tipo_propiedad = t.id_tipo_propiedad "
+                + "GROUP BY t.id_tipo_propiedad, t.nombre ORDER BY t.nombre";
+        List<Map<String, Object>> tipos = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                Map<String, Object> tipo = new LinkedHashMap<String, Object>();
+                tipo.put("id", fila.getInt("id_tipo_propiedad"));
+                tipo.put("nombre", fila.getString("nombre"));
+                tipo.put("usos", fila.getInt("usos"));
+                tipos.add(tipo);
+            }
+        }
+        return tipos;
+    }
+
+    // Compara sin distinguir mayúsculas; idExcluido = 0 al crear.
+    private boolean existeTipoPropiedad(Connection conexion, String nombre, int idExcluido) throws SQLException {
+        String sql = "SELECT 1 FROM tipo_propiedad WHERE lower(nombre) = lower(?) AND id_tipo_propiedad <> ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idExcluido);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private int crearTipoPropiedad(Connection conexion, String nombre) throws SQLException {
+        String sql = "INSERT INTO tipo_propiedad (nombre) VALUES (?) RETURNING id_tipo_propiedad";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private boolean actualizarTipoPropiedad(Connection conexion, int idTipo, String nombre) throws SQLException {
+        String sql = "UPDATE tipo_propiedad SET nombre = ? WHERE id_tipo_propiedad = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idTipo);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // 23503 si hay propiedades de ese tipo (ON DELETE RESTRICT).
+    private boolean eliminarTipoPropiedad(Connection conexion, int idTipo) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("DELETE FROM tipo_propiedad WHERE id_tipo_propiedad = ?")) {
+            sentencia.setInt(1, idTipo);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+%>

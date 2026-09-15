@@ -24,12 +24,12 @@ M = WEB-INF/modelo; C = controlador; V = WEB-INF/vista. Los archivos de M usan .
 | B0 | Base común — **terminado** | WEB-INF/web.xml, WEB-INF/jspf/conexion.jspf, conexion.jspf.ejemplo y utilidades.jspf; controlador/prueba_conexion.jsp y prueba_subida.jsp |
 | B1 | Diseño — **terminado** | css/, js/, img/; WEB-INF/jspf/cabecera.jspf y pie.jspf; V/acceso_denegado.jsp y error.jsp; controlador/prueba_diseno.jsp |
 | B2 | Acceso, usuarios/roles y perfil — **terminado** | M y C: usuario, rol, usuario_rol, perfil. C/acceso.jsp y panel.jsp. V/login.jsp, registro.jsp, panel.jsp, perfil.jsp, usuarios.jsp, formulario_usuario.jsp y roles.jsp. WEB-INF/jspf/seguridad.jspf |
-| B3 | Empresas y catálogos | M y C: inmobiliaria, ciudad, tipo_propiedad, caracteristica. V/inmobiliarias.jsp, formulario_inmobiliaria.jsp y catalogos.jsp |
+| B3 | Empresas y catálogos — **terminado** | M y C: inmobiliaria, ciudad, tipo_propiedad, caracteristica. V/inmobiliarias.jsp, formulario_inmobiliaria.jsp y catalogos.jsp |
 | B4 | Inicio y publicaciones | M y C: propiedad, imagen_propiedad, propiedad_caracteristica. index.jsp, C/inicio.jsp. V/inicio.jsp, catalogo.jsp, propiedad.jsp, propiedades.jsp y formulario_propiedad.jsp |
 | B5 | Favoritos y citas | M y C: favorito, cita. V/favoritos.jsp, citas.jsp y formulario_cita.jsp |
 | B6 | Solicitudes/documentos | M y C: solicitud, documento_solicitud. V/solicitudes.jsp, formulario_solicitud.jsp y solicitud.jsp |
 | B7 | Reportes y auditoría final | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/04-consultas.sql |
-| B8 | Datos y documentación BD | sql/03-datos-prueba.sql; sql/pruebas/02-validar-datos.sql; varios/documentacion/base-datos/ |
+| B8 | Datos y documentación BD — **terminado** (ajustes finales con B4–B7) | sql/03-datos-prueba.sql; sql/pruebas/02-validar-datos.sql; varios/documentacion/base-datos/ |
 | B9 | Integración y cierre | Documentación, pruebas finales, Scrum y README mediante el coordinador |
 
 Cabecera reúne menú y avisos; no crear fragmentos visuales adicionales por cada rol. Auditoría se implementa en B7; el coordinador integra las llamadas en operaciones ya terminadas, sin edición simultánea de esos archivos.
@@ -41,9 +41,9 @@ Cada bloque desarrolla su modelo, controlador y vistas cuando se autorice. No cr
 | Momento | Encargos | Requiere |
 | --- | --- | --- |
 | 1 | B0 — terminado | Verificado en Tomcat 8.5.96 |
-| 2 | B1 y B2 terminados; B8 entregado, falta integrarlo | B0 y B1 integrados |
-| 3 | B3 | B2 integrado. Usa `asignarRol` de usuario_rol.jspf e implementa `inmobiliaria.jsp?accion=vincular&id_usuario=N` |
-| 4 | B4 | B1, B2 y B3 integrados |
+| 2 | B1, B2 y B8 terminados e integrados | B0 y B1 integrados |
+| 3 | B3 terminado | B2 integrado |
+| 4 | B4 (se puede adelantar la parte SQL de B7) | B1, B2 y B3 integrados. Usa las funciones de B3 publicadas en CONTRATOS |
 | 5 | B5 y B6 en paralelo | B4 completo |
 | 6 | B7 y cierre B8 | Módulos principales implementados |
 | 7 | B9 y correcciones por dueño | Entregas integradas |

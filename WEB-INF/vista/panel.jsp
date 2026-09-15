@@ -22,6 +22,8 @@
         <div class="d-flex flex-wrap gap-2 mt-auto">
           <a class="btn btn-primary" href="<%= ctx %>/controlador/usuario.jsp?accion=listar">Usuarios</a>
           <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/rol.jsp?accion=listar">Roles</a>
+          <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/inmobiliaria.jsp?accion=listar">Inmobiliarias</a>
+          <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/ciudad.jsp?accion=listar">Catálogos</a>
         </div>
       </div>
     </div>
@@ -35,7 +37,8 @@
         <h2 class="h5 titulo-pagina"><i class="bi bi-building me-1"></i>Inmobiliaria</h2>
         <p class="text-suave">Publica propiedades y atiende citas y solicitudes de tus clientes.</p>
         <div class="d-flex flex-wrap gap-2 mt-auto">
-          <a class="btn btn-primary" href="<%= ctx %>/controlador/propiedad.jsp?accion=gestionar">Mis propiedades</a>
+          <a class="btn btn-primary" href="<%= ctx %>/controlador/inmobiliaria.jsp?accion=empresa">Mi empresa</a>
+          <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/propiedad.jsp?accion=gestionar">Mis propiedades</a>
           <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/cita.jsp?accion=recibidas">Citas</a>
           <a class="btn btn-outline-primary" href="<%= ctx %>/controlador/solicitud.jsp?accion=recibidas">Solicitudes</a>
         </div>

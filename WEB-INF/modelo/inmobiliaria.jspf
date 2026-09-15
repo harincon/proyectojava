@@ -1,0 +1,145 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Empresa con su responsable y la cantidad de propiedades publicadas.
+    private static final String CONSULTA_INMOBILIARIA = "SELECT i.id_inmobiliaria, i.id_usuario, i.nombre, "
+            + "i.identificacion_empresarial, i.telefono, i.correo_contacto, i.direccion, "
+            + "u.correo AS correo_responsable, u.activo, trim(concat_ws(' ', p.nombres, p.apellidos)) AS responsable, "
+            + "(SELECT count(*) FROM propiedad pr WHERE pr.id_inmobiliaria = i.id_inmobiliaria) AS propiedades "
+            + "FROM inmobiliaria i JOIN usuario u ON u.id_usuario = i.id_usuario "
+            + "LEFT JOIN perfil p ON p.id_usuario = i.id_usuario ";
+
+    private static final String FILTRO_INMOBILIARIAS = "WHERE i.nombre ILIKE ? OR i.identificacion_empresarial ILIKE ? "
+            + "OR u.correo ILIKE ? OR concat_ws(' ', p.nombres, p.apellidos) ILIKE ? ";
+
+    private Map<String, Object> buscarInmobiliaria(Connection conexion, int idInmobiliaria) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_INMOBILIARIA + "WHERE i.id_inmobiliaria = ?")) {
+            sentencia.setInt(1, idInmobiliaria);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaInmobiliaria(fila) : null;
+            }
+        }
+    }
+
+    // Empresa que administra la cuenta; null si no tiene.
+    private Map<String, Object> buscarInmobiliariaPorUsuario(Connection conexion, int idUsuario) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_INMOBILIARIA + "WHERE i.id_usuario = ?")) {
+            sentencia.setInt(1, idUsuario);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaInmobiliaria(fila) : null;
+            }
+        }
+    }
+
+    // Búsqueda por empresa, identificación, correo o nombre del responsable; null = sin filtro.
+    private List<Map<String, Object>> listarInmobiliarias(Connection conexion, String busqueda, int limite, int desplazamiento)
+            throws SQLException {
+        String sql = CONSULTA_INMOBILIARIA + (busqueda == null ? "" : FILTRO_INMOBILIARIAS)
+                + "ORDER BY i.nombre LIMIT ? OFFSET ?";
+        List<Map<String, Object>> empresas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            int indice = 1;
+            if (busqueda != null) {
+                String patron = patronBusqueda(busqueda);
+                for (int i = 0; i < 4; i++) {
+                    sentencia.setString(indice++, patron);
+                }
+            }
+            sentencia.setInt(indice++, limite);
+            sentencia.setInt(indice, desplazamiento);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    empresas.add(filaInmobiliaria(fila));
+                }
+            }
+        }
+        return empresas;
+    }
+
+    private int contarInmobiliarias(Connection conexion, String busqueda) throws SQLException {
+        String sql = "SELECT count(*) FROM inmobiliaria i JOIN usuario u ON u.id_usuario = i.id_usuario "
+                + "LEFT JOIN perfil p ON p.id_usuario = i.id_usuario " + (busqueda == null ? "" : FILTRO_INMOBILIARIAS);
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (busqueda != null) {
+                String patron = patronBusqueda(busqueda);
+                for (int i = 1; i <= 4; i++) {
+                    sentencia.setString(i, patron);
+                }
+            }
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // 23505 si la cuenta ya tiene empresa o la identificación está registrada.
+    private int crearInmobiliaria(Connection conexion, int idUsuario, String nombre, String identificacion,
+            String telefono, String correoContacto, String direccion) throws SQLException {
+        String sql = "INSERT INTO inmobiliaria (id_usuario, nombre, identificacion_empresarial, telefono, correo_contacto, direccion) "
+                + "VALUES (?, ?, ?, ?, ?, ?) RETURNING id_inmobiliaria";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idUsuario);
+            sentencia.setString(2, nombre);
+            sentencia.setString(3, identificacion);
+            sentencia.setString(4, telefono);
+            sentencia.setString(5, correoContacto);
+            sentencia.setString(6, direccion);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // El responsable no cambia; false si la empresa no existe.
+    private boolean actualizarInmobiliaria(Connection conexion, int idInmobiliaria, String nombre, String identificacion,
+            String telefono, String correoContacto, String direccion) throws SQLException {
+        String sql = "UPDATE inmobiliaria SET nombre = ?, identificacion_empresarial = ?, telefono = ?, "
+                + "correo_contacto = ?, direccion = ? WHERE id_inmobiliaria = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setString(2, identificacion);
+            sentencia.setString(3, telefono);
+            sentencia.setString(4, correoContacto);
+            sentencia.setString(5, direccion);
+            sentencia.setInt(6, idInmobiliaria);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // Cuentas activas que todavía no administran una empresa.
+    private List<Map<String, Object>> listarCuentasSinEmpresa(Connection conexion) throws SQLException {
+        String sql = "SELECT u.id_usuario, u.correo, trim(concat_ws(' ', p.nombres, p.apellidos)) AS nombre "
+                + "FROM usuario u LEFT JOIN perfil p ON p.id_usuario = u.id_usuario "
+                + "WHERE u.activo AND NOT EXISTS (SELECT 1 FROM inmobiliaria i WHERE i.id_usuario = u.id_usuario) "
+                + "ORDER BY nombre, u.correo";
+        List<Map<String, Object>> cuentas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                Map<String, Object> cuenta = new LinkedHashMap<String, Object>();
+                cuenta.put("idUsuario", fila.getInt("id_usuario"));
+                cuenta.put("correo", fila.getString("correo"));
+                cuenta.put("nombre", fila.getString("nombre"));
+                cuentas.add(cuenta);
+            }
+        }
+        return cuentas;
+    }
+
+    private Map<String, Object> filaInmobiliaria(ResultSet fila) throws SQLException {
+        Map<String, Object> empresa = new LinkedHashMap<String, Object>();
+        empresa.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+        empresa.put("idUsuario", fila.getInt("id_usuario"));
+        empresa.put("nombre", fila.getString("nombre"));
+        empresa.put("identificacion", fila.getString("identificacion_empresarial"));
+        empresa.put("telefono", fila.getString("telefono"));
+        empresa.put("correoContacto", fila.getString("correo_contacto"));
+        empresa.put("direccion", fila.getString("direccion"));
+        empresa.put("correoResponsable", fila.getString("correo_responsable"));
+        empresa.put("responsable", fila.getString("responsable"));
+        empresa.put("activo", fila.getBoolean("activo"));
+        empresa.put("propiedades", fila.getInt("propiedades"));
+        return empresa;
+    }
+%>

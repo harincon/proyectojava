@@ -104,6 +104,11 @@
         return recortado.isEmpty() ? null : recortado;
     }
 
+    // Patrón para ILIKE: evita que % y _ escritos por el usuario actúen como comodines.
+    private String patronBusqueda(String texto) {
+        return "%" + texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
+    }
+
     private boolean longitudValida(String texto, int minimo, int maximo) {
         String limpio = limpiar(texto);
         int largo = limpio == null ? 0 : limpio.length();

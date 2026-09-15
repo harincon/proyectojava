@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil) está implementado y verificado (15 de septiembre de 2026). Queda habilitado B3.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil) y B3 (empresas y catálogos) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Queda habilitado B4.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -39,6 +39,7 @@ utilidades.jspf va **primero**: al incluirse fija UTF-8 en la petición, y eso s
 | | `obtenerToken(HttpSession)` / `campoToken(HttpSession)` | Token de sesión / `<input type="hidden" name="token">` |
 | | `tokenValido(HttpServletRequest)` | `boolean`; usar en todo POST antes de modificar |
 | | `limpiar(String)` | Texto sin espacios extremos; vacío → `null` |
+| | `patronBusqueda(String)` | `%texto%` para `ILIKE`, con `%` y `_` escapados (movida desde usuario.jspf en B3) |
 | | `longitudValida(String, int, int)`, `esCorreo(String)`, `esTelefono(String)` | `boolean` |
 | | `aEntero(String)` / `aImporte(String)` | `Integer` / `BigDecimal` con 2 decimales; `null` si no es válido |
 | | `formatoPesos(BigDecimal)` | `$ 320.000.000` |
@@ -137,7 +138,33 @@ Rutas de B2:
 | usuario_rol.jsp | POST `asignar` · `revocar` (id_usuario, rol) | ADMINISTRADOR |
 | rol.jsp | Sin acción | ADMINISTRADOR |
 
-INMOBILIARIA no se asigna desde usuario_rol.jsp: el botón «Empresa» de la edición de usuario lleva a `inmobiliaria.jsp?accion=vincular&id_usuario=N`, que implementa B3. El administrador no puede desactivarse ni quitarse su propio rol, y ninguna cuenta queda sin roles.
+INMOBILIARIA no se asigna desde usuario_rol.jsp: el botón «Empresa» de la edición de usuario lleva a `inmobiliaria.jsp?accion=vincular&id_usuario=N` (B3). El administrador no puede desactivarse ni quitarse su propio rol, y ninguna cuenta queda sin roles.
+
+### Empresas y catálogos (B3, implementado)
+
+Funciones para B4 y los bloques siguientes. Reciben la `Connection` de quien llama. Los tres catálogos pueden incluirse en la misma página junto con los modelos de B2 (comprobado).
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| inmobiliaria.jspf | `buscarInmobiliariaPorUsuario(conexion, idUsuario)` | Map o `null`. Úsala para saber qué empresa publica: nunca aceptar `id_inmobiliaria` desde el formulario |
+| | `buscarInmobiliaria(conexion, idInmobiliaria)` | Map `idInmobiliaria`, `idUsuario`, `nombre`, `identificacion`, `telefono`, `correoContacto`, `direccion`, `correoResponsable`, `responsable`, `activo` (cuenta responsable), `propiedades`; `null` si no existe |
+| ciudad.jspf | `listarCiudades(conexion)` | `List<Map>` con `id`, `nombre` y `usos`, ordenada por nombre |
+| tipo_propiedad.jspf | `listarTiposPropiedad(conexion)` | Igual: `id`, `nombre`, `usos` |
+| caracteristica.jspf | `listarCaracteristicas(conexion)` | Igual: `id`, `nombre`, `usos` |
+
+Rutas de B3:
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| inmobiliaria.jsp | GET `listar[&q&pagina]` · `vincular[&id_usuario]` · `editar&id_inmobiliaria` · POST `crear` · `actualizar&id_inmobiliaria` | ADMINISTRADOR |
+| | GET `empresa` · POST `guardar_empresa` (sin acción, la inmobiliaria llega a `empresa`) | INMOBILIARIA |
+| ciudad.jsp · tipo_propiedad.jsp · caracteristica.jsp | GET `listar` · `editar&id_<entidad>` · POST `crear` · `actualizar&id_<entidad>` · `eliminar&id_<entidad>` (campo `nombre`) | ADMINISTRADOR |
+
+Reglas:
+- **Vincular empresa:** una transacción con `asignarRol(…, "INMOBILIARIA")` y `crearInmobiliaria`. La cuenta debe estar activa y no tener empresa. Si algo falla, el rol también se revierte.
+- **Datos de la empresa:** los cinco campos son obligatorios en la aplicación. La identificación se guarda en mayúsculas y el correo de contacto en minúsculas. La inmobiliaria edita su empresa pero no su identificación. El responsable no cambia y las empresas no se eliminan.
+- **Catálogos:** nombres únicos sin distinguir mayúsculas. No se elimina lo que esté en uso. En características se bloquea en código, porque su relación con propiedades es ON DELETE CASCADE y borraría las asignaciones.
+- **Búsqueda:** `patronBusqueda(texto)` pasó a utilidades.jspf; úsala con `ILIKE` en cualquier búsqueda.
 
 ## 5. Rutas y parámetros
 
@@ -267,4 +294,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0, B1 y B2 están terminados; B8 entregó su script en la rama bloque/B8-datos. B3 puede iniciar cuando se autorice. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0, B1, B2, B3 y B8 están terminados e integrados. B4 puede iniciar cuando se autorice. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.

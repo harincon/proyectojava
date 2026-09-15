@@ -19,7 +19,44 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Integrar B2 (confirmarlo en Git) y después ejecutar el script de B8 (`sql/03-datos-prueba.sql`, en la rama bloque/B8-datos). Luego delegar B3.
+Confirmar B3 en Git y delegar B4 (inicio y publicaciones). La parte SQL de B7 (`sql/04-consultas.sql`) puede avanzar en paralelo.
+
+## B3 — 15 de septiembre de 2026
+
+Empresas inmobiliarias y catálogos.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/modelo/inmobiliaria.jspf | Buscar, listar con búsqueda y paginación, crear, actualizar y cuentas activas sin empresa |
+| WEB-INF/modelo/ciudad.jspf, tipo_propiedad.jspf, caracteristica.jspf | Listar con cantidad de usos, comprobar nombre repetido, crear, renombrar y eliminar |
+| controlador/inmobiliaria.jsp | Admin: listado, vincular (rol INMOBILIARIA y empresa en una transacción) y edición. Inmobiliaria: Mi empresa |
+| controlador/ciudad.jsp, tipo_propiedad.jsp, caracteristica.jsp | Administración de cada catálogo |
+| WEB-INF/vista/inmobiliarias.jsp, formulario_inmobiliaria.jsp, catalogos.jsp | Listado, formulario (nueva, editar y Mi empresa) y catálogos con pestañas |
+| WEB-INF/jspf/utilidades.jspf, WEB-INF/modelo/usuario.jspf | `patronBusqueda` pasó a utilidades para que B3 y B4 la compartan |
+| WEB-INF/vista/panel.jsp | Accesos a Inmobiliarias, Catálogos y Mi empresa |
+
+Verificado en Tomcat (66 comprobaciones por HTTP, con los datos de B8 cargados):
+
+- **Permisos:** el visitante, el cliente y la inmobiliaria reciben 403 en las páginas del administrador. La inmobiliaria no abre ni modifica otra empresa por id, ni crea catálogos por POST.
+- **Vincular:**
+  - Solo ofrece cuentas activas sin empresa. Una cuenta que ya tiene empresa lleva a editarla, y una desactivada vuelve a su cuenta con aviso.
+  - Se rechazan el POST sin token, los datos inválidos (con mensaje por campo), la identificación repetida y las cuentas desactivadas o con empresa enviadas a mano.
+  - Con la identificación repetida, la transacción se revierte y la cuenta no queda con el rol.
+- **Mi empresa:** el rol nuevo funciona sin volver a iniciar sesión. La inmobiliaria guarda sus datos pero no puede cambiar la identificación. El HTML se muestra escapado.
+- **Administración:** la identificación de otra empresa se rechaza al editar, el cambio válido se guarda y el `%` no actúa como comodín en la búsqueda.
+- **Catálogos:**
+  - Rechaza nombres repetidos (sin distinguir mayúsculas ni espacios), vacíos o demasiado largos, y la eliminación por GET o sin token.
+  - No elimina una ciudad o un tipo con propiedades. Tampoco una característica en uso, cuyas asignaciones se conservan.
+- **Contrato con B4:** los modelos de B2 y B3 incluidos juntos compilan y responden.
+- **Limpieza:** los datos de B8 quedaron idénticos (se comparó una huella de cada tabla) y se retiraron las páginas temporales.
+
+Capturas revisadas a 1366 y 390 px. Corregido: alineación de columnas del formulario, NIT de solo lectura con fondo gris y pestaña «Tipos» abreviada en móvil.
+
+Pendiente: B4 usa `buscarInmobiliariaPorUsuario` para publicar y decide si oculta las propiedades de empresas cuya cuenta esté desactivada. Desvincular o eliminar empresas no está en el alcance.
+
+## Datos de prueba B8 — 15 de septiembre de 2026
+
+B8 entregó `sql/03-datos-prueba.sql` y `sql/pruebas/02-validar-datos.sql`, más el diccionario de datos en varios/documentacion/base-datos. En la revisión se pidió dejar la foto de perfil en NULL, poner las citas en horas exactas y alinear cada empresa con su ciudad, y B8 lo corrigió. Se unió a main y se cargó en la base: la validación pasa, las tildes quedaron bien y el ingreso funciona con los usuarios de prueba (`Clave123`).
 
 ## B2 — 15 de septiembre de 2026
 

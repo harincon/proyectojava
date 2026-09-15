@@ -1,0 +1,75 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Claves: id, nombre y usos (propiedades que la tienen).
+    private List<Map<String, Object>> listarCaracteristicas(Connection conexion) throws SQLException {
+        String sql = "SELECT c.id_caracteristica, c.nombre, count(pc.id_propiedad) AS usos FROM caracteristica c "
+                + "LEFT JOIN propiedad_caracteristica pc ON pc.id_caracteristica = c.id_caracteristica "
+                + "GROUP BY c.id_caracteristica, c.nombre ORDER BY c.nombre";
+        List<Map<String, Object>> caracteristicas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                Map<String, Object> caracteristica = new LinkedHashMap<String, Object>();
+                caracteristica.put("id", fila.getInt("id_caracteristica"));
+                caracteristica.put("nombre", fila.getString("nombre"));
+                caracteristica.put("usos", fila.getInt("usos"));
+                caracteristicas.add(caracteristica);
+            }
+        }
+        return caracteristicas;
+    }
+
+    // Compara sin distinguir mayúsculas; idExcluido = 0 al crear.
+    private boolean existeCaracteristica(Connection conexion, String nombre, int idExcluido) throws SQLException {
+        String sql = "SELECT 1 FROM caracteristica WHERE lower(nombre) = lower(?) AND id_caracteristica <> ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idExcluido);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private int crearCaracteristica(Connection conexion, String nombre) throws SQLException {
+        String sql = "INSERT INTO caracteristica (nombre) VALUES (?) RETURNING id_caracteristica";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private boolean actualizarCaracteristica(Connection conexion, int idCaracteristica, String nombre) throws SQLException {
+        String sql = "UPDATE caracteristica SET nombre = ? WHERE id_caracteristica = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, nombre);
+            sentencia.setInt(2, idCaracteristica);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // La FK de propiedad_caracteristica es ON DELETE CASCADE: se impide borrar una en uso (lanza 23503).
+    private boolean eliminarCaracteristica(Connection conexion, int idCaracteristica) throws SQLException {
+        String sql = "DELETE FROM caracteristica c WHERE c.id_caracteristica = ? AND NOT EXISTS "
+                + "(SELECT 1 FROM propiedad_caracteristica pc WHERE pc.id_caracteristica = c.id_caracteristica)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCaracteristica);
+            if (sentencia.executeUpdate() == 1) {
+                return true;
+            }
+        }
+        String uso = "SELECT 1 FROM propiedad_caracteristica WHERE id_caracteristica = ? LIMIT 1";
+        try (PreparedStatement sentencia = conexion.prepareStatement(uso)) {
+            sentencia.setInt(1, idCaracteristica);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (fila.next()) {
+                    throw new SQLException("La característica está asignada a propiedades.", "23503");
+                }
+            }
+        }
+        return false;
+    }
+%>
