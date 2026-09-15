@@ -1,22 +1,23 @@
--- Ejecutar sobre el modelo simplificado en una base de prueba.
+-- Prueba de restricciones. Todo termina en ROLLBACK: no deja datos.
+-- Usa nombres exclusivos de prueba para no chocar con datos reales (columnas UNIQUE).
 BEGIN;
 SET LOCAL search_path TO inmobiliaria;
 
-INSERT INTO rol VALUES (-1, 'CLIENTE'), (-2, 'INMOBILIARIA');
+INSERT INTO rol VALUES (-1, 'PRUEBA_CLIENTE'), (-2, 'PRUEBA_INMOBILIARIA');
 INSERT INTO usuario VALUES
-    (-1, 'cliente@example.test', 'hash_solo_prueba', TRUE),
-    (-2, 'inmobiliaria@example.test', 'hash_solo_prueba', TRUE);
+    (-1, 'validacion.cliente@example.test', 'hash_solo_prueba', TRUE),
+    (-2, 'validacion.inmobiliaria@example.test', 'hash_solo_prueba', TRUE);
 INSERT INTO usuario_rol VALUES (-1, -1), (-2, -1), (-2, -2);
 INSERT INTO perfil (id_perfil, id_usuario, nombres) VALUES (-1, -1, 'Cliente');
 INSERT INTO inmobiliaria (id_inmobiliaria, id_usuario, nombre, identificacion_empresarial)
-    VALUES (-1, -2, 'Inmobiliaria de prueba', 'NIT-PRUEBA-1');
-INSERT INTO ciudad VALUES (-1, 'Ciudad de prueba');
-INSERT INTO tipo_propiedad VALUES (-1, 'Casa de prueba');
-INSERT INTO caracteristica VALUES (-1, 'Patio'), (-2, 'Garaje');
+    VALUES (-1, -2, 'Inmobiliaria de validación', 'NIT-VALIDACION-1');
+INSERT INTO ciudad VALUES (-1, 'Ciudad de validación');
+INSERT INTO tipo_propiedad VALUES (-1, 'Tipo de validación');
+INSERT INTO caracteristica VALUES (-1, 'Característica de validación 1'), (-2, 'Característica de validación 2');
 INSERT INTO propiedad
     (id_propiedad, matricula_inmobiliaria, id_inmobiliaria, id_ciudad,
      id_tipo_propiedad, titulo, direccion, precio, area, tipo_operacion)
-SELECT i, 'PRUEBA-' || i, -1, -1, -1, 'Casa', 'Calle 1', 100000, 80, 'VENTA'
+SELECT i, 'VALIDACION-' || i, -1, -1, -1, 'Casa', 'Calle 1', 100000, 80, 'VENTA'
 FROM (VALUES (-1), (-2)) AS datos(i);
 
 INSERT INTO propiedad_caracteristica VALUES (-1, -1), (-1, -2), (-2, -1);
@@ -33,11 +34,11 @@ DECLARE
     total INTEGER := 0;
 BEGIN
     FOR prueba IN SELECT * FROM (VALUES
-        ('Correo repetido', $$UPDATE usuario SET correo = 'cliente@example.test' WHERE id_usuario = -2$$, '23505'),
+        ('Correo repetido', $$UPDATE usuario SET correo = 'validacion.cliente@example.test' WHERE id_usuario = -2$$, '23505'),
         ('Segundo perfil', $$INSERT INTO perfil (id_usuario) VALUES (-1)$$, '23505'),
-        ('Matricula repetida', $$UPDATE propiedad SET matricula_inmobiliaria = 'PRUEBA--1' WHERE id_propiedad = -2$$, '23505'),
-        ('Identificacion empresarial repetida', $$INSERT INTO inmobiliaria (id_usuario, nombre, identificacion_empresarial) VALUES (-1, 'Otra Inmobiliaria', 'NIT-PRUEBA-1')$$, '23505'),
-        ('Segunda inmobiliaria para el mismo usuario', $$INSERT INTO inmobiliaria (id_usuario, nombre, identificacion_empresarial) VALUES (-2, 'Otra Empresa', 'NIT-PRUEBA-2')$$, '23505'),
+        ('Matricula repetida', $$UPDATE propiedad SET matricula_inmobiliaria = 'VALIDACION--1' WHERE id_propiedad = -2$$, '23505'),
+        ('Identificacion empresarial repetida', $$INSERT INTO inmobiliaria (id_usuario, nombre, identificacion_empresarial) VALUES (-1, 'Otra Inmobiliaria', 'NIT-VALIDACION-1')$$, '23505'),
+        ('Segunda inmobiliaria para el mismo usuario', $$INSERT INTO inmobiliaria (id_usuario, nombre, identificacion_empresarial) VALUES (-2, 'Otra Empresa', 'NIT-VALIDACION-2')$$, '23505'),
         ('Rol repetido', $$INSERT INTO usuario_rol VALUES (-1, -1)$$, '23505'),
         ('Caracteristica repetida', $$INSERT INTO propiedad_caracteristica VALUES (-1, -1)$$, '23505'),
         ('Favorito repetido', $$INSERT INTO favorito VALUES (-1, -1)$$, '23505'),

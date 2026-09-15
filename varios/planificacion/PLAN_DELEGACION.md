@@ -28,8 +28,8 @@ M = WEB-INF/modelo; C = controlador; V = WEB-INF/vista. Los archivos de M usan .
 | B4 | Inicio y publicaciones | M y C: propiedad, imagen_propiedad, propiedad_caracteristica. index.jsp, C/inicio.jsp. V/inicio.jsp, catalogo.jsp, propiedad.jsp, propiedades.jsp y formulario_propiedad.jsp |
 | B5 | Favoritos y citas | M y C: favorito, cita. V/favoritos.jsp, citas.jsp y formulario_cita.jsp |
 | B6 | Solicitudes/documentos | M y C: solicitud, documento_solicitud. V/solicitudes.jsp, formulario_solicitud.jsp y solicitud.jsp |
-| B7 | Reportes y auditoría final | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/03-consultas.sql |
-| B8 | Datos y documentación BD | sql/02-datos-prueba.sql; varios/documentacion/base-datos/ |
+| B7 | Reportes y auditoría final | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/04-consultas.sql |
+| B8 | Datos y documentación BD | sql/03-datos-prueba.sql; sql/pruebas/02-validar-datos.sql; varios/documentacion/base-datos/ |
 | B9 | Integración y cierre | Documentación, pruebas finales, Scrum y README mediante el coordinador |
 
 Cabecera reúne menú y avisos; no crear fragmentos visuales adicionales por cada rol. Auditoría se implementa en B7; el coordinador integra las llamadas en operaciones ya terminadas, sin edición simultánea de esos archivos.
@@ -70,7 +70,7 @@ B8 usa el formato de claves que entrega B0. B9 acompaña la integración con com
 
 Para auditoría, el coordinador reserva temporalmente los archivos de acciones ya terminados, añade los puntos de registro y devuelve su propiedad. Las IA no editan esos archivos a la vez. No se inventan eventos previos: los eventos reales comienzan al incorporar la función y los recorridos se comprueban nuevamente al final.
 
-**B8:** mínimo diez registros por tabla principal, roles/tipos reales y claves compatibles. MER, relacional, diccionario y 3FN conforme al SQL; conservar la imagen aportada y actualizar solo lo acordado. No recrear esquemas anteriores.
+**B8:** mínimo diez registros por tabla principal, tipos reales y claves compatibles. Parte de `sql/02-datos-base.sql` (3 roles y administrador, del coordinador): no los vuelve a insertar y los referencia por nombre y correo. No inserta auditoría. Entrega el script sin confirmarlo en la BD compartida; el coordinador lo ejecuta. MER, relacional, diccionario y 3FN conforme al SQL; conservar la imagen aportada y actualizar solo lo acordado. No recrear esquemas anteriores.
 
 **B9:** recorrido completo y pruebas unitarias/funcionales exigidas, permisos, concurrencia, JDBC local/remoto, responsive, consultas y auditoría ya incorporada. Casos de uso, presentación como simulacro, guía de ejecución, capturas reales y sustentación. Conservar evidencia Scrum de tres sprints de siete días, Git/tablero/Padlet; no inventar reuniones ni publicar sin autorización.
 

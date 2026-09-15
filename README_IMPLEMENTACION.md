@@ -19,7 +19,15 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Delegar B2 y B8 cuando se autoricen.
+Delegar B2 y B8 en paralelo. El coordinador integra B2 primero y después ejecuta el script de B8.
+
+## Datos base — 15 de septiembre de 2026
+
+`sql/02-datos-base.sql` carga los 3 roles (ADMINISTRADOR, INMOBILIARIA, CLIENTE) y el administrador inicial `admin@habita.com` / `Admin123` con su perfil. Se puede ejecutar varias veces sin duplicar. Los datos de prueba de B8 pasan a `sql/03-datos-prueba.sql` y las consultas de B7 a `sql/04-consultas.sql`.
+
+`sql/pruebas/01-validar-esquema.sql` usaba nombres que chocarían con datos reales en columnas UNIQUE (rol CLIENTE, características Patio y Garaje). Ahora usa nombres exclusivos de validación.
+
+Verificado: 16 rechazos esperados con la base vacía y otra vez con los roles cargados; el script base ejecutado dos veces sin duplicar; la contraseña del administrador validada por `verificarClave` de utilidades.jspf leyendo la base (correcta acepta, incorrecta rechaza).
 
 ## B1 — 15 de septiembre de 2026
 

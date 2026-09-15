@@ -73,7 +73,16 @@ La configuración auxiliar de la versión retirada no está implementada. El nom
 | tokenFormulario | String |
 | nombreUsuario | String (nombre que muestra la cabecera; B2 lo guarda al iniciar sesión) |
 
-Roles: ADMINISTRADOR, INMOBILIARIA, CLIENTE. El visitante es anónimo. Usuario multirrol mantiene todos los permisos, con panel inicial admin > inmobiliaria > cliente.
+Roles: ADMINISTRADOR, INMOBILIARIA, CLIENTE. El visitante es anónimo.
+
+**Datos base ya cargados** (`sql/02-datos-base.sql`, del coordinador; se puede ejecutar varias veces sin duplicar):
+
+| Dato | Valor |
+| --- | --- |
+| Roles | `1 = ADMINISTRADOR`, `2 = INMOBILIARIA`, `3 = CLIENTE`. Buscar siempre por nombre, nunca por número |
+| Administrador inicial | `admin@habita.com` / `Admin123`, con perfil «Administrador Habita» y rol ADMINISTRADOR. Solo para desarrollo: cambiar antes de publicar |
+
+No borrar ni modificar estas filas en pruebas. Orden de ejecución de scripts: `01-esquema.sql` → `02-datos-base.sql` → `03-datos-prueba.sql` (B8) → `04-consultas.sql` (B7). Usuario multirrol mantiene todos los permisos, con panel inicial admin > inmobiliaria > cliente.
 
 Cada controlador privado define los roles permitidos como atributo de petición rolesPermitidos (Set<String>) antes de incluir seguridad.jspf. El fragmento comprobará sesión, cuenta activa y roles actuales; ante fallo hace forward a `/WEB-INF/vista/acceso_denegado.jsp` y termina la página con `return;`. No debe generar HTML antes de esa comprobación.
 
