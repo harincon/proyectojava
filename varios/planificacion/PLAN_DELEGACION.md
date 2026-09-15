@@ -21,7 +21,7 @@ M = WEB-INF/modelo; C = controlador; V = WEB-INF/vista. Los archivos de M usan .
 
 | Bloque | Trabajo | Archivos exclusivos previstos |
 | --- | --- | --- |
-| B0 | Base común | WEB-INF/web.xml, WEB-INF/jspf/conexion.jspf y utilidades.jspf; controlador/prueba_conexion.jsp. Driver y conexión ya existen |
+| B0 | Base común — **terminado** | WEB-INF/web.xml, WEB-INF/jspf/conexion.jspf, conexion.jspf.ejemplo y utilidades.jspf; controlador/prueba_conexion.jsp y prueba_subida.jsp |
 | B1 | Diseño | css/, js/, img/; WEB-INF/jspf/cabecera.jspf y pie.jspf; V/acceso_denegado.jsp y error.jsp |
 | B2 | Acceso, usuarios/roles y perfil | M y C: usuario, rol, usuario_rol, perfil. C/acceso.jsp y panel.jsp. V/login.jsp, registro.jsp, panel.jsp, perfil.jsp, usuarios.jsp, formulario_usuario.jsp y roles.jsp. WEB-INF/jspf/seguridad.jspf |
 | B3 | Empresas y catálogos | M y C: inmobiliaria, ciudad, tipo_propiedad, caracteristica. V/inmobiliarias.jsp, formulario_inmobiliaria.jsp y catalogos.jsp |
@@ -40,7 +40,7 @@ Cada bloque desarrolla su modelo, controlador y vistas cuando se autorice. No cr
 
 | Momento | Encargos | Requiere |
 | --- | --- | --- |
-| 1 | B0 | Autorización de completar base JSP; conexión ya comprobada |
+| 1 | B0 — terminado | Verificado en Tomcat 8.5.96 |
 | 2 | B1, B2 y B8 en paralelo | B0 integrado; B2 espera componentes B1 para su cierre visual |
 | 3 | B3 | Acceso de B2; coordinar empresa y rol antes de aceptar ambos |
 | 4 | B4 | B1, B2 y B3 integrados |

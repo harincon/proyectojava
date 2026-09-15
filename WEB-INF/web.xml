@@ -7,6 +7,26 @@
 
     <display-name>Proyecto inmobiliaria</display-name>
 
+    <!-- Carpeta privada de archivos subidos. Vacío = WEB-INF/archivos. -->
+    <context-param>
+        <param-name>rutaArchivos</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <!-- Toda JSP que reciba archivos se registra así, con sus límites en bytes. -->
+    <servlet>
+        <servlet-name>pruebaSubida</servlet-name>
+        <jsp-file>/controlador/prueba_subida.jsp</jsp-file>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>11534336</max-request-size>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>pruebaSubida</servlet-name>
+        <url-pattern>/controlador/prueba_subida.jsp</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>

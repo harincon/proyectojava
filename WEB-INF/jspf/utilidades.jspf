@@ -1,0 +1,193 @@
+<%@ page import="java.io.File,java.math.BigDecimal,java.math.RoundingMode,java.nio.charset.StandardCharsets,java.security.GeneralSecurityException,java.security.MessageDigest,java.security.SecureRandom,java.sql.SQLException,java.text.NumberFormat,java.time.LocalDateTime,java.time.ZoneId,java.time.format.DateTimeFormatter,java.time.format.DateTimeParseException,java.util.Base64,java.util.Locale,javax.crypto.SecretKeyFactory,javax.crypto.spec.PBEKeySpec" %>
+<%-- Incluir antes de leer parámetros: fija UTF-8 en la petición. --%>
+<%
+    if (request.getCharacterEncoding() == null) {
+        request.setCharacterEncoding("UTF-8");
+    }
+%>
+<%!
+    private static final SecureRandom ALEATORIO = new SecureRandom();
+    private static final ZoneId ZONA_BOGOTA = ZoneId.of("America/Bogota");
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final int ITERACIONES_CLAVE = 120000;
+
+    // Formato guardado: pbkdf2-sha256$iteraciones$salBase64$hashBase64
+    private String generarClave(String plana) {
+        if (plana == null || plana.isEmpty()) {
+            throw new IllegalArgumentException("La contraseña no puede estar vacía.");
+        }
+        byte[] sal = new byte[16];
+        ALEATORIO.nextBytes(sal);
+        return "pbkdf2-sha256$" + ITERACIONES_CLAVE + "$"
+                + Base64.getEncoder().encodeToString(sal) + "$"
+                + Base64.getEncoder().encodeToString(derivarClave(plana, sal, ITERACIONES_CLAVE));
+    }
+
+    private boolean verificarClave(String plana, String almacenada) {
+        if (plana == null || almacenada == null) {
+            return false;
+        }
+        String[] partes = almacenada.split("\\$");
+        if (partes.length != 4 || !"pbkdf2-sha256".equals(partes[0])) {
+            return false;
+        }
+        try {
+            byte[] sal = Base64.getDecoder().decode(partes[2]);
+            byte[] esperado = Base64.getDecoder().decode(partes[3]);
+            return MessageDigest.isEqual(esperado, derivarClave(plana, sal, Integer.parseInt(partes[1])));
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private byte[] derivarClave(String plana, byte[] sal, int iteraciones) {
+        PBEKeySpec especificacion = new PBEKeySpec(plana.toCharArray(), sal, iteraciones, 256);
+        try {
+            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(especificacion).getEncoded();
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("No se pudo calcular la contraseña.", e);
+        } finally {
+            especificacion.clearPassword();
+        }
+    }
+
+    private String escapar(Object valor) {
+        if (valor == null) {
+            return "";
+        }
+        String texto = valor.toString();
+        StringBuilder salida = new StringBuilder(texto.length() + 16);
+        for (char c : texto.toCharArray()) {
+            switch (c) {
+                case '&': salida.append("&amp;"); break;
+                case '<': salida.append("&lt;"); break;
+                case '>': salida.append("&gt;"); break;
+                case '"': salida.append("&quot;"); break;
+                case '\'': salida.append("&#39;"); break;
+                default: salida.append(c);
+            }
+        }
+        return salida.toString();
+    }
+
+    private String obtenerToken(HttpSession sesion) {
+        synchronized (sesion) {
+            Object token = sesion.getAttribute("tokenFormulario");
+            if (token == null) {
+                byte[] bytes = new byte[24];
+                ALEATORIO.nextBytes(bytes);
+                token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+                sesion.setAttribute("tokenFormulario", token);
+            }
+            return token.toString();
+        }
+    }
+
+    private String campoToken(HttpSession sesion) {
+        return "<input type=\"hidden\" name=\"token\" value=\"" + obtenerToken(sesion) + "\">";
+    }
+
+    private boolean tokenValido(HttpServletRequest peticion) {
+        HttpSession sesion = peticion.getSession(false);
+        Object guardado = sesion == null ? null : sesion.getAttribute("tokenFormulario");
+        String recibido = peticion.getParameter("token");
+        return guardado != null && recibido != null && MessageDigest.isEqual(
+                guardado.toString().getBytes(StandardCharsets.UTF_8), recibido.getBytes(StandardCharsets.UTF_8));
+    }
+
+    // Recorta espacios; devuelve null si queda vacío.
+    private String limpiar(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        String recortado = texto.trim();
+        return recortado.isEmpty() ? null : recortado;
+    }
+
+    private boolean longitudValida(String texto, int minimo, int maximo) {
+        String limpio = limpiar(texto);
+        int largo = limpio == null ? 0 : limpio.length();
+        return largo >= minimo && largo <= maximo;
+    }
+
+    private boolean esCorreo(String texto) {
+        String limpio = limpiar(texto);
+        return limpio != null && limpio.length() <= 150 && limpio.matches("[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+");
+    }
+
+    private boolean esTelefono(String texto) {
+        String limpio = limpiar(texto);
+        return limpio != null && limpio.matches("[0-9+()\\-\\s]{7,25}");
+    }
+
+    private Integer aEntero(String texto) {
+        String limpio = limpiar(texto);
+        try {
+            return limpio == null ? null : Integer.valueOf(limpio);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    // Importes en COP con punto decimal, como los envía input type="number".
+    private BigDecimal aImporte(String texto) {
+        String limpio = limpiar(texto);
+        try {
+            return limpio == null ? null : new BigDecimal(limpio).setScale(2, RoundingMode.HALF_UP);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String formatoPesos(BigDecimal valor) {
+        if (valor == null) {
+            return "";
+        }
+        NumberFormat formato = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+        formato.setMaximumFractionDigits(0);
+        return formato.format(valor);
+    }
+
+    private LocalDateTime ahora() {
+        return LocalDateTime.now(ZONA_BOGOTA);
+    }
+
+    // Une input type="date" y input type="time".
+    private LocalDateTime aFechaHora(String fecha, String hora) {
+        String f = limpiar(fecha);
+        String h = limpiar(hora);
+        try {
+            return f == null || h == null ? null : LocalDateTime.parse(f + "T" + h);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    private String formatoFecha(LocalDateTime fechaHora) {
+        return fechaHora == null ? "" : FORMATO_FECHA.format(fechaHora);
+    }
+
+    private String mensajeError(SQLException e) {
+        String estado = e.getSQLState();
+        if ("23505".equals(estado)) {
+            return "El dato ya se encuentra registrado.";
+        }
+        if ("23503".equals(estado) || "23001".equals(estado)) {
+            return "La operación no es posible porque hay información relacionada.";
+        }
+        if ("23514".equals(estado)) {
+            return "Uno de los valores no es válido.";
+        }
+        return "No fue posible completar la operación. Intente nuevamente.";
+    }
+
+    // Carpeta privada para archivos subidos; se configura en web.xml (rutaArchivos).
+    private File carpetaArchivos(ServletContext contexto) {
+        String configurada = limpiar(contexto.getInitParameter("rutaArchivos"));
+        File carpeta = configurada != null ? new File(configurada) : new File(contexto.getRealPath("/WEB-INF/archivos"));
+        if (!carpeta.isDirectory() && !carpeta.mkdirs()) {
+            throw new IllegalStateException("No se pudo crear la carpeta de archivos.");
+        }
+        return carpeta;
+    }
+%>

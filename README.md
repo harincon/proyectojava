@@ -7,8 +7,8 @@ Aplicación académica para publicar inmuebles, buscar propiedades, agendar visi
 - Base de datos: PostgreSQL, 16 tablas y 18 relaciones FK.
 - [SQL vigente](sql/01-esquema.sql): conserva contraseña_hash, baños e imagen_propiedad.ruta de tipo TEXT.
 - Driver JDBC conservado en WEB-INF/lib.
-- Por instrucción del estudiante, se retiró B0 basado en clases Java propias. Ya existe conexion.jspf con conexión JDBC comprobada; el resto de la base JSP/JSPF está pendiente.
-- No delegar los antiguos encargos de B0: sus contratos y estructura fueron sustituidos.
+- B0 (base común en JSP/JSPF) terminado y verificado en Tomcat 8.5.96: conexión, utilidades, subida de archivos y pruebas de diagnóstico. Ya se pueden delegar B1, B2 y B8.
+- En otro equipo, copiar `WEB-INF/jspf/conexion.jspf.ejemplo` como `conexion.jspf` y completar la contraseña. Diagnóstico local: `http://localhost:8080/proyectojava/controlador/prueba_conexion.jsp`.
 
 ## Forma de trabajo elegida
 

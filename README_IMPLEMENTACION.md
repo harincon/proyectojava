@@ -13,13 +13,29 @@ La base de datos está creada en PostgreSQL. La estructura anterior de B0 basada
 | Fuentes y compilados de B0 | Retirados, incluida la prueba Java y su script de compilación |
 | web.xml | Conserva configuración de sesión y restricciones del material auxiliar; se retiró la referencia al filtro eliminado |
 | Plan, contratos y plano | Actualizados para páginas JSP y fragmentos JSPF |
-| Nueva base B0 | Conexión creada; utilidades, seguridad y diagnóstico JSP pendientes |
+| Nueva base B0 | Terminada en JSP/JSPF y verificada en Tomcat (ver abajo) |
 
 La comprobación técnica /estado y los contratos de base-B0-v1 ya no están disponibles. Las pruebas anteriores de esa versión no certifican la futura base JSP.
 
 ## Próximo paso
 
-Completar B0 cuando se autorice: utilidades.jspf y controlador/prueba_conexion.jsp; verificar ejecución de las JSP en Tomcat y publicar los acuerdos de funciones compartidas. La conexión ya está centralizada. Después se habilitan B1, B2 y B8 según sus dependencias.
+Delegar B1, B2 y B8 cuando se autoricen.
+
+## B0 — 15 de septiembre de 2026
+
+Base común en JSP/JSPF sobre Tomcat 8.5.96, con web.xml 3.1.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/jspf/utilidades.jspf | UTF-8, hash PBKDF2, escape, token, validaciones, pesos, fechas, errores SQL y carpeta de archivos |
+| WEB-INF/jspf/conexion.jspf.ejemplo | Plantilla de conexión sin contraseña, versionada en Git |
+| controlador/prueba_conexion.jsp | Diagnóstico de conexión y utilidades; solo responde en el propio equipo |
+| controlador/prueba_subida.jsp | Diagnóstico de subida multipart; solo en el propio equipo |
+| WEB-INF/web.xml | `rutaArchivos` y registro multipart de la prueba de subida |
+
+Verificado por HTTP en Tomcat: conexión a PostgreSQL 18.6, esquema con 16 tablas, columnas con ñ, hash (confirmado también con .NET), escape, validaciones, fechas, token aceptado y rechazado, texto POST con ñ intacto, y subida de archivos (nombre con ñ, 3 MB aceptado, 12 MB rechazado con mensaje, token falso rechazado, sin archivos residuales). La base de datos no se modificó.
+
+Pendiente para B9: retirar o proteger las dos páginas de prueba antes de publicar.
 
 Se retiraron los dos archivos de propiedades y su carpeta config. conexion.jspf conserva los datos de conexión, fija currentSchema=inmobiliaria y está excluido de Git por contener credenciales. La prueba ejecutó su función por JDBC y confirmó 16 tablas; no fue una prueba HTTP de JSP en Tomcat.
 

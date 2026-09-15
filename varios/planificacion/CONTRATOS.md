@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. La función abrirConexion() de conexion.jspf ya está implementada y comprobada por JDBC. Los demás fragmentos y la prueba HTTP de JSP están pendientes; B0 aún no habilita dependientes.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. Habilita B1, B2 y B8.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -16,26 +16,47 @@ Modelo/vista no son accesibles directamente por navegador al quedar bajo WEB-INF
 
 Crear carpetas no equivale a implementar MVC. La lógica y el Filter de servlet solicitado en el parcial siguen pendientes; no se considera seguridad.jspf un Filter.
 
-Se conserva Tomcat instalado y driver PostgreSQL en WEB-INF/lib. Los datos de conexión están directamente en WEB-INF/jspf/conexion.jspf, sin archivos .properties. B0 verificará la ejecución JSP en Tomcat. No cambiar a Jakarta ni copiar versiones XML de capturas ajenas.
+Se conserva Tomcat instalado y driver PostgreSQL en WEB-INF/lib. Los datos de conexión están directamente en WEB-INF/jspf/conexion.jspf, sin archivos .properties. web.xml se mantiene en versión 3.1: Tomcat 8.5 lee la 4.0 como 3.1 e ignora sus funciones nuevas. No cambiar a Jakarta ni copiar versiones XML de capturas ajenas.
 
-## 2. Funciones comunes propuestas para B0
+## 2. Funciones comunes de B0 (implementadas)
 
-La conexión ya existe; las otras firmas son el contrato de destino. Si hace falta ajustarlas, el coordinador lo hace antes de habilitar B2/B8.
+Controlador típico, en este orden:
 
-| Fragmento | Funciones y responsabilidad |
-| --- | --- |
-| conexion.jspf | abrirConexion(): Connection; carga el driver y conecta con currentSchema=inmobiliaria. Declara SQLException y ClassNotFoundException |
-| utilidades.jspf | generarClave(String), verificarClave(String, String), escapar(String), obtenerToken(HttpSession), tokenValido(HttpServletRequest), formatos y validaciones sencillas |
+~~~jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/utilidades.jspf" %>
+<%@ include file="/WEB-INF/jspf/conexion.jspf" %>
+~~~
+
+utilidades.jspf va **primero**: al incluirse fija UTF-8 en la petición, y eso solo funciona antes de leer cualquier parámetro.
+
+| Fragmento | Función | Devuelve |
+| --- | --- | --- |
+| conexion.jspf | `abrirConexion()` | `Connection` con `currentSchema=inmobiliaria`. Lanza `SQLException` y `ClassNotFoundException` |
+| utilidades.jspf | `generarClave(String)` | Hash `pbkdf2-sha256$120000$sal$hash` |
+| | `verificarClave(String plana, String guardada)` | `boolean`, comparación en tiempo constante |
+| | `escapar(Object)` | Texto seguro para HTML y atributos; `null` → `""` |
+| | `obtenerToken(HttpSession)` / `campoToken(HttpSession)` | Token de sesión / `<input type="hidden" name="token">` |
+| | `tokenValido(HttpServletRequest)` | `boolean`; usar en todo POST antes de modificar |
+| | `limpiar(String)` | Texto sin espacios extremos; vacío → `null` |
+| | `longitudValida(String, int, int)`, `esCorreo(String)`, `esTelefono(String)` | `boolean` |
+| | `aEntero(String)` / `aImporte(String)` | `Integer` / `BigDecimal` con 2 decimales; `null` si no es válido |
+| | `formatoPesos(BigDecimal)` | `$ 320.000.000` |
+| | `ahora()`, `aFechaHora(String fecha, String hora)`, `formatoFecha(LocalDateTime)` | Zona America/Bogota; formato `dd/MM/yyyy HH:mm` |
+| | `mensajeError(SQLException)` | Mensaje claro para 23505, 23503, 23001 y 23514 |
+| | `carpetaArchivos(ServletContext)` | Carpeta privada de archivos subidos (se crea si falta) |
+
+No crear funciones con los mismos nombres en otros fragmentos: la página no compilaría.
 
 Sin variables compartidas mutables entre peticiones dentro de declaraciones JSP. Incluir cada fragmento con declaraciones una sola vez por página; no incluir conexion/utilidades de nuevo desde cabecera u otros fragmentos.
 
-JSP UTF-8. Fijar codificación de petición antes de leer parámetros, incluida cualquier lectura desde un fragmento. Claves nunca en el HTML, los logs ni el repositorio.
+JSP UTF-8. Incluir utilidades.jspf antes de leer parámetros. Claves nunca en el HTML, los logs ni el repositorio.
 
 ## 3. JDBC y configuración
 
 conexion.jspf contiene url, usuario y contrasena como variables locales de abrirConexion(). La URL JDBC incluye currentSchema=inmobiliaria. Para una BD remota se ajustan allí los datos de conexión y los parámetros que requiera el proveedor; no se repiten en cada página.
 
-El fragmento está excluido de Git por contener credenciales locales. Al preparar el repositorio público, proporcionar su plantilla sin claves en la guía de instalación y completar el fragmento de cada ambiente de manera privada. No recrear db.properties ni una clase de conexión.
+El fragmento está excluido de Git por contener credenciales locales. En otro equipo se copia `WEB-INF/jspf/conexion.jspf.ejemplo` como `conexion.jspf` y se completa la contraseña. No recrear db.properties ni una clase de conexión.
 
 PreparedStatement para valores. Nombre de esquema fijo/validado; no concatenar entradas de usuario en SQL. Cerrar conexión y resultados. Una transacción, una conexión: el que abre confirma/revierte. Registro, empresa/rol, cita y cierre son operaciones atómicas.
 
@@ -79,13 +100,32 @@ B1 fija tituloPagina y menuActivo. cabecera.jspf reúne cabecera, menú y mensaj
 
 ## 7. Claves, archivos y fechas
 
-B0 debe preservar compatibilidad del formato de hash ya elegido si existen usuarios: pbkdf2-sha256$120000$salBase64$hashBase64, PBKDF2WithHmacSHA256 con sal aleatoria de 16 bytes y salida de 256 bits. Verificar formato y comparación segura. No cambiar hashes en BD durante esta limpieza.
+Formato de hash: pbkdf2-sha256$120000$salBase64$hashBase64, PBKDF2WithHmacSHA256 con sal aleatoria de 16 bytes y salida de 256 bits. Verificado también con una implementación independiente (.NET).
 
-B8 genera datos de prueba usando la función JSPF validada; ya no existe un comando Java para generar claves.
+B8 obtiene un hash válido de `Clave123` en `controlador/prueba_conexion.jsp` (fila «Clave PBKDF2»). Puede usarlo en los usuarios de prueba: cada recarga genera otro distinto y todos son válidos.
 
 Fotos de propiedades mediante enlaces HTTPS validados; demostrar acceso de visitante y tipo de visualización. No descargar URLs arbitrarias desde el servidor. Documento privado mediante carga PDF y foto de perfil JPG/PNG; límites se acuerdan antes de implementar.
 
-B0 demuestra carga multipart en JSP con configuración válida en web.xml antes de B2/B6; la operación de negocio y sus formularios pertenecen a esos bloques. Almacenamiento privado configurable y descarga autorizada.
+Subida de archivos (verificada por B0 con `controlador/prueba_subida.jsp`). En Tomcat 8.5 una JSP solo recibe archivos si se registra en web.xml con `<multipart-config>`:
+
+~~~xml
+<servlet>
+    <servlet-name>documentoSolicitud</servlet-name>
+    <jsp-file>/controlador/documento_solicitud.jsp</jsp-file>
+    <multipart-config>
+        <max-file-size>10485760</max-file-size>
+        <max-request-size>11534336</max-request-size>
+    </multipart-config>
+</servlet>
+<servlet-mapping>
+    <servlet-name>documentoSolicitud</servlet-name>
+    <url-pattern>/controlador/documento_solicitud.jsp</url-pattern>
+</servlet-mapping>
+~~~
+
+B2 y B6 piden ese registro al coordinador; no editan web.xml. En la JSP: `Part archivo = request.getPart("archivo")` dentro de `try/catch (IllegalStateException)`, que indica archivo demasiado grande. El token del formulario se lee con `tokenValido` como siempre. Comprobado: nombres con ñ, archivos de 3 MB y rechazo claro por encima del límite.
+
+Los archivos se guardan con nombre generado en `carpetaArchivos(application)`. La ruta se configura en el `context-param rutaArchivos` de web.xml; vacío = `WEB-INF/archivos`, que no es accesible por URL y está excluida de Git. La descarga pasa siempre por un controlador autorizado.
 
 Fechas interpretadas en America/Bogota, importes COP con BigDecimal, baños enteros. No inventar cantidad de estacionamientos ni fecha de registro.
 
@@ -117,4 +157,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-Solo B0 inicia tras autorización de completarlo; la conexión ya existe. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0 está terminado; B1, B2 y B8 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.

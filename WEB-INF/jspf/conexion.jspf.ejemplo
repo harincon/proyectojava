@@ -1,0 +1,12 @@
+<%-- Copiar como conexion.jspf y completar los datos del ambiente. conexion.jspf no se sube a Git. --%>
+<%@ page import="java.sql.Connection,java.sql.DriverManager,java.sql.SQLException" %>
+<%!
+    private Connection abrirConexion() throws SQLException, ClassNotFoundException {
+        String url = "jdbc:postgresql://localhost:5432/proyectojava?currentSchema=inmobiliaria";
+        String usuario = "postgres";
+        String contrasena = "";
+
+        Class.forName("org.postgresql.Driver");
+        return DriverManager.getConnection(url, usuario, contrasena);
+    }
+%>
