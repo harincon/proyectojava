@@ -91,7 +91,7 @@ Estas comprobaciones siguen pendientes de implementación. No existe actualmente
 
 ## 7. Ajustes visuales respecto a Figma
 
-Conservar el estilo de [Sin título.pdf](../referencias/Sin%20título.pdf): azul oscuro, verde petróleo, fondos claros, tarjetas y menús laterales. Habita es un nombre propuesto, no aprobado.
+Conservar el estilo de [Sin título.pdf](../referencias/Sin%20título.pdf): azul oscuro, verde petróleo, fondos claros, tarjetas y menús laterales. **Aprobados y aplicados en B1:** nombre Habita, lema «Encuentra tu próximo espacio» y paleta A (azul `#183B56`, turquesa `#0F766E`).
 
 Quitar mensajería al asesor, blog/redes sin contenido, fecha de registro inexistente y cantidad de estacionamientos. Mostrar empresa responsable y parqueadero como característica. Simplificar el pie interno.
 

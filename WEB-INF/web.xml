@@ -42,10 +42,25 @@
     <jsp-config>
         <jsp-property-group>
             <url-pattern>*.jsp</url-pattern>
+            <url-pattern>*.jspf</url-pattern>
             <page-encoding>UTF-8</page-encoding>
             <trim-directive-whitespaces>true</trim-directive-whitespaces>
         </jsp-property-group>
     </jsp-config>
+
+    <!-- Páginas de error con el diseño de la aplicación (B1). -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/vista/acceso_denegado.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/vista/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/vista/error.jsp</location>
+    </error-page>
 
     <!-- Material interno; el plano sigue accesible durante la planificación. -->
     <security-constraint>

@@ -1,0 +1,46 @@
+<%-- Cierra lo que abre cabecera.jspf. --%>
+<% if (vistaPanel) { %>
+  </main>
+</div>
+<footer class="pie-interno py-2 px-3 text-center">
+  <%= "© " + ahora().getYear() + " " + NOMBRE_APP %> · Aplicación académica
+</footer>
+<% } else { %>
+</main>
+<footer class="pie-publico pt-5 pb-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <img src="<%= ctx %>/img/logo.svg" alt="" width="32" height="32">
+          <span class="h5 mb-0 text-white"><%= NOMBRE_APP %></span>
+        </div>
+        <p class="mb-0"><%= LEMA_APP %>. Casas, apartamentos, locales, oficinas y terrenos en venta y arriendo.</p>
+      </div>
+      <div class="col-6 col-md-3">
+        <p class="fw-semibold text-white mb-2">Explorar</p>
+        <ul class="list-unstyled mb-0">
+          <li><a href="<%= ctx %>/controlador/inicio.jsp">Inicio</a></li>
+          <li><a href="<%= ctx %>/controlador/propiedad.jsp?accion=catalogo">Catálogo</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md-3">
+        <p class="fw-semibold text-white mb-2">Mi cuenta</p>
+        <ul class="list-unstyled mb-0">
+          <% if (haySesion) { %>
+          <li><a href="<%= ctx %>/controlador/panel.jsp">Mi panel</a></li>
+          <% } else { %>
+          <li><a href="<%= ctx %>/controlador/acceso.jsp?accion=ingresar">Iniciar sesión</a></li>
+          <li><a href="<%= ctx %>/controlador/acceso.jsp?accion=registro">Registrarse</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary my-4">
+    <p class="small mb-0"><%= "© " + ahora().getYear() + " " + NOMBRE_APP %> · Aplicación académica</p>
+  </div>
+</footer>
+<% } %>
+<script src="<%= ctx %>/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

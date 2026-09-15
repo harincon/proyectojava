@@ -1,0 +1,305 @@
+/* Habita · paleta A (azul y turquesa) sobre Bootstrap 5.3 */
+
+:root {
+    --habita-marca: #183B56;
+    --habita-marca-oscuro: #10293D;
+    --habita-accion: #0F766E;
+    --habita-accion-oscuro: #0B5E58;
+    --habita-fondo: #F5F7FA;
+    --habita-texto: #172B4D;
+    --habita-borde: #DCE2E9;
+    --habita-suave: #5B6B80;
+
+    --bs-primary: #0F766E;
+    --bs-primary-rgb: 15, 118, 110;
+    --bs-link-color: #0F766E;
+    --bs-link-color-rgb: 15, 118, 110;
+    --bs-link-hover-color: #0B5E58;
+    --bs-link-hover-color-rgb: 11, 94, 88;
+    --bs-body-color: #172B4D;
+    --bs-body-bg: #F5F7FA;
+    --bs-border-color: #DCE2E9;
+    --bs-focus-ring-color: rgba(15, 118, 110, .25);
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Botones: primario = acción (turquesa); marca = azul. */
+.btn-primary {
+    --bs-btn-bg: var(--habita-accion);
+    --bs-btn-border-color: var(--habita-accion);
+    --bs-btn-hover-bg: var(--habita-accion-oscuro);
+    --bs-btn-hover-border-color: var(--habita-accion-oscuro);
+    --bs-btn-active-bg: var(--habita-accion-oscuro);
+    --bs-btn-active-border-color: var(--habita-accion-oscuro);
+    --bs-btn-disabled-bg: var(--habita-accion);
+    --bs-btn-disabled-border-color: var(--habita-accion);
+    --bs-btn-focus-shadow-rgb: 15, 118, 110;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--habita-accion);
+    --bs-btn-border-color: var(--habita-accion);
+    --bs-btn-hover-bg: var(--habita-accion);
+    --bs-btn-hover-border-color: var(--habita-accion);
+    --bs-btn-active-bg: var(--habita-accion-oscuro);
+    --bs-btn-active-border-color: var(--habita-accion-oscuro);
+    --bs-btn-focus-shadow-rgb: 15, 118, 110;
+}
+
+.btn-marca {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--habita-marca);
+    --bs-btn-border-color: var(--habita-marca);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--habita-marca-oscuro);
+    --bs-btn-hover-border-color: var(--habita-marca-oscuro);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--habita-marca-oscuro);
+    --bs-btn-focus-shadow-rgb: 24, 59, 86;
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: var(--habita-accion);
+    box-shadow: 0 0 0 .25rem rgba(15, 118, 110, .25);
+}
+
+.form-check-input:checked {
+    background-color: var(--habita-accion);
+    border-color: var(--habita-accion);
+}
+
+.pagination {
+    --bs-pagination-color: var(--habita-accion);
+    --bs-pagination-hover-color: var(--habita-accion-oscuro);
+    --bs-pagination-focus-color: var(--habita-accion-oscuro);
+    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(15, 118, 110, .25);
+    --bs-pagination-active-bg: var(--habita-accion);
+    --bs-pagination-active-border-color: var(--habita-accion);
+}
+
+.bg-marca { background-color: var(--habita-marca) !important; }
+.text-marca { color: var(--habita-marca) !important; }
+.text-suave { color: var(--habita-suave) !important; }
+
+/* Foco visible para teclado en toda la aplicación. */
+a:focus-visible,
+button:focus-visible {
+    outline: 3px solid rgba(15, 118, 110, .55);
+    outline-offset: 2px;
+}
+
+/* Cabecera */
+.navbar-habita {
+    background-color: var(--habita-marca);
+}
+
+.navbar-habita .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 700;
+}
+
+.navbar-habita .navbar-brand img {
+    width: 32px;
+    height: 32px;
+}
+
+.navbar-habita .nav-link.active {
+    font-weight: 600;
+    border-bottom: 2px solid #5EC4B6;
+}
+
+/* Contenido */
+.contenido {
+    flex: 1 0 auto;
+}
+
+.titulo-pagina {
+    color: var(--habita-marca);
+    font-weight: 700;
+}
+
+/* Panel con menú lateral */
+.menu-lateral {
+    background-color: #fff;
+    border-right: 1px solid var(--habita-borde);
+}
+
+@media (min-width: 992px) {
+    .menu-lateral {
+        min-height: calc(100vh - 56px);
+        width: 240px;
+        flex: 0 0 240px;
+    }
+}
+
+.menu-lateral .grupo-menu {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--habita-suave);
+    padding: 1rem 1rem .35rem;
+}
+
+.menu-lateral .nav-link {
+    color: var(--habita-texto);
+    border-radius: .375rem;
+    padding: .5rem .75rem;
+    margin: 0 .5rem .15rem;
+}
+
+.menu-lateral .nav-link:hover {
+    background-color: var(--habita-fondo);
+}
+
+.menu-lateral .nav-link.active {
+    background-color: rgba(15, 118, 110, .12);
+    color: var(--habita-accion-oscuro);
+    font-weight: 600;
+}
+
+/* Tarjetas de propiedad: misma altura, imagen y precio alineados. */
+.tarjeta-propiedad {
+    height: 100%;
+    border: 1px solid var(--habita-borde);
+    border-radius: .5rem;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.tarjeta-propiedad .foto {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    object-fit: cover;
+    background-color: #E7ECF2;
+}
+
+.tarjeta-propiedad .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.tarjeta-propiedad .precio {
+    color: var(--habita-marca);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: auto;
+}
+
+.tarjeta-propiedad .datos {
+    font-size: .875rem;
+    color: var(--habita-suave);
+}
+
+/* Portada del inicio */
+.portada {
+    background-color: var(--habita-marca);
+    color: #fff;
+}
+
+.buscador-rapido {
+    background-color: #fff;
+    border-radius: .5rem;
+    padding: 1rem;
+    box-shadow: 0 .5rem 1.5rem rgba(16, 41, 61, .25);
+}
+
+/* Tablas de administración */
+.tabla-habita thead th {
+    background-color: var(--habita-marca);
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tabla-habita td {
+    vertical-align: middle;
+}
+
+.tabla-habita .acciones {
+    white-space: nowrap;
+    text-align: end;
+}
+
+/* Estados: el texto siempre acompaña al color. */
+.estado {
+    display: inline-block;
+    padding: .3em .65em;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.estado-DISPONIBLE, .estado-APROBADA, .estado-APROBADO, .estado-CONFIRMADA, .estado-ACTIVA, .estado-ACTIVO {
+    background-color: #DDF3EF; color: #0B5E58; border-color: #A8DDD4;
+}
+
+.estado-PENDIENTE {
+    background-color: #FFF3D2; color: #6A4A0A; border-color: #F1D78A;
+}
+
+.estado-VENDIDA, .estado-ARRENDADA, .estado-FINALIZADA, .estado-REALIZADA {
+    background-color: #E3EAF3; color: #183B56; border-color: #BCCADB;
+}
+
+.estado-RECHAZADA, .estado-RECHAZADO, .estado-CANCELADA, .estado-INACTIVA, .estado-INACTIVO {
+    background-color: #FBE3E3; color: #8A2323; border-color: #F0B9B9;
+}
+
+/* Lista sin resultados */
+.vacio {
+    text-align: center;
+    color: var(--habita-suave);
+    padding: 3rem 1rem;
+    border: 1px dashed var(--habita-borde);
+    border-radius: .5rem;
+    background-color: #fff;
+}
+
+.vacio .bi {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: .5rem;
+}
+
+/* Pies */
+.pie-publico {
+    background-color: var(--habita-marca);
+    color: #D5DEE8;
+}
+
+.pie-publico a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.pie-publico a:hover {
+    text-decoration: underline;
+}
+
+.pie-interno {
+    border-top: 1px solid var(--habita-borde);
+    background-color: #fff;
+    color: var(--habita-suave);
+    font-size: .85rem;
+}
+
+@media print {
+    .navbar, .menu-lateral, footer, .no-imprimir { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}

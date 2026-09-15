@@ -1,0 +1,150 @@
+<%@ page import="java.util.Collection,java.util.HashSet,java.util.Map,java.util.Set" %>
+<%--
+  Requiere, antes de incluirlo: utilidades.jspf y las variables
+  String tituloPagina, String menuActivo, boolean vistaPanel.
+  Declara para la vista: ctx, haySesion, rolesSesion, nombreSesion.
+--%>
+<%!
+    private static final String NOMBRE_APP = "Habita";
+    private static final String LEMA_APP = "Encuentra tu próximo espacio";
+
+    private String claseMenu(String clave, String activo) {
+        return clave.equals(activo) ? "nav-link active" : "nav-link";
+    }
+%>
+<%
+    String ctx = request.getContextPath();
+    boolean haySesion = session.getAttribute("idUsuario") != null;
+    String nombreSesion = haySesion && session.getAttribute("nombreUsuario") != null
+            ? session.getAttribute("nombreUsuario").toString() : "";
+
+    Set<String> rolesSesion = new HashSet<String>();
+    Object rolesGuardados = session.getAttribute("roles");
+    if (haySesion && rolesGuardados instanceof Collection) {
+        for (Object rol : (Collection<?>) rolesGuardados) {
+            rolesSesion.add(String.valueOf(rol));
+        }
+    }
+
+    // Avisos de un solo uso: se muestran y se borran de la sesión.
+    Object avisoExito = session.getAttribute("mensaje");
+    Object avisoFallo = session.getAttribute("mensajeError");
+    session.removeAttribute("mensaje");
+    session.removeAttribute("mensajeError");
+    Object erroresPeticion = request.getAttribute("errores");
+    Object errorGeneral = erroresPeticion instanceof Map ? ((Map<?, ?>) erroresPeticion).get("general") : null;
+%>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= escapar(tituloPagina) %> · <%= NOMBRE_APP %></title>
+<link rel="icon" href="<%= ctx %>/img/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="<%= ctx %>/css/bootstrap.min.css">
+<link rel="stylesheet" href="<%= ctx %>/css/bootstrap-icons.min.css">
+<link rel="stylesheet" href="<%= ctx %>/css/estilos.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark navbar-habita sticky-top">
+  <div class="container-fluid px-3 px-lg-4">
+    <a class="navbar-brand" href="<%= ctx %>/controlador/inicio.jsp">
+      <img src="<%= ctx %>/img/logo.svg" alt=""> <%= NOMBRE_APP %>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navegacion"
+            aria-controls="navegacion" aria-expanded="false" aria-label="Abrir navegación">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navegacion">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="<%= claseMenu("inicio", menuActivo) %>" href="<%= ctx %>/controlador/inicio.jsp">Inicio</a></li>
+        <li class="nav-item"><a class="<%= claseMenu("catalogo", menuActivo) %>" href="<%= ctx %>/controlador/propiedad.jsp?accion=catalogo">Catálogo</a></li>
+        <% if (haySesion) { %>
+        <li class="nav-item"><a class="<%= claseMenu("panel", menuActivo) %>" href="<%= ctx %>/controlador/panel.jsp">Mi panel</a></li>
+        <% } %>
+      </ul>
+      <% if (haySesion) { %>
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-2 py-2 py-lg-0">
+        <span class="navbar-text text-white"><i class="bi bi-person-circle me-1"></i><%= escapar(nombreSesion) %></span>
+        <form method="post" action="<%= ctx %>/controlador/acceso.jsp?accion=salir" class="m-0">
+          <%= campoToken(session) %>
+          <button type="submit" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</button>
+        </form>
+      </div>
+      <% } else { %>
+      <div class="d-flex gap-2 py-2 py-lg-0">
+        <a class="btn btn-outline-light btn-sm" href="<%= ctx %>/controlador/acceso.jsp?accion=ingresar">Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="<%= ctx %>/controlador/acceso.jsp?accion=registro">Registrarse</a>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</nav>
+
+<% if (vistaPanel) { %>
+<div class="contenido d-lg-flex">
+  <aside class="menu-lateral offcanvas-lg offcanvas-start" tabindex="-1" id="menuPanel" aria-labelledby="tituloMenuPanel">
+    <div class="offcanvas-header">
+      <h2 class="h5 offcanvas-title" id="tituloMenuPanel">Menú</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#menuPanel" aria-label="Cerrar menú"></button>
+    </div>
+    <nav class="offcanvas-body d-block p-0 pb-3" aria-label="Menú del panel">
+      <div class="grupo-menu">Mi cuenta</div>
+      <a class="<%= claseMenu("panel", menuActivo) %>" href="<%= ctx %>/controlador/panel.jsp"><i class="bi bi-grid"></i> Mi panel</a>
+      <a class="<%= claseMenu("perfil", menuActivo) %>" href="<%= ctx %>/controlador/perfil.jsp?accion=ver"><i class="bi bi-person"></i> Mi perfil</a>
+
+      <% if (rolesSesion.contains("ADMINISTRADOR")) { %>
+      <div class="grupo-menu">Administración</div>
+      <a class="<%= claseMenu("usuarios", menuActivo) %>" href="<%= ctx %>/controlador/usuario.jsp?accion=listar"><i class="bi bi-people"></i> Usuarios</a>
+      <a class="<%= claseMenu("inmobiliarias", menuActivo) %>" href="<%= ctx %>/controlador/inmobiliaria.jsp?accion=listar"><i class="bi bi-buildings"></i> Inmobiliarias</a>
+      <a class="<%= claseMenu("catalogos", menuActivo) %>" href="<%= ctx %>/controlador/ciudad.jsp?accion=listar"><i class="bi bi-tags"></i> Catálogos</a>
+      <a class="<%= claseMenu("reportes", menuActivo) %>" href="<%= ctx %>/controlador/reporte.jsp?accion=general"><i class="bi bi-bar-chart"></i> Reportes</a>
+      <a class="<%= claseMenu("auditoria", menuActivo) %>" href="<%= ctx %>/controlador/auditoria.jsp?accion=listar"><i class="bi bi-journal-text"></i> Auditoría</a>
+      <% } %>
+
+      <% if (rolesSesion.contains("INMOBILIARIA")) { %>
+      <div class="grupo-menu">Inmobiliaria</div>
+      <a class="<%= claseMenu("empresa", menuActivo) %>" href="<%= ctx %>/controlador/inmobiliaria.jsp?accion=empresa"><i class="bi bi-building"></i> Mi empresa</a>
+      <a class="<%= claseMenu("propiedades", menuActivo) %>" href="<%= ctx %>/controlador/propiedad.jsp?accion=gestionar"><i class="bi bi-house-gear"></i> Mis propiedades</a>
+      <a class="<%= claseMenu("citas_recibidas", menuActivo) %>" href="<%= ctx %>/controlador/cita.jsp?accion=recibidas"><i class="bi bi-calendar-check"></i> Citas recibidas</a>
+      <a class="<%= claseMenu("solicitudes_recibidas", menuActivo) %>" href="<%= ctx %>/controlador/solicitud.jsp?accion=recibidas"><i class="bi bi-folder-check"></i> Solicitudes recibidas</a>
+      <a class="<%= claseMenu("reportes_empresa", menuActivo) %>" href="<%= ctx %>/controlador/reporte.jsp?accion=empresa"><i class="bi bi-graph-up"></i> Reportes</a>
+      <% } %>
+
+      <% if (rolesSesion.contains("CLIENTE")) { %>
+      <div class="grupo-menu">Cliente</div>
+      <a class="<%= claseMenu("favoritos", menuActivo) %>" href="<%= ctx %>/controlador/favorito.jsp?accion=listar"><i class="bi bi-heart"></i> Favoritos</a>
+      <a class="<%= claseMenu("citas", menuActivo) %>" href="<%= ctx %>/controlador/cita.jsp?accion=mis_citas"><i class="bi bi-calendar-event"></i> Mis citas</a>
+      <a class="<%= claseMenu("solicitudes", menuActivo) %>" href="<%= ctx %>/controlador/solicitud.jsp?accion=mis_solicitudes"><i class="bi bi-folder2-open"></i> Mis solicitudes</a>
+      <% } %>
+    </nav>
+  </aside>
+  <main class="flex-grow-1 p-3 p-lg-4" id="contenido">
+    <button class="btn btn-outline-secondary btn-sm d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuPanel" aria-controls="menuPanel">
+      <i class="bi bi-list"></i> Menú
+    </button>
+<% } else { %>
+<main class="contenido" id="contenido">
+<% } %>
+
+<% if (avisoExito != null || avisoFallo != null || errorGeneral != null) { %>
+<div class="<%= vistaPanel ? "" : "container pt-3" %>">
+  <% if (avisoExito != null) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-1"></i><%= escapar(avisoExito) %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+  <% } %>
+  <% if (avisoFallo != null) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-1"></i><%= escapar(avisoFallo) %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+  <% } %>
+  <% if (errorGeneral != null) { %>
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle me-1"></i><%= escapar(errorGeneral) %>
+  </div>
+  <% } %>
+</div>
+<% } %>

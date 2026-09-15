@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. Habilita B1, B2 y B8.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). Quedan habilitados B2 y B8.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -71,10 +71,11 @@ La configuración auxiliar de la versión retirada no está implementada. El nom
 | idUsuario | Integer |
 | roles | Set<String> |
 | tokenFormulario | String |
+| nombreUsuario | String (nombre que muestra la cabecera; B2 lo guarda al iniciar sesión) |
 
 Roles: ADMINISTRADOR, INMOBILIARIA, CLIENTE. El visitante es anónimo. Usuario multirrol mantiene todos los permisos, con panel inicial admin > inmobiliaria > cliente.
 
-Cada controlador privado define los roles permitidos como atributo de petición rolesPermitidos (Set<String>) antes de incluir seguridad.jspf. El fragmento comprobará sesión, cuenta activa y roles actuales; ante fallo redirige a acceso denegado y termina la página. No debe generar HTML antes de esa comprobación.
+Cada controlador privado define los roles permitidos como atributo de petición rolesPermitidos (Set<String>) antes de incluir seguridad.jspf. El fragmento comprobará sesión, cuenta activa y roles actuales; ante fallo hace forward a `/WEB-INF/vista/acceso_denegado.jsp` y termina la página con `return;`. No debe generar HTML antes de esa comprobación.
 
 Todas las acciones y descargas privadas también lo incluyen. El controlador comprueba pertenencia del registro, con validaciones del modelo antes de modificar datos. Administrador con acceso total conforme al parcial; empresa solo sus propiedades/trámites y cliente los suyos.
 
@@ -92,11 +93,62 @@ La propiedad de archivos está en PLAN_DELEGACION.md. No crear rutas por rol ni 
 
 ## 6. Mensajes y presentación
 
-Errores por campo en atributo de petición errores (Map<String,String>); valores previos en valores (Map<String,String>); aviso posterior a redirección en sesión mensaje (String), consumido una vez. B1 presenta; el controlador escribe.
+Errores por campo en atributo de petición `errores` (Map<String,String>); la clave `general` se muestra como aviso rojo en la cabecera. Valores previos en `valores` (Map<String,String>). Tras una redirección: sesión `mensaje` (aviso verde) o `mensajeError` (aviso rojo), String; la cabecera los muestra una vez y los borra. B1 presenta; el controlador escribe.
 
 Escapar textos procedentes de usuario/BD antes de HTML. Traducir duplicados 23505, FK 23503, RESTRICT 23001 y CHECK 23514 a mensajes claros. No exponer trazas SQL ni claves.
 
-B1 fija tituloPagina y menuActivo. cabecera.jspf reúne cabecera, menú y mensajes comunes; pie.jspf cierra HTML y carga únicamente el JavaScript necesario. No crear menu.jspf ni mensajes.jspf separados. Las peticiones de estilos comunes se entregan a B1, sin crear carpetas de CSS por bloque.
+### Presentación (B1, implementado)
+
+Diseño aprobado: **Habita**, «Encuentra tu próximo espacio», **paleta A** (azul `#183B56`, turquesa `#0F766E`, fondo `#F5F7FA`). Bootstrap 5.3.3 y Bootstrap Icons 1.11.3 están guardados en local (`css/`, `js/`): no usar CDN. Muestra de todos los componentes en `controlador/prueba_diseno.jsp` (solo en el propio equipo).
+
+Toda vista empieza así:
+
+~~~jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/utilidades.jspf" %>
+<%
+    String tituloPagina = "Mis citas";
+    String menuActivo = "citas";
+    boolean vistaPanel = true;   // true: panel con menú lateral · false: página pública
+%>
+<%@ include file="/WEB-INF/jspf/cabecera.jspf" %>
+  ... contenido ...
+<%@ include file="/WEB-INF/jspf/pie.jspf" %>
+~~~
+
+La cabecera declara `ctx`, `haySesion`, `rolesSesion` y `nombreSesion`: la vista puede usarlos pero no volver a declararlos. En páginas públicas el contenido va dentro de `<div class="container py-4">`; en el panel ya tiene márgenes.
+
+| Componente | Clases |
+| --- | --- |
+| Botón principal / marca / secundario | `btn btn-primary` (turquesa) · `btn btn-marca` (azul) · `btn btn-outline-primary` |
+| Título de página | `h1.h3.titulo-pagina` |
+| Tarjeta de propiedad | `card tarjeta-propiedad`, imagen `img.foto` (usar `img/sin_foto.svg` si no hay foto), precio `.precio`, datos `.datos`. Rejilla `row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4` |
+| Tabla de administración | `table tabla-habita` dentro de `.table-responsive`; celda de botones `td.acciones` |
+| Estado | `<span class="estado estado-<%= estado %>"><%= estado %></span>` con el valor exacto del SQL, más `ACTIVA`/`INACTIVA` |
+| Campo con error | `is-invalid` en el campo y `<div class="invalid-feedback">` debajo |
+| Lista vacía | `<div class="vacio"><i class="bi bi-..."></i> Texto</div>` |
+| Portada y buscador | `section.portada` y `form.buscador-rapido` |
+
+Destinos del menú: cada dueño implementa la acción indicada (o pide al coordinador cambiar el enlace).
+
+| Menú | Enlace | menuActivo |
+| --- | --- | --- |
+| Inicio · Catálogo | `inicio.jsp` · `propiedad.jsp?accion=catalogo` | `inicio` · `catalogo` |
+| Iniciar sesión · Registrarse · Cerrar sesión (POST con token) | `acceso.jsp?accion=ingresar` · `accion=registro` · `accion=salir` | — |
+| Mi panel · Mi perfil | `panel.jsp` · `perfil.jsp?accion=ver` | `panel` · `perfil` |
+| Admin: Usuarios · Inmobiliarias · Catálogos · Reportes · Auditoría | `usuario.jsp?accion=listar` · `inmobiliaria.jsp?accion=listar` · `ciudad.jsp?accion=listar` · `reporte.jsp?accion=general` · `auditoria.jsp?accion=listar` | `usuarios` · `inmobiliarias` · `catalogos` · `reportes` · `auditoria` |
+| Inmobiliaria: Mi empresa · Mis propiedades · Citas recibidas · Solicitudes recibidas · Reportes | `inmobiliaria.jsp?accion=empresa` · `propiedad.jsp?accion=gestionar` · `cita.jsp?accion=recibidas` · `solicitud.jsp?accion=recibidas` · `reporte.jsp?accion=empresa` | `empresa` · `propiedades` · `citas_recibidas` · `solicitudes_recibidas` · `reportes_empresa` |
+| Cliente: Favoritos · Mis citas · Mis solicitudes | `favorito.jsp?accion=listar` · `cita.jsp?accion=mis_citas` · `solicitud.jsp?accion=mis_solicitudes` | `favoritos` · `citas` · `solicitudes` |
+
+Páginas de error: `WEB-INF/vista/acceso_denegado.jsp` (403) y `WEB-INF/vista/error.jsp` (404 y 500), registradas en web.xml. seguridad.jspf llega a acceso denegado con `forward` a esa vista, porque WEB-INF no es accesible por redirección.
+
+No crear menu.jspf ni mensajes.jspf separados. Las peticiones de estilos comunes se entregan a B1, sin crear carpetas de CSS por bloque.
+
+### Detalles de JSP comprobados en este Tomcat
+
+- Las JSP compilan con nivel **Java 7**: no usar lambdas ni referencias a métodos (una lambda da error 500).
+- `trim-directive-whitespaces` borra el espacio que queda solo entre dos `<%= %>`. Escribir el espacio dentro de la expresión (`<%= a + " " + b %>`) o separar con una clase como `me-1`.
+- Los `.jspf` se leen en UTF-8 porque web.xml los incluye en la regla de codificación; al crear otra extensión, agregarla allí.
 
 ## 7. Claves, archivos y fechas
 
@@ -157,4 +209,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0 está terminado; B1, B2 y B8 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0 y B1 están terminados; B2 y B8 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
