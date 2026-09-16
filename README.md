@@ -11,7 +11,8 @@ Aplicación académica para publicar inmuebles, buscar propiedades, agendar visi
 - B1 (diseño) terminado: **Habita**, paleta azul y turquesa, Bootstrap en local, cabecera, pie, menú por roles y páginas de error. Muestra: `http://localhost:8080/proyectojava/controlador/prueba_diseno.jsp`.
 - B2 (acceso, usuarios, roles y perfil) terminado: ingreso y registro, panel por roles, perfil con foto y administración de usuarios. Entrada: `http://localhost:8080/proyectojava/controlador/acceso.jsp?accion=ingresar` (desarrollo: `admin@habita.com` / `Admin123`).
 - B8 (datos de prueba) integrado y cargado: 20 usuarios (`Clave123`), 10 inmobiliarias, 20 propiedades, citas y solicitudes.
-- B3 (empresas y catálogos) terminado: inmobiliarias con su cuenta responsable, Mi empresa y catálogos de ciudades, tipos y características. Sigue B4.
+- B3 (empresas y catálogos) terminado: inmobiliarias con su cuenta responsable, Mi empresa y catálogos de ciudades, tipos y características.
+- B4 (inicio y publicaciones) terminado: portada, catálogo con filtros, detalle con galería y publicación de propiedades con fotografías y características. Siguen B5 y B6.
 - En otro equipo, copiar `WEB-INF/jspf/conexion.jspf.ejemplo` como `conexion.jspf` y completar la contraseña. Diagnóstico local: `http://localhost:8080/proyectojava/controlador/prueba_conexion.jsp`.
 
 ## Forma de trabajo elegida

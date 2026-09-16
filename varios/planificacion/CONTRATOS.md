@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil) y B3 (empresas y catálogos) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Queda habilitado B4.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil), B3 (empresas y catálogos) y B4 (inicio y publicaciones) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Quedan habilitados B5 y B6.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -40,6 +40,7 @@ utilidades.jspf va **primero**: al incluirse fija UTF-8 en la petición, y eso s
 | | `tokenValido(HttpServletRequest)` | `boolean`; usar en todo POST antes de modificar |
 | | `limpiar(String)` | Texto sin espacios extremos; vacío → `null` |
 | | `patronBusqueda(String)` | `%texto%` para `ILIKE`, con `%` y `_` escapados (movida desde usuario.jspf en B3) |
+| | `urlImagen(ctx, ruta)` · `rutaImagenValida(String)` · `formatoArea(BigDecimal)` | Añadidas en B4: dirección de la foto (o el reemplazo), validación de enlace https o archivo de `img/`, y área sin decimales sobrantes |
 | | `longitudValida(String, int, int)`, `esCorreo(String)`, `esTelefono(String)` | `boolean` |
 | | `aEntero(String)` / `aImporte(String)` | `Integer` / `BigDecimal` con 2 decimales; `null` si no es válido |
 | | `formatoPesos(BigDecimal)` | `$ 320.000.000` |
@@ -166,11 +167,37 @@ Reglas:
 - **Catálogos:** nombres únicos sin distinguir mayúsculas. No se elimina lo que esté en uso. En características se bloquea en código, porque su relación con propiedades es ON DELETE CASCADE y borraría las asignaciones.
 - **Búsqueda:** `patronBusqueda(texto)` pasó a utilidades.jspf; úsala con `ILIKE` en cualquier búsqueda.
 
+### Publicaciones (B4, implementado)
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| propiedad.jspf | `buscarPropiedad(conexion, idPropiedad)` | Map con `idPropiedad`, `matricula`, `titulo`, `descripcion`, `direccion`, `precio`, `area`, `habitaciones`, `banos`, `operacion`, `estado`, `activa`, `destacada`, ciudad, tipo, empresa (`idInmobiliaria`, `inmobiliaria`, `telefonoEmpresa`, `correoContacto`, `idResponsable`) y `foto`; `null` si no existe |
+| | `listarPropiedades(conexion, filtros, orden, limite, desplazamiento)` · `contarPropiedades(conexion, filtros)` | Filtros opcionales en un Map: `publicas`, `idCiudad`, `idTipoPropiedad`, `operacion`, `estado`, `precioMinimo`, `precioMaximo`, `texto`, `idInmobiliaria`, `destacada` y `caracteristicas` (List de ids: las exige todas) |
+| | `actualizarDisponibilidad(conexion, idPropiedad, estado)` | **Para B6:** cambia el estado comercial dentro de su transacción de cierre |
+| imagen_propiedad.jspf | `listarImagenes(conexion, idPropiedad)` | `List<Map>` con `idImagen` y `ruta`, en orden; la primera es la del catálogo |
+| propiedad_caracteristica.jspf | `caracteristicasDePropiedad(conexion, idPropiedad)` · `idsCaracteristicas(…)` | Lista con `id`/`nombre` · `Set<Integer>` |
+
+Rutas de B4:
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| inicio.jsp | Sin acción (index.jsp reenvía aquí) | Público |
+| propiedad.jsp | GET `catalogo[&ciudad&tipo&operacion&precio_min&precio_max&caracteristica(varias)&q&orden&pagina]` · `detalle&id_propiedad` | Público |
+| | GET `gestionar[&q&pagina]` · `nueva` · `editar&id_propiedad` · POST `crear` · `actualizar&id_propiedad` · `cambiar_activa&id_propiedad` | INMOBILIARIA dueña o ADMINISTRADOR |
+| imagen_propiedad.jsp | POST `agregar&id_propiedad` (campo `ruta`) · `eliminar&id_propiedad&id_imagen` | INMOBILIARIA dueña o ADMINISTRADOR |
+
+Reglas:
+- **Pertenencia:** la empresa se toma de `buscarInmobiliariaPorUsuario`, nunca del formulario. Con una propiedad ajena se responde 403. El administrador entra a todas y es el único que elige empresa al publicar y que marca «destacada».
+- **Visibilidad:** el catálogo muestra solo propiedades `activa` y `DISPONIBLE`. `activa` es baja lógica y se cambia aquí; el estado comercial lo cierra B6. Una publicación retirada solo la ven su empresa y el administrador.
+- **Contacto:** el teléfono y el correo de la empresa se muestran solo con sesión iniciada.
+- **Fotografías:** `ruta` admite un enlace `https://` o un archivo del proyecto bajo `img/` (jpg, png, svg o webp), validado con `rutaImagenValida`; hasta 8 por propiedad. Las vistas las muestran con `urlImagen(ctx, ruta)`, que usa `img/sin_foto.svg` cuando no hay.
+- **Botones hacia B5 y B6** (rutas acordadas, visibles para CLIENTE en el detalle de una propiedad disponible): `cita.jsp?accion=nueva&id_propiedad=N`, `solicitud.jsp?accion=nueva&id_propiedad=N` y POST `favorito.jsp?accion=agregar&id_propiedad=N` con token.
+
 ## 5. Rutas y parámetros
 
 Los enlaces y formularios apuntan a /controlador/<entidad>.jsp, nunca directamente a las vistas. Usar el contexto de aplicación. Los modelos se incluyen estáticamente en el controlador; las vistas reciben los resultados mediante atributos de petición y forward.
 
-Ejemplo previsto: GET /controlador/propiedad.jsp?accion=detalle&id_propiedad=5 → modelo/propiedad.jspf → vista/propiedad.jsp. Todavía no existe esa funcionalidad.
+Ejemplo implementado: GET /controlador/propiedad.jsp?accion=detalle&id_propiedad=5 → modelo/propiedad.jspf → vista/propiedad.jsp.
 
 GET consulta; POST modifica. Cada controlador publica sus acciones, parámetros, roles y atributos para la vista. Tras un POST correcto redirige a una acción GET. Los identificadores de cliente/empresa no se aceptan sin contrastarlos con la sesión y pertenencia.
 
@@ -294,4 +321,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0, B1, B2, B3 y B8 están terminados e integrados. B4 puede iniciar cuando se autorice. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0 a B4 y B8 están terminados e integrados, y B7 entregó sus consultas SQL. B5 y B6 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.

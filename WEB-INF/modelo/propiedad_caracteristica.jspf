@@ -1,0 +1,57 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.LinkedHashSet,java.util.List,java.util.Map,java.util.Set" %>
+<%!
+    // Características de una propiedad para mostrarlas. Claves: id y nombre.
+    private List<Map<String, Object>> caracteristicasDePropiedad(Connection conexion, int idPropiedad) throws SQLException {
+        String sql = "SELECT c.id_caracteristica, c.nombre FROM propiedad_caracteristica pc "
+                + "JOIN caracteristica c ON c.id_caracteristica = pc.id_caracteristica "
+                + "WHERE pc.id_propiedad = ? ORDER BY c.nombre";
+        List<Map<String, Object>> caracteristicas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    Map<String, Object> caracteristica = new LinkedHashMap<String, Object>();
+                    caracteristica.put("id", fila.getInt("id_caracteristica"));
+                    caracteristica.put("nombre", fila.getString("nombre"));
+                    caracteristicas.add(caracteristica);
+                }
+            }
+        }
+        return caracteristicas;
+    }
+
+    // Solo los identificadores, para marcar las casillas del formulario.
+    private Set<Integer> idsCaracteristicas(Connection conexion, int idPropiedad) throws SQLException {
+        String sql = "SELECT id_caracteristica FROM propiedad_caracteristica WHERE id_propiedad = ?";
+        Set<Integer> ids = new LinkedHashSet<Integer>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    ids.add(Integer.valueOf(fila.getInt(1)));
+                }
+            }
+        }
+        return ids;
+    }
+
+    // Deja exactamente las características recibidas; el controlador la llama dentro de su transacción.
+    private void reemplazarCaracteristicas(Connection conexion, int idPropiedad, List<Integer> ids) throws SQLException {
+        try (PreparedStatement borrado = conexion.prepareStatement("DELETE FROM propiedad_caracteristica WHERE id_propiedad = ?")) {
+            borrado.setInt(1, idPropiedad);
+            borrado.executeUpdate();
+        }
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        String sql = "INSERT INTO propiedad_caracteristica (id_propiedad, id_caracteristica) VALUES (?, ?) ON CONFLICT DO NOTHING";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            for (Integer idCaracteristica : ids) {
+                sentencia.setInt(1, idPropiedad);
+                sentencia.setInt(2, idCaracteristica.intValue());
+                sentencia.addBatch();
+            }
+            sentencia.executeBatch();
+        }
+    }
+%>

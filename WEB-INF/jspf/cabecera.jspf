@@ -98,6 +98,7 @@
       <div class="grupo-menu">Administración</div>
       <a class="<%= claseMenu("usuarios", menuActivo) %>" href="<%= ctx %>/controlador/usuario.jsp?accion=listar"><i class="bi bi-people"></i> Usuarios</a>
       <a class="<%= claseMenu("inmobiliarias", menuActivo) %>" href="<%= ctx %>/controlador/inmobiliaria.jsp?accion=listar"><i class="bi bi-buildings"></i> Inmobiliarias</a>
+      <a class="<%= claseMenu("propiedades", menuActivo) %>" href="<%= ctx %>/controlador/propiedad.jsp?accion=gestionar"><i class="bi bi-house-gear"></i> Propiedades</a>
       <a class="<%= claseMenu("catalogos", menuActivo) %>" href="<%= ctx %>/controlador/ciudad.jsp?accion=listar"><i class="bi bi-tags"></i> Catálogos</a>
       <a class="<%= claseMenu("reportes", menuActivo) %>" href="<%= ctx %>/controlador/reporte.jsp?accion=general"><i class="bi bi-bar-chart"></i> Reportes</a>
       <a class="<%= claseMenu("auditoria", menuActivo) %>" href="<%= ctx %>/controlador/auditoria.jsp?accion=listar"><i class="bi bi-journal-text"></i> Auditoría</a>

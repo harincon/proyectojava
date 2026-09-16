@@ -1,0 +1,215 @@
+<%@ page import="java.math.BigDecimal,java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Propiedad con ciudad, tipo, empresa y su primera imagen.
+    private static final String CONSULTA_PROPIEDAD = "SELECT p.id_propiedad, p.matricula_inmobiliaria, p.titulo, p.descripcion, "
+            + "p.direccion, p.precio, p.area, p.habitaciones, p.baños AS banos, p.tipo_operacion, p.estado, p.activa, p.destacada, "
+            + "c.id_ciudad, c.nombre AS ciudad, t.id_tipo_propiedad, t.nombre AS tipo, "
+            + "i.id_inmobiliaria, i.nombre AS inmobiliaria, i.telefono AS telefono_empresa, i.correo_contacto, i.id_usuario AS id_responsable, "
+            + "(SELECT ip.ruta FROM imagen_propiedad ip WHERE ip.id_propiedad = p.id_propiedad ORDER BY ip.id_imagen LIMIT 1) AS foto "
+            + "FROM propiedad p "
+            + "JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+            + "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad "
+            + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria ";
+
+    /*
+      Filtros admitidos (todos opcionales): publicas (Boolean, solo activas), idCiudad, idTipoPropiedad,
+      operacion, estado, precioMinimo, precioMaximo, texto, idInmobiliaria, destacada (Boolean)
+      y caracteristicas (List<Integer>: la propiedad debe tenerlas todas).
+    */
+    private String condicionesPropiedades(Map<String, Object> filtros, List<Object> parametros) {
+        StringBuilder sql = new StringBuilder(" WHERE 1 = 1");
+        if (Boolean.TRUE.equals(filtros.get("publicas"))) {
+            sql.append(" AND p.activa");
+        }
+        if (Boolean.TRUE.equals(filtros.get("destacada"))) {
+            sql.append(" AND p.destacada");
+        }
+        String[] iguales = {"idCiudad", "p.id_ciudad", "idTipoPropiedad", "p.id_tipo_propiedad",
+                "operacion", "p.tipo_operacion", "estado", "p.estado", "idInmobiliaria", "p.id_inmobiliaria"};
+        for (int i = 0; i < iguales.length; i += 2) {
+            Object valor = filtros.get(iguales[i]);
+            if (valor != null) {
+                sql.append(" AND ").append(iguales[i + 1]).append(" = ?");
+                parametros.add(valor);
+            }
+        }
+        if (filtros.get("precioMinimo") != null) {
+            sql.append(" AND p.precio >= ?");
+            parametros.add(filtros.get("precioMinimo"));
+        }
+        if (filtros.get("precioMaximo") != null) {
+            sql.append(" AND p.precio <= ?");
+            parametros.add(filtros.get("precioMaximo"));
+        }
+        if (filtros.get("texto") != null) {
+            sql.append(" AND (p.titulo ILIKE ? OR p.direccion ILIKE ? OR p.matricula_inmobiliaria ILIKE ? OR i.nombre ILIKE ?)");
+            String patron = patronBusqueda(filtros.get("texto").toString());
+            for (int i = 0; i < 4; i++) {
+                parametros.add(patron);
+            }
+        }
+        Object caracteristicas = filtros.get("caracteristicas");
+        if (caracteristicas instanceof List) {
+            for (Object idCaracteristica : (List<?>) caracteristicas) {
+                sql.append(" AND EXISTS (SELECT 1 FROM propiedad_caracteristica pc "
+                        + "WHERE pc.id_propiedad = p.id_propiedad AND pc.id_caracteristica = ?)");
+                parametros.add(idCaracteristica);
+            }
+        }
+        return sql.toString();
+    }
+
+    // Orden permitido; cualquier otro valor usa el predeterminado.
+    private String ordenPropiedades(String orden) {
+        if ("precio_asc".equals(orden)) {
+            return " ORDER BY p.precio, p.id_propiedad DESC";
+        }
+        if ("precio_desc".equals(orden)) {
+            return " ORDER BY p.precio DESC, p.id_propiedad DESC";
+        }
+        if ("area_desc".equals(orden)) {
+            return " ORDER BY p.area DESC, p.id_propiedad DESC";
+        }
+        return " ORDER BY p.destacada DESC, p.id_propiedad DESC";
+    }
+
+    private List<Map<String, Object>> listarPropiedades(Connection conexion, Map<String, Object> filtros, String orden,
+            int limite, int desplazamiento) throws SQLException {
+        List<Object> parametros = new ArrayList<Object>();
+        String sql = CONSULTA_PROPIEDAD + condicionesPropiedades(filtros, parametros) + ordenPropiedades(orden)
+                + " LIMIT ? OFFSET ?";
+        parametros.add(Integer.valueOf(limite));
+        parametros.add(Integer.valueOf(desplazamiento));
+        List<Map<String, Object>> propiedades = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            for (int i = 0; i < parametros.size(); i++) {
+                sentencia.setObject(i + 1, parametros.get(i));
+            }
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    propiedades.add(filaPropiedad(fila));
+                }
+            }
+        }
+        return propiedades;
+    }
+
+    private int contarPropiedades(Connection conexion, Map<String, Object> filtros) throws SQLException {
+        List<Object> parametros = new ArrayList<Object>();
+        String sql = "SELECT count(*) FROM propiedad p JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria"
+                + condicionesPropiedades(filtros, parametros);
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            for (int i = 0; i < parametros.size(); i++) {
+                sentencia.setObject(i + 1, parametros.get(i));
+            }
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private Map<String, Object> buscarPropiedad(Connection conexion, int idPropiedad) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_PROPIEDAD + " WHERE p.id_propiedad = ?")) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaPropiedad(fila) : null;
+            }
+        }
+    }
+
+    // 23505 si la matrícula ya existe; 23503 si la ciudad o el tipo no existen.
+    private int crearPropiedad(Connection conexion, Map<String, Object> datos) throws SQLException {
+        String sql = "INSERT INTO propiedad (matricula_inmobiliaria, id_inmobiliaria, id_ciudad, id_tipo_propiedad, titulo, "
+                + "descripcion, direccion, precio, area, habitaciones, baños, tipo_operacion, destacada) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_propiedad";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, (String) datos.get("matricula"));
+            sentencia.setInt(2, (Integer) datos.get("idInmobiliaria"));
+            sentencia.setInt(3, (Integer) datos.get("idCiudad"));
+            sentencia.setInt(4, (Integer) datos.get("idTipoPropiedad"));
+            sentencia.setString(5, (String) datos.get("titulo"));
+            sentencia.setString(6, (String) datos.get("descripcion"));
+            sentencia.setString(7, (String) datos.get("direccion"));
+            sentencia.setBigDecimal(8, (BigDecimal) datos.get("precio"));
+            sentencia.setBigDecimal(9, (BigDecimal) datos.get("area"));
+            sentencia.setInt(10, (Integer) datos.get("habitaciones"));
+            sentencia.setInt(11, (Integer) datos.get("banos"));
+            sentencia.setString(12, (String) datos.get("operacion"));
+            sentencia.setBoolean(13, Boolean.TRUE.equals(datos.get("destacada")));
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // La empresa responsable y el estado comercial no cambian aquí.
+    private boolean actualizarPropiedad(Connection conexion, int idPropiedad, Map<String, Object> datos) throws SQLException {
+        String sql = "UPDATE propiedad SET matricula_inmobiliaria = ?, id_ciudad = ?, id_tipo_propiedad = ?, titulo = ?, "
+                + "descripcion = ?, direccion = ?, precio = ?, area = ?, habitaciones = ?, baños = ?, tipo_operacion = ?, "
+                + "destacada = ? WHERE id_propiedad = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, (String) datos.get("matricula"));
+            sentencia.setInt(2, (Integer) datos.get("idCiudad"));
+            sentencia.setInt(3, (Integer) datos.get("idTipoPropiedad"));
+            sentencia.setString(4, (String) datos.get("titulo"));
+            sentencia.setString(5, (String) datos.get("descripcion"));
+            sentencia.setString(6, (String) datos.get("direccion"));
+            sentencia.setBigDecimal(7, (BigDecimal) datos.get("precio"));
+            sentencia.setBigDecimal(8, (BigDecimal) datos.get("area"));
+            sentencia.setInt(9, (Integer) datos.get("habitaciones"));
+            sentencia.setInt(10, (Integer) datos.get("banos"));
+            sentencia.setString(11, (String) datos.get("operacion"));
+            sentencia.setBoolean(12, Boolean.TRUE.equals(datos.get("destacada")));
+            sentencia.setInt(13, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // Baja lógica: la publicación deja de verse sin borrar historia.
+    private boolean cambiarActivaPropiedad(Connection conexion, int idPropiedad, boolean activa) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE propiedad SET activa = ? WHERE id_propiedad = ?")) {
+            sentencia.setBoolean(1, activa);
+            sentencia.setInt(2, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // Para B6: cambia el estado comercial dentro de la transacción de cierre.
+    private boolean actualizarDisponibilidad(Connection conexion, int idPropiedad, String estado) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("UPDATE propiedad SET estado = ? WHERE id_propiedad = ?")) {
+            sentencia.setString(1, estado);
+            sentencia.setInt(2, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private Map<String, Object> filaPropiedad(ResultSet fila) throws SQLException {
+        Map<String, Object> propiedad = new LinkedHashMap<String, Object>();
+        propiedad.put("idPropiedad", fila.getInt("id_propiedad"));
+        propiedad.put("matricula", fila.getString("matricula_inmobiliaria"));
+        propiedad.put("titulo", fila.getString("titulo"));
+        propiedad.put("descripcion", fila.getString("descripcion"));
+        propiedad.put("direccion", fila.getString("direccion"));
+        propiedad.put("precio", fila.getBigDecimal("precio"));
+        propiedad.put("area", fila.getBigDecimal("area"));
+        propiedad.put("habitaciones", fila.getInt("habitaciones"));
+        propiedad.put("banos", fila.getInt("banos"));
+        propiedad.put("operacion", fila.getString("tipo_operacion"));
+        propiedad.put("estado", fila.getString("estado"));
+        propiedad.put("activa", fila.getBoolean("activa"));
+        propiedad.put("destacada", fila.getBoolean("destacada"));
+        propiedad.put("idCiudad", fila.getInt("id_ciudad"));
+        propiedad.put("ciudad", fila.getString("ciudad"));
+        propiedad.put("idTipoPropiedad", fila.getInt("id_tipo_propiedad"));
+        propiedad.put("tipo", fila.getString("tipo"));
+        propiedad.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+        propiedad.put("inmobiliaria", fila.getString("inmobiliaria"));
+        propiedad.put("telefonoEmpresa", fila.getString("telefono_empresa"));
+        propiedad.put("correoContacto", fila.getString("correo_contacto"));
+        propiedad.put("idResponsable", fila.getInt("id_responsable"));
+        propiedad.put("foto", fila.getString("foto"));
+        return propiedad;
+    }
+%>

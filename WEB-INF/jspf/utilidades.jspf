@@ -153,6 +153,11 @@
         return formato.format(valor);
     }
 
+    // Área sin decimales sobrantes: 92.00 → 92
+    private String formatoArea(BigDecimal valor) {
+        return valor == null ? "" : valor.stripTrailingZeros().toPlainString();
+    }
+
     private LocalDateTime ahora() {
         return LocalDateTime.now(ZONA_BOGOTA);
     }
@@ -200,6 +205,24 @@
     // Devuelve " is-invalid" para agregar a la clase del campo con error.
     private String invalido(HttpServletRequest peticion, String campo) {
         return errorFormulario(peticion, campo).isEmpty() ? "" : " is-invalid";
+    }
+
+    // Dirección para mostrar una fotografía: enlace https, archivo dentro de img/ o el reemplazo.
+    private String urlImagen(String contexto, Object ruta) {
+        String limpia = limpiar(ruta == null ? null : ruta.toString());
+        if (limpia == null) {
+            return escapar(contexto + "/img/sin_foto.svg");
+        }
+        return escapar(limpia.startsWith("https://") ? limpia : contexto + "/" + limpia);
+    }
+
+    // true si la ruta es un enlace https o un archivo del proyecto dentro de img/, sin saltos de carpeta.
+    private boolean rutaImagenValida(String ruta) {
+        String limpia = limpiar(ruta);
+        if (limpia == null || limpia.length() > 500 || limpia.contains("..")) {
+            return false;
+        }
+        return limpia.matches("https://[^\\s\"'<>]+") || limpia.matches("img/[A-Za-z0-9/_.-]+\\.(jpg|jpeg|png|svg|webp)");
     }
 
     // Carpeta privada para archivos subidos; se configura en web.xml (rutaArchivos).

@@ -19,7 +19,36 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Confirmar B3 en Git y delegar B4 (inicio y publicaciones). La parte SQL de B7 (`sql/04-consultas.sql`) puede avanzar en paralelo.
+Confirmar B4 en Git y delegar B5 (favoritos y citas) y B6 (solicitudes y documentos), que pueden avanzar en paralelo.
+
+## B4 — 15 de septiembre de 2026
+
+Portada, catálogo y publicaciones.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/modelo/propiedad.jspf | Listado con filtros combinables, conteo, detalle, crear, actualizar, baja lógica y `actualizarDisponibilidad` para B6 |
+| WEB-INF/modelo/imagen_propiedad.jspf, propiedad_caracteristica.jspf | Fotografías de cada propiedad y asignación de características |
+| controlador/inicio.jsp | Portada pública con destacadas y cifras reales; index.jsp reenvía aquí |
+| controlador/propiedad.jsp | Catálogo y detalle públicos; gestión, publicación, edición y visibilidad para la empresa dueña o el administrador |
+| controlador/imagen_propiedad.jsp | Agregar y quitar fotografías |
+| WEB-INF/vista/inicio.jsp, catalogo.jsp, propiedad.jsp, propiedades.jsp, formulario_propiedad.jsp | Portada, catálogo con filtros, detalle con galería, gestión y formulario |
+| WEB-INF/jspf/utilidades.jspf, cabecera.jspf, css/estilos.css | `urlImagen`, `rutaImagenValida` y `formatoArea`; enlace a Propiedades en el menú del administrador; estilos de la galería |
+
+Verificado en Tomcat (58 comprobaciones por HTTP, con los datos de B8):
+
+- **Catálogo público:** muestra solo las 14 propiedades disponibles y publicadas; oculta retiradas y vendidas. Filtros por ciudad, tipo, modalidad, precio mínimo y máximo, búsqueda y características (dos características exigen ambas), orden por precio y paginación que conserva los filtros. El `%` no actúa como comodín.
+- **Detalle:** abierto al visitante, pero el teléfono y el correo de la empresa solo aparecen con sesión. Una propiedad retirada o inexistente devuelve al catálogo; una vendida avisa que ya no está disponible. Un cliente ve los botones hacia citas, solicitudes y favoritos (B5 y B6).
+- **Permisos:** el cliente recibe 403 en la gestión y al publicar por POST. Una inmobiliaria no abre, edita, retira ni agrega fotos a propiedades de otra empresa.
+- **Publicar:** validaciones por campo, POST sin token rechazado, matrícula repetida rechazada (al crear y al editar) y matrícula guardada en mayúsculas. La empresa enviada a mano se ignora: queda la del responsable, sin destacar.
+- **Características:** se guardan al publicar y al editar quedan exactamente las marcadas.
+- **Fotografías:** acepta archivos del proyecto y enlaces https; rechaza `javascript:`, `http://`, saltos de carpeta y rutas absolutas; no borra ni agrega fotos de otra propiedad.
+- **Visibilidad:** retirar saca la propiedad del catálogo y la empresa la sigue viendo; el administrador puede volver a publicarla, destacarla (aparece en la portada) y publicar eligiendo empresa.
+- **Limpieza:** los datos de B8 quedaron idénticos y las páginas temporales se retiraron.
+
+Capturas revisadas a 1366 y 390 px. Corregido: aviso correcto en propiedades no disponibles para visitantes, precio y empresa apilados en las tarjetas, y campos de precio y área sin decimales sobrantes.
+
+Pendiente: las propiedades de B8 usan la imagen de reemplazo, así que el catálogo se ve sin fotos. En el cierre de B8 conviene asignarles las fotografías de `img/habita/`.
 
 ## B3 — 15 de septiembre de 2026
 

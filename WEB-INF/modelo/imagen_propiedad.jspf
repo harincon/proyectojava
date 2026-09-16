@@ -1,0 +1,53 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Imágenes de una propiedad en el orden en que se agregaron. Claves: idImagen y ruta.
+    private List<Map<String, Object>> listarImagenes(Connection conexion, int idPropiedad) throws SQLException {
+        String sql = "SELECT id_imagen, ruta FROM imagen_propiedad WHERE id_propiedad = ? ORDER BY id_imagen";
+        List<Map<String, Object>> imagenes = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    Map<String, Object> imagen = new LinkedHashMap<String, Object>();
+                    imagen.put("idImagen", fila.getInt("id_imagen"));
+                    imagen.put("ruta", fila.getString("ruta"));
+                    imagenes.add(imagen);
+                }
+            }
+        }
+        return imagenes;
+    }
+
+    private int contarImagenes(Connection conexion, int idPropiedad) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement("SELECT count(*) FROM imagen_propiedad WHERE id_propiedad = ?")) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // La ruta ya viene validada por el controlador (enlace https o archivo dentro de img/).
+    private int agregarImagen(Connection conexion, int idPropiedad, String ruta) throws SQLException {
+        String sql = "INSERT INTO imagen_propiedad (id_propiedad, ruta) VALUES (?, ?) RETURNING id_imagen";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            sentencia.setString(2, ruta);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    // Se exige la propiedad para que nadie borre imágenes de otra publicación.
+    private boolean eliminarImagen(Connection conexion, int idImagen, int idPropiedad) throws SQLException {
+        String sql = "DELETE FROM imagen_propiedad WHERE id_imagen = ? AND id_propiedad = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idImagen);
+            sentencia.setInt(2, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+%>
