@@ -1,0 +1,182 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.sql.Timestamp,java.time.LocalDateTime,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    private static final String CONSULTA_CITA_B5 = "SELECT ci.id_cita, ci.id_cliente, ci.id_propiedad, ci.fecha_hora, ci.estado, "
+            + "p.titulo, p.matricula_inmobiliaria, p.direccion, p.tipo_operacion, p.estado AS estado_propiedad, p.activa, "
+            + "c.nombre AS ciudad, t.nombre AS tipo, i.id_inmobiliaria, i.nombre AS inmobiliaria, i.id_usuario AS id_responsable, "
+            + "u.correo AS correo_cliente, trim(concat_ws(' ', pf.nombres, pf.apellidos)) AS cliente "
+            + "FROM cita ci JOIN usuario u ON u.id_usuario = ci.id_cliente "
+            + "LEFT JOIN perfil pf ON pf.id_usuario = u.id_usuario "
+            + "JOIN propiedad p ON p.id_propiedad = ci.id_propiedad "
+            + "JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+            + "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad "
+            + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria ";
+
+    private Map<String, Object> buscarCita(Connection conexion, int idCita) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_CITA_B5 + "WHERE ci.id_cita = ?")) {
+            sentencia.setInt(1, idCita);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaCitaB5(fila) : null;
+            }
+        }
+    }
+
+    // Se usa dentro de la transacción que cambia el estado.
+    private Map<String, Object> bloquearCita(Connection conexion, int idCita) throws SQLException {
+        String sql = CONSULTA_CITA_B5 + "WHERE ci.id_cita = ? FOR UPDATE OF ci";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCita);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaCitaB5(fila) : null;
+            }
+        }
+    }
+
+    private List<Map<String, Object>> listarCitasCliente(Connection conexion, int idCliente) throws SQLException {
+        String sql = CONSULTA_CITA_B5 + "WHERE ci.id_cliente = ? "
+                + "ORDER BY CASE WHEN ci.fecha_hora >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, ci.fecha_hora, ci.id_cita";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            return filasCitaB5(sentencia);
+        }
+    }
+
+    // idInmobiliaria null permite al administrador consultar todas.
+    private List<Map<String, Object>> listarCitasInmobiliaria(Connection conexion, Integer idInmobiliaria) throws SQLException {
+        String filtro = idInmobiliaria == null ? "" : "WHERE i.id_inmobiliaria = ? ";
+        String sql = CONSULTA_CITA_B5 + filtro
+                + "ORDER BY CASE WHEN ci.fecha_hora >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, ci.fecha_hora, ci.id_cita";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            return filasCitaB5(sentencia);
+        }
+    }
+
+    // Bloquear la propiedad es el primer paso del orden de concurrencia de B5/B6.
+    private Map<String, Object> bloquearPropiedadParaCita(Connection conexion, int idPropiedad) throws SQLException {
+        String sql = "SELECT p.id_propiedad, p.activa, p.estado, p.id_inmobiliaria, i.id_usuario AS id_responsable "
+                + "FROM propiedad p JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + "WHERE p.id_propiedad = ? FOR UPDATE OF p";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (!fila.next()) {
+                    return null;
+                }
+                Map<String, Object> propiedad = new LinkedHashMap<String, Object>();
+                propiedad.put("idPropiedad", fila.getInt("id_propiedad"));
+                propiedad.put("activa", fila.getBoolean("activa"));
+                propiedad.put("estado", fila.getString("estado"));
+                propiedad.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+                propiedad.put("idResponsable", fila.getInt("id_responsable"));
+                return propiedad;
+            }
+        }
+    }
+
+    // Evita carreras entre citas de distintas propiedades para el mismo participante.
+    private void bloquearParticipantesCita(Connection conexion, int idCliente, int idResponsable) throws SQLException {
+        String sql = "SELECT id_usuario FROM usuario WHERE id_usuario IN (?, ?) ORDER BY id_usuario FOR UPDATE";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idResponsable);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) { /* El bloqueo se conserva hasta terminar la transacción. */ }
+            }
+        }
+    }
+
+    private boolean clienteTieneCitaActiva(Connection conexion, int idCliente, LocalDateTime fechaHora) throws SQLException {
+        String sql = "SELECT 1 FROM cita WHERE id_cliente = ? AND fecha_hora = ? "
+                + "AND estado IN ('PENDIENTE', 'CONFIRMADA')";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setTimestamp(2, Timestamp.valueOf(fechaHora));
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private boolean propiedadTieneCitaActiva(Connection conexion, int idPropiedad, LocalDateTime fechaHora) throws SQLException {
+        String sql = "SELECT 1 FROM cita WHERE id_propiedad = ? AND fecha_hora = ? "
+                + "AND estado IN ('PENDIENTE', 'CONFIRMADA')";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            sentencia.setTimestamp(2, Timestamp.valueOf(fechaHora));
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private boolean responsableTieneCitaActiva(Connection conexion, int idResponsable, LocalDateTime fechaHora) throws SQLException {
+        String sql = "SELECT 1 FROM cita ci JOIN propiedad p ON p.id_propiedad = ci.id_propiedad "
+                + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + "WHERE i.id_usuario = ? AND ci.fecha_hora = ? AND ci.estado IN ('PENDIENTE', 'CONFIRMADA')";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idResponsable);
+            sentencia.setTimestamp(2, Timestamp.valueOf(fechaHora));
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private int crearCita(Connection conexion, int idCliente, int idPropiedad, LocalDateTime fechaHora) throws SQLException {
+        String sql = "INSERT INTO cita (id_cliente, id_propiedad, fecha_hora, estado) "
+                + "VALUES (?, ?, ?, 'PENDIENTE') RETURNING id_cita";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idPropiedad);
+            sentencia.setTimestamp(3, Timestamp.valueOf(fechaHora));
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private boolean cambiarEstadoCita(Connection conexion, int idCita, String estado) throws SQLException {
+        String sql = "UPDATE cita SET estado = ? WHERE id_cita = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, estado);
+            sentencia.setInt(2, idCita);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private List<Map<String, Object>> filasCitaB5(PreparedStatement sentencia) throws SQLException {
+        List<Map<String, Object>> citas = new ArrayList<Map<String, Object>>();
+        try (ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                citas.add(filaCitaB5(fila));
+            }
+        }
+        return citas;
+    }
+
+    private Map<String, Object> filaCitaB5(ResultSet fila) throws SQLException {
+        Map<String, Object> cita = new LinkedHashMap<String, Object>();
+        cita.put("idCita", fila.getInt("id_cita"));
+        cita.put("idCliente", fila.getInt("id_cliente"));
+        cita.put("idPropiedad", fila.getInt("id_propiedad"));
+        cita.put("fechaHora", fila.getTimestamp("fecha_hora").toLocalDateTime());
+        cita.put("estado", fila.getString("estado"));
+        cita.put("titulo", fila.getString("titulo"));
+        cita.put("matricula", fila.getString("matricula_inmobiliaria"));
+        cita.put("direccion", fila.getString("direccion"));
+        cita.put("operacion", fila.getString("tipo_operacion"));
+        cita.put("estadoPropiedad", fila.getString("estado_propiedad"));
+        cita.put("activa", fila.getBoolean("activa"));
+        cita.put("ciudad", fila.getString("ciudad"));
+        cita.put("tipo", fila.getString("tipo"));
+        cita.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+        cita.put("inmobiliaria", fila.getString("inmobiliaria"));
+        cita.put("idResponsable", fila.getInt("id_responsable"));
+        cita.put("correoCliente", fila.getString("correo_cliente"));
+        cita.put("cliente", fila.getString("cliente"));
+        return cita;
+    }
+%>

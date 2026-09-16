@@ -1,0 +1,60 @@
+<%@ page import="java.math.BigDecimal,java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    // Agrega solo una vez la relación cliente-propiedad.
+    private boolean agregarFavorito(Connection conexion, int idCliente, int idPropiedad) throws SQLException {
+        String sql = "INSERT INTO favorito (id_cliente, id_propiedad) VALUES (?, ?) ON CONFLICT DO NOTHING";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private boolean quitarFavorito(Connection conexion, int idCliente, int idPropiedad) throws SQLException {
+        String sql = "DELETE FROM favorito WHERE id_cliente = ? AND id_propiedad = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idPropiedad);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    // Conserva las mismas claves que las tarjetas del catálogo de B4.
+    private List<Map<String, Object>> listarFavoritos(Connection conexion, int idCliente) throws SQLException {
+        String sql = "SELECT p.id_propiedad, p.matricula_inmobiliaria, p.titulo, p.precio, p.area, "
+                + "p.habitaciones, p.baños AS banos, p.tipo_operacion, p.estado, p.activa, "
+                + "c.nombre AS ciudad, t.nombre AS tipo, i.nombre AS inmobiliaria, "
+                + "(SELECT ip.ruta FROM imagen_propiedad ip WHERE ip.id_propiedad = p.id_propiedad "
+                + " ORDER BY ip.id_imagen LIMIT 1) AS foto "
+                + "FROM favorito f JOIN propiedad p ON p.id_propiedad = f.id_propiedad "
+                + "JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+                + "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad "
+                + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + "WHERE f.id_cliente = ? ORDER BY p.id_propiedad DESC";
+        List<Map<String, Object>> favoritos = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    Map<String, Object> propiedad = new LinkedHashMap<String, Object>();
+                    propiedad.put("idPropiedad", fila.getInt("id_propiedad"));
+                    propiedad.put("matricula", fila.getString("matricula_inmobiliaria"));
+                    propiedad.put("titulo", fila.getString("titulo"));
+                    propiedad.put("precio", fila.getBigDecimal("precio"));
+                    propiedad.put("area", fila.getBigDecimal("area"));
+                    propiedad.put("habitaciones", fila.getInt("habitaciones"));
+                    propiedad.put("banos", fila.getInt("banos"));
+                    propiedad.put("operacion", fila.getString("tipo_operacion"));
+                    propiedad.put("estado", fila.getString("estado"));
+                    propiedad.put("activa", fila.getBoolean("activa"));
+                    propiedad.put("ciudad", fila.getString("ciudad"));
+                    propiedad.put("tipo", fila.getString("tipo"));
+                    propiedad.put("inmobiliaria", fila.getString("inmobiliaria"));
+                    propiedad.put("foto", fila.getString("foto"));
+                    favoritos.add(propiedad);
+                }
+            }
+        }
+        return favoritos;
+    }
+%>
