@@ -57,7 +57,9 @@
         File carpeta = carpetaArchivos(application).getCanonicalFile();
         File archivo = new File(carpeta, (String) documento.get("ruta")).getCanonicalFile();
         if (!archivo.getPath().startsWith(carpeta.getPath() + File.separator) || !archivo.isFile()) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            session.setAttribute("mensajeError", "El archivo de este documento no está disponible.");
+            response.sendRedirect(ctx + "/controlador/solicitud.jsp?accion=detalle&id_solicitud="
+                    + documento.get("idSolicitud"));
             return;
         }
         out.clear();

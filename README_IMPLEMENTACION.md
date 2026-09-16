@@ -43,7 +43,9 @@ Verificado en Tomcat (43 comprobaciones por HTTP, sobre una propiedad de prueba 
 - **Cierre:** no finaliza una solicitud pendiente ni sin token. Al finalizar una aprobada, la propiedad queda VENDIDA, las demás solicitudes abiertas quedan RECHAZADA con la observación acordada y la observación del cliente se conserva. Un segundo cierre se rechaza y la propiedad sale del catálogo. El orden de bloqueo es propiedad → solicitud.
 - **Limpieza:** la base volvió a 15 solicitudes, 20 documentos y 20 propiedades, sin archivos de prueba.
 
-Pendiente: los 20 documentos sembrados por B8 tienen ruta en la base pero no tienen el PDF en el disco, así que su botón «Descargar» responde 404. Se decide en el cierre de B8: generar archivos de ejemplo o dejar que los PDF se suban desde la aplicación durante la demostración.
+Los 20 documentos sembrados por B8 tenían ruta en la base pero no archivo en el disco, así que su descarga respondía 404. Se conservan las filas, porque `documento_solicitud` es tabla principal y el parcial exige al menos diez registros, y los archivos se generan con `varios/herramientas/generar-pdf-ejemplo.ps1`. El script lee las rutas de la base y crea un PDF de una página por documento («Documento de ejemplo del proyecto académico Habita», sin datos personales). Como `WEB-INF/archivos/` está excluido de Git, se ejecuta en cada equipo después de cargar los datos de prueba. Verificado: 20 PDF con estructura válida (longitud de contenido y tabla xref), los 20 se descargan como administrador, la dueña los descarga idénticos y otra clienta recibe 403.
+
+B6 ajustó la descarga: si el usuario tiene permiso pero el archivo no está en el disco, vuelve al detalle de la solicitud con el aviso «El archivo de este documento no está disponible.» en lugar de un 404. Se mantienen el 404 para un documento inexistente y el 403 sin permiso (verificado por el coordinador).
 
 ## B5 — 15 de septiembre de 2026
 

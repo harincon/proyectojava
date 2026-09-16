@@ -42,9 +42,10 @@ scripts.
 `auditoria` queda vacía porque sus eventos se implementan en B7. Las fotografías de
 `imagen_propiedad` apuntan a los archivos del proyecto en `img/habita/`, y seis
 propiedades tienen dos para mostrar la galería del detalle. Las rutas de
-`documento_solicitud`, por ejemplo `solicitudes/001/cedula.pdf`, representan dónde
-se guardarán los archivos. Los PDF físicos todavía no existen; B6 se encarga de
-crearlos, protegerlos y servirlos.
+`documento_solicitud`, por ejemplo `solicitudes/001/cedula.pdf`, son relativas a la
+carpeta privada `WEB-INF/archivos/`. Esos PDF de ejemplo no se guardan en Git: se crean
+con `varios/herramientas/generar-pdf-ejemplo.ps1` después de cargar los datos de prueba,
+y B6 los protege y los sirve solo a quien tiene permiso.
 
 ## Relaciones
 
