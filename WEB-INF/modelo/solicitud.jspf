@@ -1,0 +1,174 @@
+<%@ page import="java.math.BigDecimal,java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.sql.Timestamp,java.time.LocalDateTime,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    private static final String CONSULTA_SOLICITUD_B6 = "SELECT s.id_solicitud, s.id_cliente, s.id_propiedad, s.fecha, s.estado, s.observacion, "
+            + "p.matricula_inmobiliaria, p.titulo, p.direccion, p.precio, p.area, p.tipo_operacion, "
+            + "p.estado AS estado_propiedad, p.activa, c.nombre AS ciudad, t.nombre AS tipo, "
+            + "i.id_inmobiliaria, i.nombre AS inmobiliaria, i.id_usuario AS id_responsable, "
+            + "u.correo AS correo_cliente, trim(concat_ws(' ', pf.nombres, pf.apellidos)) AS cliente, "
+            + "(SELECT ip.ruta FROM imagen_propiedad ip WHERE ip.id_propiedad = p.id_propiedad "
+            + " ORDER BY ip.id_imagen LIMIT 1) AS foto "
+            + "FROM solicitud s JOIN usuario u ON u.id_usuario = s.id_cliente "
+            + "LEFT JOIN perfil pf ON pf.id_usuario = u.id_usuario "
+            + "JOIN propiedad p ON p.id_propiedad = s.id_propiedad "
+            + "JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+            + "JOIN tipo_propiedad t ON t.id_tipo_propiedad = p.id_tipo_propiedad "
+            + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria ";
+
+    private Map<String, Object> buscarSolicitud(Connection conexion, int idSolicitud) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_SOLICITUD_B6 + "WHERE s.id_solicitud = ?")) {
+            sentencia.setInt(1, idSolicitud);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaSolicitudB6(fila) : null;
+            }
+        }
+    }
+
+    // Consulta previa para respetar el orden de bloqueo propiedad -> solicitud.
+    private Integer idPropiedadDeSolicitud(Connection conexion, int idSolicitud) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(
+                "SELECT id_propiedad FROM solicitud WHERE id_solicitud = ?")) {
+            sentencia.setInt(1, idSolicitud);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? Integer.valueOf(fila.getInt(1)) : null;
+            }
+        }
+    }
+
+    private Map<String, Object> bloquearSolicitud(Connection conexion, int idSolicitud) throws SQLException {
+        String sql = CONSULTA_SOLICITUD_B6 + "WHERE s.id_solicitud = ? FOR UPDATE OF s";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idSolicitud);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaSolicitudB6(fila) : null;
+            }
+        }
+    }
+
+    private Map<String, Object> bloquearPropiedadSolicitud(Connection conexion, int idPropiedad) throws SQLException {
+        String sql = "SELECT p.id_propiedad, p.activa, p.estado, p.tipo_operacion, p.id_inmobiliaria "
+                + "FROM propiedad p WHERE p.id_propiedad = ? FOR UPDATE";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                if (!fila.next()) {
+                    return null;
+                }
+                Map<String, Object> propiedad = new LinkedHashMap<String, Object>();
+                propiedad.put("idPropiedad", fila.getInt("id_propiedad"));
+                propiedad.put("activa", fila.getBoolean("activa"));
+                propiedad.put("estado", fila.getString("estado"));
+                propiedad.put("operacion", fila.getString("tipo_operacion"));
+                propiedad.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+                return propiedad;
+            }
+        }
+    }
+
+    private boolean existeSolicitudAbierta(Connection conexion, int idCliente, int idPropiedad) throws SQLException {
+        String sql = "SELECT 1 FROM solicitud WHERE id_cliente = ? AND id_propiedad = ? "
+                + "AND estado IN ('PENDIENTE', 'APROBADA')";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idPropiedad);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next();
+            }
+        }
+    }
+
+    private int crearSolicitud(Connection conexion, int idCliente, int idPropiedad, String observacion) throws SQLException {
+        String sql = "INSERT INTO solicitud (id_cliente, id_propiedad, observacion) VALUES (?, ?, ?) RETURNING id_solicitud";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            sentencia.setInt(2, idPropiedad);
+            sentencia.setString(3, observacion);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private List<Map<String, Object>> listarSolicitudesCliente(Connection conexion, int idCliente) throws SQLException {
+        String sql = CONSULTA_SOLICITUD_B6 + "WHERE s.id_cliente = ? ORDER BY s.fecha DESC, s.id_solicitud DESC";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idCliente);
+            return filasSolicitudB6(sentencia);
+        }
+    }
+
+    // idInmobiliaria null permite al administrador consultar todas.
+    private List<Map<String, Object>> listarSolicitudesInmobiliaria(Connection conexion, Integer idInmobiliaria)
+            throws SQLException {
+        String filtro = idInmobiliaria == null ? "" : "WHERE i.id_inmobiliaria = ? ";
+        String sql = CONSULTA_SOLICITUD_B6 + filtro
+                + "ORDER BY CASE s.estado WHEN 'PENDIENTE' THEN 0 WHEN 'APROBADA' THEN 1 ELSE 2 END, "
+                + "s.fecha DESC, s.id_solicitud DESC";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            return filasSolicitudB6(sentencia);
+        }
+    }
+
+    private boolean cambiarEstadoSolicitud(Connection conexion, int idSolicitud, String estado, String observacion)
+            throws SQLException {
+        String sql = "UPDATE solicitud SET estado = ?, observacion = ? WHERE id_solicitud = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, estado);
+            sentencia.setString(2, observacion);
+            sentencia.setInt(3, idSolicitud);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private int rechazarOtrasSolicitudesAbiertas(Connection conexion, int idPropiedad, int idSolicitudFinalizada)
+            throws SQLException {
+        String sql = "UPDATE solicitud SET estado = 'RECHAZADA', "
+                + "observacion = 'La propiedad fue cerrada en otra solicitud' "
+                + "WHERE id_propiedad = ? AND id_solicitud <> ? AND estado IN ('PENDIENTE', 'APROBADA')";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idPropiedad);
+            sentencia.setInt(2, idSolicitudFinalizada);
+            return sentencia.executeUpdate();
+        }
+    }
+
+    private List<Map<String, Object>> filasSolicitudB6(PreparedStatement sentencia) throws SQLException {
+        List<Map<String, Object>> solicitudes = new ArrayList<Map<String, Object>>();
+        try (ResultSet fila = sentencia.executeQuery()) {
+            while (fila.next()) {
+                solicitudes.add(filaSolicitudB6(fila));
+            }
+        }
+        return solicitudes;
+    }
+
+    private Map<String, Object> filaSolicitudB6(ResultSet fila) throws SQLException {
+        Map<String, Object> solicitud = new LinkedHashMap<String, Object>();
+        solicitud.put("idSolicitud", fila.getInt("id_solicitud"));
+        solicitud.put("idCliente", fila.getInt("id_cliente"));
+        solicitud.put("idPropiedad", fila.getInt("id_propiedad"));
+        solicitud.put("fecha", fila.getTimestamp("fecha").toLocalDateTime());
+        solicitud.put("estado", fila.getString("estado"));
+        solicitud.put("observacion", fila.getString("observacion"));
+        solicitud.put("matricula", fila.getString("matricula_inmobiliaria"));
+        solicitud.put("titulo", fila.getString("titulo"));
+        solicitud.put("direccion", fila.getString("direccion"));
+        solicitud.put("precio", fila.getBigDecimal("precio"));
+        solicitud.put("area", fila.getBigDecimal("area"));
+        solicitud.put("operacion", fila.getString("tipo_operacion"));
+        solicitud.put("estadoPropiedad", fila.getString("estado_propiedad"));
+        solicitud.put("activa", fila.getBoolean("activa"));
+        solicitud.put("ciudad", fila.getString("ciudad"));
+        solicitud.put("tipo", fila.getString("tipo"));
+        solicitud.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+        solicitud.put("inmobiliaria", fila.getString("inmobiliaria"));
+        solicitud.put("idResponsable", fila.getInt("id_responsable"));
+        solicitud.put("correoCliente", fila.getString("correo_cliente"));
+        solicitud.put("cliente", fila.getString("cliente"));
+        solicitud.put("foto", fila.getString("foto"));
+        return solicitud;
+    }
+%>

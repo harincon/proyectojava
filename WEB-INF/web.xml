@@ -41,6 +41,20 @@
         <url-pattern>/controlador/perfil.jsp</url-pattern>
     </servlet-mapping>
 
+    <!-- B6: documentos de solicitudes en PDF, hasta 5 MB. -->
+    <servlet>
+        <servlet-name>documentoSolicitud</servlet-name>
+        <jsp-file>/controlador/documento_solicitud.jsp</jsp-file>
+        <multipart-config>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>6291456</max-request-size>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>documentoSolicitud</servlet-name>
+        <url-pattern>/controlador/documento_solicitud.jsp</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
         <cookie-config>

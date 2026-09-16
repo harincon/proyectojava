@@ -1,0 +1,84 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    private static final String CONSULTA_DOCUMENTO_B6 = "SELECT d.id_documento, d.id_solicitud, d.nombre, d.ruta, "
+            + "d.estado, d.observacion, s.id_cliente, s.id_propiedad, s.estado AS estado_solicitud, "
+            + "p.id_inmobiliaria, p.titulo, i.id_usuario AS id_responsable "
+            + "FROM documento_solicitud d JOIN solicitud s ON s.id_solicitud = d.id_solicitud "
+            + "JOIN propiedad p ON p.id_propiedad = s.id_propiedad "
+            + "JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria ";
+
+    private Map<String, Object> buscarDocumentoSolicitud(Connection conexion, int idDocumento) throws SQLException {
+        try (PreparedStatement sentencia = conexion.prepareStatement(CONSULTA_DOCUMENTO_B6 + "WHERE d.id_documento = ?")) {
+            sentencia.setInt(1, idDocumento);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaDocumentoB6(fila) : null;
+            }
+        }
+    }
+
+    private Map<String, Object> bloquearDocumentoSolicitud(Connection conexion, int idDocumento) throws SQLException {
+        String sql = CONSULTA_DOCUMENTO_B6 + "WHERE d.id_documento = ? FOR UPDATE OF d";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idDocumento);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? filaDocumentoB6(fila) : null;
+            }
+        }
+    }
+
+    private List<Map<String, Object>> listarDocumentosSolicitud(Connection conexion, int idSolicitud) throws SQLException {
+        String sql = CONSULTA_DOCUMENTO_B6 + "WHERE d.id_solicitud = ? ORDER BY d.id_documento";
+        List<Map<String, Object>> documentos = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idSolicitud);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    documentos.add(filaDocumentoB6(fila));
+                }
+            }
+        }
+        return documentos;
+    }
+
+    private int crearDocumentoSolicitud(Connection conexion, int idSolicitud, String nombre, String ruta)
+            throws SQLException {
+        String sql = "INSERT INTO documento_solicitud (id_solicitud, nombre, ruta) VALUES (?, ?, ?) RETURNING id_documento";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, idSolicitud);
+            sentencia.setString(2, nombre);
+            sentencia.setString(3, ruta);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private boolean revisarDocumentoSolicitud(Connection conexion, int idDocumento, String estado, String observacion)
+            throws SQLException {
+        String sql = "UPDATE documento_solicitud SET estado = ?, observacion = ? WHERE id_documento = ?";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, estado);
+            sentencia.setString(2, observacion);
+            sentencia.setInt(3, idDocumento);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    private Map<String, Object> filaDocumentoB6(ResultSet fila) throws SQLException {
+        Map<String, Object> documento = new LinkedHashMap<String, Object>();
+        documento.put("idDocumento", fila.getInt("id_documento"));
+        documento.put("idSolicitud", fila.getInt("id_solicitud"));
+        documento.put("nombre", fila.getString("nombre"));
+        documento.put("ruta", fila.getString("ruta"));
+        documento.put("estado", fila.getString("estado"));
+        documento.put("observacion", fila.getString("observacion"));
+        documento.put("idCliente", fila.getInt("id_cliente"));
+        documento.put("idPropiedad", fila.getInt("id_propiedad"));
+        documento.put("estadoSolicitud", fila.getString("estado_solicitud"));
+        documento.put("idInmobiliaria", fila.getInt("id_inmobiliaria"));
+        documento.put("titulo", fila.getString("titulo"));
+        documento.put("idResponsable", fila.getInt("id_responsable"));
+        return documento;
+    }
+%>
