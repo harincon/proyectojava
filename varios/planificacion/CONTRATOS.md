@@ -184,7 +184,7 @@ Escapar textos procedentes de usuario/BD antes de HTML. Traducir duplicados 2350
 
 ### Presentación (B1, implementado)
 
-Diseño aprobado: **Habita**, «Encuentra tu próximo espacio», **paleta A** (azul `#183B56`, turquesa `#0F766E`, fondo `#F5F7FA`). Bootstrap 5.3.3 y Bootstrap Icons 1.11.3 están guardados en local (`css/`, `js/`): no usar CDN. Muestra de todos los componentes en `controlador/prueba_diseno.jsp` (solo en el propio equipo).
+Diseño vigente: **Habita**, «Encuentra tu próximo espacio» y paleta Figma: verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`. Bootstrap 5.3.3 y Bootstrap Icons 1.11.3 están guardados en local (`css/`, `js/`): no usar CDN. Los recursos de marca y las fotografías seleccionadas están en `img/habita/`. El código React, TypeScript y Tailwind de Figma no se incorpora; se adapta a JSP/JSPF, HTML, CSS y Bootstrap local. Muestra de componentes en `controlador/prueba_diseno.jsp` (solo en el propio equipo).
 
 Toda vista empieza así:
 
@@ -205,7 +205,7 @@ La cabecera declara `ctx`, `haySesion`, `rolesSesion` y `nombreSesion`: la vista
 
 | Componente | Clases |
 | --- | --- |
-| Botón principal / marca / secundario | `btn btn-primary` (turquesa) · `btn btn-marca` (azul) · `btn btn-outline-primary` |
+| Botón principal / marca / secundario | `btn btn-primary` (terracota) · `btn btn-marca` (verde bosque) · `btn btn-outline-primary` |
 | Título de página | `h1.h3.titulo-pagina` |
 | Tarjeta de propiedad | `card tarjeta-propiedad`, imagen `img.foto` (usar `img/sin_foto.svg` si no hay foto), precio `.precio`, datos `.datos`. Rejilla `row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4` |
 | Tabla de administración | `table tabla-habita` dentro de `.table-responsive`; celda de botones `td.acciones` |
@@ -218,7 +218,7 @@ Destinos del menú: cada dueño implementa la acción indicada (o pide al coordi
 
 | Menú | Enlace | menuActivo |
 | --- | --- | --- |
-| Inicio · Catálogo | `inicio.jsp` · `propiedad.jsp?accion=catalogo` | `inicio` · `catalogo` |
+| Inicio · Catálogo | raíz `/` · `propiedad.jsp?accion=catalogo` | `inicio` · `catalogo` |
 | Iniciar sesión · Registrarse · Cerrar sesión (POST con token) | `acceso.jsp?accion=ingresar` · `accion=registro` · `accion=salir` | — |
 | Mi panel · Mi perfil | `panel.jsp` · `perfil.jsp?accion=ver` | `panel` · `perfil` |
 | Admin: Usuarios · Inmobiliarias · Catálogos · Reportes · Auditoría | `usuario.jsp?accion=listar` · `inmobiliaria.jsp?accion=listar` · `ciudad.jsp?accion=listar` · `reporte.jsp?accion=general` · `auditoria.jsp?accion=listar` | `usuarios` · `inmobiliarias` · `catalogos` · `reportes` · `auditoria` |

@@ -91,7 +91,9 @@ seguridad.jspf, el token, el hash y la subida de fotos están implementados desd
 
 ## 7. Ajustes visuales respecto a Figma
 
-Conservar el estilo de [Sin título.pdf](../referencias/Sin%20título.pdf): azul oscuro, verde petróleo, fondos claros, tarjetas y menús laterales. **Aprobados y aplicados en B1:** nombre Habita, lema «Encuentra tu próximo espacio» y paleta A (azul `#183B56`, turquesa `#0F766E`).
+La referencia vigente está en `varios/referencias/figma-habita/`. Se conserva el nombre Habita y el lema «Encuentra tu próximo espacio». La paleta aplicada es verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`. Los recursos usados por la aplicación están en `img/habita/` y los estilos comunes en `css/estilos.css`.
+
+El código React, TypeScript y Tailwind entregado por Figma es solo una referencia visual. Las pantallas del proyecto se construyen con JSP/JSPF, HTML, CSS y Bootstrap local, conservando la arquitectura y los contratos del parcial.
 
 Quitar mensajería al asesor, blog/redes sin contenido, fecha de registro inexistente y cantidad de estacionamientos. Mostrar empresa responsable y parqueadero como característica. Simplificar el pie interno.
 

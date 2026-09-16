@@ -100,20 +100,21 @@ Verificado: 16 rechazos esperados con la base vacía y otra vez con los roles ca
 
 ## B1 — 15 de septiembre de 2026
 
-Diseño aprobado por el estudiante: nombre **Habita**, lema «Encuentra tu próximo espacio» y **paleta A** (azul y turquesa), cercana a la plantilla de Figma.
+Identidad visual vigente: nombre **Habita**, lema «Encuentra tu próximo espacio» y la paleta del Figma más reciente: verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`. El diseño de referencia se adaptó a JSP/JSPF, HTML, CSS y Bootstrap local; no se trasladaron React, TypeScript ni Tailwind.
 
 | Archivo | Contenido |
 | --- | --- |
 | css/bootstrap.min.css, js/bootstrap.bundle.min.js | Bootstrap 5.3.3 en local |
 | css/bootstrap-icons.min.css, css/fonts/ | Bootstrap Icons 1.11.3 en local |
-| css/estilos.css | Paleta, botones, menú lateral, tarjetas, tablas, estados, lista vacía y pies |
-| img/logo.svg, img/sin_foto.svg | Logo y reemplazo de propiedad sin foto |
+| css/estilos.css | Paleta vigente, portada, acceso, botones, formularios, menú lateral, tarjetas, tablas, estados, listas vacías y pies |
+| img/habita/ | Logo, icono, referencia de paleta y 13 fotografías locales seleccionadas del Figma |
+| img/logo.svg, img/sin_foto.svg | Recursos de compatibilidad con la identidad vigente y reemplazo cuando no hay fotografía |
 | WEB-INF/jspf/cabecera.jspf | Encabezado, menú público, menú lateral por roles, cierre de sesión por POST y avisos |
 | WEB-INF/jspf/pie.jspf | Pie público o interno y JavaScript de Bootstrap |
 | WEB-INF/vista/acceso_denegado.jsp, error.jsp | Páginas 403, 404 y 500, registradas en web.xml |
 | controlador/prueba_diseno.jsp | Muestra de componentes; solo en el propio equipo |
 
-Verificado en Tomcat (22 comprobaciones): recursos locales servidos, menú público, menú de panel con varios roles y opción activa, nombre escapado, aviso de un solo uso, páginas 403 y 404 propias. Capturas revisadas a 1366, 768 y 390 px.
+Verificado en Tomcat: portada, acceso, registro, muestra de diseño, CSS, SVG y fotografías responden correctamente. Se revisaron capturas de la portada a 1440 y 500 px, y del acceso a 1440 px. `index.jsp` es la portada visual actual; sus filtros son el bosquejo de B4 y todavía no consultan la base de datos.
 
 Corregido durante la prueba: los `.jspf` se leían en ISO-8859-1 y dañaban las tildes (también los mensajes de utilidades.jspf de B0); web.xml ahora aplica UTF-8 a `*.jspf`. Detectado y documentado: las JSP de Tomcat 8.5 no aceptan lambdas, y `trim-directive-whitespaces` borra espacios entre expresiones.
 
