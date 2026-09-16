@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso, usuarios, roles y perfil), B3 (empresas y catálogos) y B4 (inicio y publicaciones) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Quedan habilitados B5 y B6.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso y usuarios), B3 (empresas y catálogos), B4 (inicio y publicaciones), B5 (favoritos y citas) y B6 (solicitudes y documentos) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Queda habilitado B7.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -193,6 +193,47 @@ Reglas:
 - **Fotografías:** `ruta` admite un enlace `https://` o un archivo del proyecto bajo `img/` (jpg, png, svg o webp), validado con `rutaImagenValida`; hasta 8 por propiedad. Las vistas las muestran con `urlImagen(ctx, ruta)`, que usa `img/sin_foto.svg` cuando no hay.
 - **Botones hacia B5 y B6** (rutas acordadas, visibles para CLIENTE en el detalle de una propiedad disponible): `cita.jsp?accion=nueva&id_propiedad=N`, `solicitud.jsp?accion=nueva&id_propiedad=N` y POST `favorito.jsp?accion=agregar&id_propiedad=N` con token.
 
+### Favoritos y citas (B5, implementado)
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| favorito.jspf | `agregarFavorito(conexion, idCliente, idPropiedad)` · `quitarFavorito(…)` · `listarFavoritos(conexion, idCliente)` | `boolean` · `boolean` · `List<Map>` con las claves de las tarjetas del catálogo |
+| cita.jspf | `buscarCita(conexion, idCita)` · `bloquearCita(…)` | Map con la cita, su propiedad, la empresa y el cliente |
+| | `listarCitasCliente(conexion, idCliente)` · `listarCitasInmobiliaria(conexion, idInmobiliaria)` | `List<Map>`; con `null` como empresa, el administrador ve todas |
+| | `crearCita(…)` · `cambiarEstadoCita(conexion, idCita, estado)` | `int` · `boolean` |
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| favorito.jsp | GET `listar` · POST `agregar&id_propiedad` · `quitar&id_propiedad` | CLIENTE |
+| cita.jsp | GET `nueva&id_propiedad` · POST `crear&id_propiedad` (campos `fecha` y `hora`) · GET `mis_citas` · POST `cancelar&id_cita` | CLIENTE |
+| | GET `recibidas` · POST `confirmar&id_cita` · `rechazar&id_cita` · `realizar&id_cita` | INMOBILIARIA dueña o ADMINISTRADOR |
+
+Reglas: se agenda solo sobre propiedades activas y `DISPONIBLE`, en fecha futura. Además del índice `uq_cita_horario`, se comprueba que ni el cliente ni la empresa tengan otra cita activa a esa hora; el 23505 se traduce a «Ese horario ya está reservado». Orden de bloqueo: **propiedad → participantes**. Transiciones: el cliente cancela PENDIENTE o CONFIRMADA; la empresa confirma una PENDIENTE, rechaza PENDIENTE o CONFIRMADA y marca REALIZADA solo una CONFIRMADA ya pasada. Las acciones de estado van por POST con token; por GET responden 405.
+
+### Solicitudes y documentos (B6, implementado)
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| solicitud.jspf | `buscarSolicitud` · `bloquearSolicitud` · `bloquearPropiedadSolicitud` | Map de la solicitud con propiedad, empresa y cliente |
+| | `existeSolicitudAbierta(conexion, idCliente, idPropiedad)` · `crearSolicitud(…)` | `boolean` · `int` |
+| | `listarSolicitudesCliente` · `listarSolicitudesInmobiliaria(conexion, idInmobiliaria)` | `List<Map>`; `null` como empresa lista todas |
+| | `cambiarEstadoSolicitud(conexion, id, estado, observacion)` · `rechazarOtrasSolicitudesAbiertas(conexion, idPropiedad, idFinalizada)` | `boolean` · `int` |
+| documento_solicitud.jspf | `listarDocumentosSolicitud` · `buscarDocumentoSolicitud` · `bloquearDocumentoSolicitud` · `crearDocumentoSolicitud` · `revisarDocumentoSolicitud` | Documentos del trámite y su revisión |
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| solicitud.jsp | GET `nueva&id_propiedad` · POST `crear&id_propiedad` (campo `observacion`) · GET `mis_solicitudes` · `detalle&id_solicitud` | CLIENTE dueño |
+| | GET `recibidas` · POST `revisar&id_solicitud` (`estado` APROBADA o RECHAZADA y `observacion`) · `finalizar&id_solicitud` | INMOBILIARIA dueña o ADMINISTRADOR |
+| documento_solicitud.jsp | POST `subir&id_solicitud` (multipart: `nombre` y `archivo`) | CLIENTE dueño |
+| | POST `revisar&id_documento` (`estado` APROBADO o RECHAZADO y `observacion`) | INMOBILIARIA dueña o ADMINISTRADOR |
+| | GET `descargar&id_documento` | Cliente dueño, empresa propietaria o ADMINISTRADOR |
+
+Reglas:
+- **Radicación:** solo sobre propiedades activas y `DISPONIBLE`, y sin otra solicitud abierta (PENDIENTE o APROBADA) del mismo cliente sobre esa propiedad.
+- **Revisión:** aprobar exige que la solicitud esté PENDIENTE y la propiedad siga disponible; rechazar admite PENDIENTE o APROBADA. Siempre con observación.
+- **Cierre:** una sola transacción que bloquea **propiedad → solicitud**, marca FINALIZADA, llama a `actualizarDisponibilidad` (VENDIDA o ARRENDADA según la operación) y deja las demás solicitudes abiertas como RECHAZADA con la observación «La propiedad fue cerrada en otra solicitud». Solo se finaliza una solicitud APROBADA sobre una propiedad DISPONIBLE.
+- **Documentos:** PDF de hasta 5 MB, comprobados por la firma `%PDF-`, guardados con nombre generado en `carpetaArchivos(application)/solicitudes/`. La descarga pasa siempre por el controlador. `documento_solicitud.jsp` está registrado con `multipart-config` en web.xml (5 MB por archivo, 6 MB por petición).
+
 ## 5. Rutas y parámetros
 
 Los enlaces y formularios apuntan a /controlador/<entidad>.jsp, nunca directamente a las vistas. Usar el contexto de aplicación. Los modelos se incluyen estáticamente en el controlador; las vistas reciben los resultados mediante atributos de petición y forward.
@@ -321,4 +362,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0 a B4 y B8 están terminados e integrados, y B7 entregó sus consultas SQL. B5 y B6 pueden iniciar cuando se autoricen. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0 a B6 y B8 están terminados e integrados, y B7 entregó sus consultas SQL. Faltan las pantallas de reportes y la auditoría (B7), el cierre de B8 y B9. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.

@@ -19,7 +19,54 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Confirmar B4 en Git y delegar B5 (favoritos y citas) y B6 (solicitudes y documentos), que pueden avanzar en paralelo.
+Confirmar B5 y B6 en Git y delegar B7 (pantallas de reportes y auditoría). Después, el cierre de B8 y B9.
+
+## B6 — 15 de septiembre de 2026
+
+Solicitudes, documentos PDF y cierre de la operación.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/modelo/solicitud.jspf | Radicación, listados por cliente y por empresa, bloqueos, cambio de estado y rechazo de las demás solicitudes abiertas |
+| WEB-INF/modelo/documento_solicitud.jspf | Documentos del trámite y su revisión |
+| controlador/solicitud.jsp | Radicar, consultar, revisar (aprobar o rechazar) y finalizar |
+| controlador/documento_solicitud.jsp | Subir PDF, revisarlos y descargarlos con permisos |
+| WEB-INF/vista/solicitudes.jsp, solicitud.jsp, formulario_solicitud.jsp | Listado, detalle con documentos y formulario de radicación |
+| WEB-INF/web.xml | El coordinador registró `documento_solicitud.jsp` como multipart (5 MB por archivo, 6 MB por petición) |
+
+Verificado en Tomcat (43 comprobaciones por HTTP, sobre una propiedad de prueba propia):
+
+- **Radicación:** solo sobre propiedades activas y disponibles; sin dos solicitudes abiertas del mismo cliente sobre la misma propiedad; otro cliente sí puede radicar. Sin token no crea y por GET responde 405.
+- **Permisos:** un cliente no abre ni aprueba la solicitud de otro; una inmobiliaria ajena recibe 403 al consultar y al revisar.
+- **Revisión:** exige observación, no permite saltar a FINALIZADA ni aprobar dos veces.
+- **Documentos:** el archivo se guarda con nombre generado y no es accesible por URL (404 directo). Otro cliente no sube a una solicitud ajena ni el cliente revisa su propio documento. La descarga solo la permiten el cliente dueño, la empresa propietaria y el administrador, y el archivo bajado es idéntico al subido. Se rechazan los archivos sin firma `%PDF-` y los mayores de 5 MB.
+- **Cierre:** no finaliza una solicitud pendiente ni sin token. Al finalizar una aprobada, la propiedad queda VENDIDA, las demás solicitudes abiertas quedan RECHAZADA con la observación acordada y la observación del cliente se conserva. Un segundo cierre se rechaza y la propiedad sale del catálogo. El orden de bloqueo es propiedad → solicitud.
+- **Limpieza:** la base volvió a 15 solicitudes, 20 documentos y 20 propiedades, sin archivos de prueba.
+
+Pendiente: los 20 documentos sembrados por B8 tienen ruta en la base pero no tienen el PDF en el disco, así que su botón «Descargar» responde 404. Se decide en el cierre de B8: generar archivos de ejemplo o dejar que los PDF se suban desde la aplicación durante la demostración.
+
+## B5 — 15 de septiembre de 2026
+
+Favoritos y citas.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/modelo/favorito.jspf | Agregar sin duplicar, quitar y listar con las claves de las tarjetas del catálogo |
+| WEB-INF/modelo/cita.jspf | Consultas y bloqueos de cita, comprobación de cruces, creación y cambio de estado |
+| controlador/favorito.jsp | Guardar y quitar favoritos desde el detalle y el listado |
+| controlador/cita.jsp | Agendar, consultar, cancelar, confirmar, rechazar y marcar realizada |
+| WEB-INF/vista/favoritos.jsp, citas.jsp, formulario_cita.jsp | Listados del cliente y de la empresa, y formulario de agendamiento |
+
+Verificado en Tomcat (42 comprobaciones por HTTP):
+
+- **Favoritos:** no se duplican, no se guardan propiedades retiradas, cada quien ve los suyos y una cuenta sin rol CLIENTE recibe 403.
+- **Cruces de horario:** no se repite el horario de una propiedad, ni el cliente ni la empresa pueden tener dos visitas activas a la misma hora, y al cancelar el horario vuelve a quedar libre.
+- **Transiciones:** no se marca realizada antes de la fecha, no se reabre una cita cancelada y no se rechaza una ya realizada.
+- **Permisos:** una empresa ajena no confirma, otro cliente no cancela y el cliente no confirma la suya. El administrador sí gestiona cualquier cita.
+- **Formularios:** POST sin token no cambia nada y las acciones por GET responden 405.
+- **Limpieza:** la base volvió a sus 15 citas y 10 favoritos.
+
+Durante la revisión se borró por error un favorito de los datos de B8 y se restauró; la validación de B8 vuelve a pasar.
 
 ## B4 — 15 de septiembre de 2026
 
