@@ -14,7 +14,8 @@ Aplicación académica para publicar inmuebles, buscar propiedades, agendar visi
 - B3 (empresas y catálogos) terminado: inmobiliarias con su cuenta responsable, Mi empresa y catálogos de ciudades, tipos y características.
 - B4 (inicio y publicaciones) terminado: portada, catálogo con filtros, detalle con galería y publicación de propiedades con fotografías y características.
 - B5 (favoritos y citas) terminado: agendar visitas sin cruces de horario, confirmar, rechazar, realizar y cancelar.
-- B6 (solicitudes y documentos) terminado: radicar, revisar, documentos PDF privados y cierre que marca el inmueble como vendido o arrendado. Sigue B7.
+- B6 (solicitudes y documentos) terminado: radicar, revisar, documentos PDF privados y cierre que marca el inmueble como vendido o arrendado.
+- B7 (reportes y auditoría) terminado: reportes por rol y auditoría que registra ingresos, cambios de cuentas y roles, empresas, propiedades, citas, solicitudes y documentos. Sigue B9.
 - Después de cargar `sql/03-datos-prueba.sql`, generar los PDF de ejemplo de los documentos sembrados: `powershell -ExecutionPolicy Bypass -File varios\herramientas\generar-pdf-ejemplo.ps1` (pide la contraseña de PostgreSQL). Los archivos quedan en `WEB-INF/archivos/`, que no se sube a Git.
 - En otro equipo, copiar `WEB-INF/jspf/conexion.jspf.ejemplo` como `conexion.jspf` y completar la contraseña. Diagnóstico local: `http://localhost:8080/proyectojava/controlador/prueba_conexion.jsp`.
 

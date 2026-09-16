@@ -28,7 +28,7 @@ M = WEB-INF/modelo; C = controlador; V = WEB-INF/vista. Los archivos de M usan .
 | B4 | Inicio y publicaciones — **terminado** | M y C: propiedad, imagen_propiedad, propiedad_caracteristica. index.jsp, C/inicio.jsp. V/inicio.jsp, catalogo.jsp, propiedad.jsp, propiedades.jsp y formulario_propiedad.jsp |
 | B5 | Favoritos y citas — **terminado** | M y C: favorito, cita. V/favoritos.jsp, citas.jsp y formulario_cita.jsp |
 | B6 | Solicitudes/documentos — **terminado** | M y C: solicitud, documento_solicitud. V/solicitudes.jsp, formulario_solicitud.jsp y solicitud.jsp |
-| B7 | Reportes y auditoría final | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/04-consultas.sql |
+| B7 | Reportes y auditoría final — **terminado** (auditoría integrada por el coordinador) | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/04-consultas.sql |
 | B8 | Datos y documentación BD — **terminado** (ajustes finales con B4–B7) | sql/03-datos-prueba.sql; sql/pruebas/02-validar-datos.sql; varios/documentacion/base-datos/ |
 | B9 | Integración y cierre | Documentación, pruebas finales, Scrum y README mediante el coordinador |
 
@@ -45,7 +45,7 @@ Cada bloque desarrolla su modelo, controlador y vistas cuando se autorice. No cr
 | 3 | B3 terminado | B2 integrado |
 | 4 | B4 terminado; la parte SQL de B7 ya está entregada | B1, B2 y B3 integrados |
 | 5 | B5 y B6 terminados | B4 completo |
-| 6 | B7 (pantallas y auditoría) y cierre de B8 | Módulos principales implementados. B7 entrega su función de auditoría; el coordinador incorpora los registros |
+| 6 | B7 terminado y auditoría integrada; cierre de B8 hecho (fotografías y PDF de ejemplo) | Módulos principales implementados |
 | 7 | B9 y correcciones por dueño | Entregas integradas |
 
 B8 usa el formato de claves que entrega B0. B9 acompaña la integración con comprobaciones breves; no exige una auditoría completa para avanzar de un bloque a otro.

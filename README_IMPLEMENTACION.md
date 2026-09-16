@@ -19,7 +19,52 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Confirmar B5 y B6 en Git y delegar B7 (pantallas de reportes y auditoría). Después, el cierre de B8 y B9.
+Confirmar B7 y la integración de la auditoría en Git. Después, B9: recorrido completo, evidencias, casos de uso, guía de ejecución y sustentación.
+
+## B7 — 16 de septiembre de 2026
+
+Reportes por rol y auditoría.
+
+| Archivo | Contenido |
+| --- | --- |
+| WEB-INF/modelo/reporte.jspf | Propiedades, citas, solicitudes por empresa y operaciones finalizadas; consolidado o filtrado por empresa |
+| WEB-INF/modelo/auditoria.jspf | `registrarEvento` y consulta con filtros por usuario, texto y rango de fechas, con paginación |
+| controlador/reporte.jsp, auditoria.jsp | Reporte general (administrador), reporte de la empresa (inmobiliaria, tomada de la sesión) y consulta de auditoría (administrador, solo lectura) |
+| WEB-INF/vista/reportes.jsp, auditoria.jsp | Tablas con resumen de propiedades por ciudad y estado, conteo de citas por estado y filtros de auditoría |
+
+Verificado en Tomcat (34 comprobaciones por HTTP):
+- **Permisos:** visitante, cliente e inmobiliaria reciben 403 donde no les corresponde, y POST responde 405.
+- **Reporte general:** trae las 20 propiedades, citas de todos los estados, solicitudes por empresa y las 4 operaciones finalizadas.
+- **Reporte de empresa:** solo muestra lo propio e ignora un id de empresa enviado a mano.
+- **Auditoría:** paginación de 15; filtros por usuario, por texto (el `%` no es comodín) y por rango de fechas; mensajes claros ante rango invertido o fecha inválida; HTML escapado; sin acciones para editar o borrar.
+
+Ajustes del coordinador en la revisión: matrícula sin partirse en las tablas, resumen de propiedades por ciudad y estado con totales, conteo de citas por estado y alineación de los filtros de auditoría.
+
+### Integración de la auditoría
+
+El coordinador incorporó `registrarEvento` en acceso.jsp, usuario.jsp, usuario_rol.jsp, inmobiliaria.jsp, propiedad.jsp, cita.jsp, solicitud.jsp y documento_solicitud.jsp. La lista de eventos y las reglas están en CONTRATOS.md. Cada evento se registra con la misma conexión y antes del `commit`, para que una operación revertida no quede auditada.
+
+Verificado (27 comprobaciones por HTTP, ejecutando cada acción una vez):
+- **Acceso:** clave incorrecta con la cuenta afectada, correo inexistente sin usuario, ingreso, cierre de sesión (por GET no registra) y registro de cuenta.
+- **Usuarios y roles:** usuario creado; el correo repetido revierte y no deja evento; actualizado con cambio de clave; desactivado y activado; el intento de desactivarse a sí mismo no deja evento; rol asignado una sola vez aunque se repita; rol revocado.
+- **Propiedades:** publicada, con la autora correcta; la matrícula repetida no deja evento; editada, retirada y reactivada.
+- **Citas y solicitudes:** cita solicitada, confirmada y cancelada, cada una con su autor; la transición no permitida no deja evento. Solicitud radicada, documento subido y aprobado, solicitud aprobada y finalizada; el segundo cierre no duplica el evento.
+- **Pantalla:** los eventos se ven en la auditoría y se filtran por usuario.
+- **Limpieza:** la base quedó como estaba y la auditoría sin eventos de prueba.
+
+Las pruebas de B3 borran cuentas de prueba: ahora eliminan primero sus eventos, porque `auditoria.id_usuario` protege a las cuentas con historia. La aplicación nunca borra cuentas, solo las desactiva.
+
+### Bloqueo por intentos fallidos
+
+A pedido del estudiante: tras 5 intentos fallidos seguidos para un mismo correo, el ingreso queda bloqueado 5 minutos desde el quinto intento, con el aviso «Demasiados intentos fallidos. Por seguridad, espera N minutos…». Se calcula con los eventos de auditoría (`INGRESO_FALLIDO`, `INGRESO_BLOQUEO` e `INGRESO_BLOQUEADO`), sin tablas nuevas.
+
+Verificado (14 comprobaciones; los 5 minutos se simularon retrocediendo la hora del evento de bloqueo):
+- **Bloqueo:** los primeros 4 intentos dan el mensaje normal y el quinto bloquea. Durante el bloqueo ni la clave correcta entra y no queda sesión; esos intentos quedan registrados pero no alargan el bloqueo.
+- **Alcance:** otra cuenta no se afecta, y un correo inexistente se bloquea igual, sin revelar qué cuentas existen.
+- **Tiempo:** a los 3 minutos avisa que faltan 2; pasados los 5 minutos la clave correcta entra.
+- **Reinicio:** un ingreso correcto reinicia el conteo, y otros 4 fallos después no bloquean.
+
+La prueba general de auditoría sigue en 27 de 27.
 
 ## B6 — 15 de septiembre de 2026
 

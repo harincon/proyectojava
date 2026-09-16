@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso y usuarios), B3 (empresas y catálogos), B4 (inicio y publicaciones), B5 (favoritos y citas) y B6 (solicitudes y documentos) están implementados y verificados, y los datos de B8 están cargados (15 de septiembre de 2026). Queda habilitado B7.
+Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso y usuarios), B3 (empresas y catálogos), B4 (inicio y publicaciones), B5 (favoritos y citas), B6 (solicitudes y documentos) y B7 (reportes y auditoría) están implementados y verificados, y los datos de B8 están cargados (16 de septiembre de 2026). Queda habilitado B9.
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 
@@ -234,6 +234,38 @@ Reglas:
 - **Cierre:** una sola transacción que bloquea **propiedad → solicitud**, marca FINALIZADA, llama a `actualizarDisponibilidad` (VENDIDA o ARRENDADA según la operación) y deja las demás solicitudes abiertas como RECHAZADA con la observación «La propiedad fue cerrada en otra solicitud». Solo se finaliza una solicitud APROBADA sobre una propiedad DISPONIBLE.
 - **Documentos:** PDF de hasta 5 MB, comprobados por la firma `%PDF-`, guardados con nombre generado en `carpetaArchivos(application)/solicitudes/`. La descarga pasa siempre por el controlador. `documento_solicitud.jsp` está registrado con `multipart-config` en web.xml (5 MB por archivo, 6 MB por petición).
 
+### Reportes y auditoría (B7, implementado e integrado)
+
+| Modelo | Función | Devuelve |
+| --- | --- | --- |
+| reporte.jspf | `listarReportePropiedades` · `listarReporteCitas` · `listarReporteSolicitudes` · `listarReporteFinalizadas` `(conexion, idInmobiliaria)` | `List<Map>`; con `null` como empresa, el consolidado |
+| auditoria.jspf | `registrarEvento(conexion, idUsuario, accion)` | Inserta el evento; `idUsuario` puede ser `null`; `accion` de 1 a 255 caracteres |
+| | `listarAuditoria` · `contarAuditoria` `(conexion, usuario, texto, desde, hastaExclusiva, …)` | Consulta con filtros y paginación |
+
+| Controlador | Acciones | Roles |
+| --- | --- | --- |
+| reporte.jsp | GET `general` | ADMINISTRADOR |
+| | GET `empresa` (la empresa sale de la sesión) | INMOBILIARIA |
+| auditoria.jsp | GET `listar[&usuario&q&desde&hasta&pagina]` (solo lectura) | ADMINISTRADOR |
+
+**Eventos registrados.** Formato: `EVENTO · detalle`, con el autor en `id_usuario`.
+
+| Controlador | Eventos |
+| --- | --- |
+| acceso.jsp | `INGRESO`, `INGRESO_FALLIDO` (con la cuenta si existe, o sin usuario), `INGRESO_BLOQUEO` (inicio de un bloqueo), `INGRESO_BLOQUEADO` (intento durante el bloqueo), `CIERRE_SESION`, `REGISTRO` |
+| usuario.jsp · usuario_rol.jsp | `USUARIO_CREADO`, `USUARIO_ACTUALIZADO` (indica si cambió la clave), `USUARIO_ACTIVADO`, `USUARIO_DESACTIVADO`, `ROL_ASIGNADO`, `ROL_REVOCADO` |
+| inmobiliaria.jsp | `EMPRESA_VINCULADA`, `EMPRESA_ACTUALIZADA` |
+| propiedad.jsp | `PROPIEDAD_PUBLICADA`, `PROPIEDAD_EDITADA`, `PROPIEDAD_RETIRADA`, `PROPIEDAD_REACTIVADA` |
+| cita.jsp | `CITA_SOLICITADA`, `CITA_CONFIRMADA`, `CITA_RECHAZADA`, `CITA_REALIZADA`, `CITA_CANCELADA` |
+| solicitud.jsp · documento_solicitud.jsp | `SOLICITUD_RADICADA`, `SOLICITUD_APROBADA`, `SOLICITUD_RECHAZADA`, `SOLICITUD_FINALIZADA`, `DOCUMENTO_SUBIDO`, `DOCUMENTO_APROBADO`, `DOCUMENTO_RECHAZADO` |
+
+Reglas:
+- **Momento del registro:** el evento se registra con la misma `Connection`, después del cambio y antes del `commit`. Si la operación se revierte, el evento también; las acciones rechazadas no dejan evento.
+- **Cierre de sesión:** nunca se bloquea por un fallo de auditoría.
+- **Bloqueo de ingreso:** tras 5 intentos fallidos seguidos para un mismo correo, el ingreso queda bloqueado 5 minutos desde el quinto intento; durante ese tiempo tampoco entra la clave correcta. El conteo vuelve a cero con un ingreso correcto o al empezar un bloqueo, y los intentos hechos durante el bloqueo no lo alargan. Se aplica al correo escrito, exista o no la cuenta, para no revelar qué cuentas existen. Se calcula con los eventos de auditoría mediante `segundosBloqueoIngreso` e `intentosFallidosSeguidos` (auditoria.jspf); los límites son constantes en acceso.jsp.
+- **Integridad:** la auditoría no se edita ni se borra desde la aplicación. Como `auditoria.id_usuario` es ON DELETE RESTRICT, una cuenta con eventos no se puede borrar; la aplicación solo desactiva cuentas.
+- **Operaciones nuevas:** toda operación que modifique datos debe registrar su evento con esta misma forma.
+
 ## 5. Rutas y parámetros
 
 Los enlaces y formularios apuntan a /controlador/<entidad>.jsp, nunca directamente a las vistas. Usar el contexto de aplicación. Los modelos se incluyen estáticamente en el controlador; las vistas reciben los resultados mediante atributos de petición y forward.
@@ -344,7 +376,7 @@ B5 comprueba cruces de cliente y responsable además del índice propiedad/horar
 
 Para operaciones sobre un inmueble, coordinar propiedad → solicitud → cita y validar también bajas y cierre frente a nuevas reservas. Si hacen falta bloqueos de usuario/empresa para cruces entre inmuebles, fijar su orden común antes de implementar B5/B6.
 
-Auditoría aplazada hasta finalizar los módulos principales. B0–B6 no registran eventos todavía ni dependen de un fragmento de auditoría. En B7 se crea WEB-INF/modelo/auditoria.jspf, su controlador y vista. El coordinador incorpora llamadas de registro en operaciones ya terminadas. Para esa integración se reserva temporalmente la edición de los archivos afectados; ninguna otra IA los modifica a la vez. La tabla existente se conserva y no se inventan eventos anteriores.
+La auditoría se implementó al final, en B7 (WEB-INF/modelo/auditoria.jspf, su controlador y su vista). Después, el coordinador incorporó las llamadas de registro en los controladores de B2 a B6 (ver «Reportes y auditoría» en la sección 4). Los eventos empiezan desde esa integración: no se inventaron eventos anteriores.
 
 ## 9. Estados exactos
 
@@ -362,4 +394,4 @@ propiedad.activa es independiente del estado comercial. No borrar historia para 
 
 No utilizar los antiguos nombres Conexion.obtener, AuditoriaDAO, Textos.escapar, Mensajes ni Sesion: esas clases fueron retiradas. No reemplazarlas con nuevas clases equivalentes.
 
-B0 a B6 y B8 están terminados e integrados, y B7 entregó sus consultas SQL. Faltan las pantallas de reportes y la auditoría (B7), el cierre de B8 y B9. Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
+B0 a B8 están terminados e integrados, incluida la auditoría en las operaciones. Falta B9 (integración final, evidencias y sustentación). Se comprueba cada cambio de forma breve y se deja la revisión global para B9. La auditoría no bloquea el avance de otros módulos. Cada cambio de contrato se solicita al coordinador y se incorpora antes de que lo consuma otro bloque.
