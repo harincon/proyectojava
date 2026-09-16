@@ -15,7 +15,7 @@
   <div class="col-lg-4">
     <div class="card border-0 shadow-sm text-center">
       <div class="card-body p-4">
-        <img class="rounded-circle mb-3 border" width="140" height="140" style="object-fit:cover"
+        <img class="rounded-circle mb-3 border foto-perfil"
              src="<%= tieneFoto ? ctx + "/controlador/perfil.jsp?accion=foto" : ctx + "/img/sin_foto.svg" %>"
              alt="Foto de perfil">
         <p class="fw-semibold mb-0"><%= escapar(nombreSesion) %></p>

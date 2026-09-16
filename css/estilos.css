@@ -1,59 +1,95 @@
-/* Habita · paleta A (azul y turquesa) sobre Bootstrap 5.3 */
+/* Habita · identidad visual adaptada del diseño de Figma para JSP/Bootstrap. */
 
 :root {
-    --habita-marca: #183B56;
-    --habita-marca-oscuro: #10293D;
-    --habita-accion: #0F766E;
-    --habita-accion-oscuro: #0B5E58;
-    --habita-fondo: #F5F7FA;
-    --habita-texto: #172B4D;
-    --habita-borde: #DCE2E9;
-    --habita-suave: #5B6B80;
+    --color1: #243B32;
+    --color2: #C96E4B;
+    --color3: #83946A;
+    --color4: #E8D8C4;
+    --color5: #F7F2E8;
 
-    --bs-primary: #0F766E;
-    --bs-primary-rgb: 15, 118, 110;
-    --bs-link-color: #0F766E;
-    --bs-link-color-rgb: 15, 118, 110;
-    --bs-link-hover-color: #0B5E58;
-    --bs-link-hover-color-rgb: 11, 94, 88;
-    --bs-body-color: #172B4D;
-    --bs-body-bg: #F5F7FA;
-    --bs-border-color: #DCE2E9;
-    --bs-focus-ring-color: rgba(15, 118, 110, .25);
+    --habita-marca: var(--color1);
+    --habita-marca-oscuro: #182A23;
+    --habita-accion: var(--color2);
+    --habita-accion-oscuro: #A64F35;
+    --habita-acento: var(--color3);
+    --habita-secundario: var(--color4);
+    --habita-fondo: var(--color5);
+    --habita-superficie: #FFFDF8;
+    --habita-texto: #252525;
+    --habita-texto-boton: #17120F;
+    --habita-borde: #D8CBBB;
+    --habita-suave: #5F665F;
+
+    --bs-primary: #C96E4B;
+    --bs-primary-rgb: 201, 110, 75;
+    --bs-link-color: #8E402B;
+    --bs-link-color-rgb: 142, 64, 43;
+    --bs-link-hover-color: #243B32;
+    --bs-link-hover-color-rgb: 36, 59, 50;
+    --bs-body-color: #252525;
+    --bs-body-bg: #F7F2E8;
+    --bs-border-color: #D8CBBB;
+    --bs-focus-ring-color: rgba(131, 148, 106, .35);
 }
+
+.color1 { color: var(--color1) !important; }
+.color2 { color: var(--color2) !important; }
+.color3 { color: var(--color3) !important; }
+.color4 { color: var(--color4) !important; }
+.color5 { color: var(--color5) !important; }
+
+html { scroll-behavior: smooth; }
 
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: var(--habita-texto);
+    background-color: var(--habita-fondo);
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* Botones: primario = acción (turquesa); marca = azul. */
+h1, h2, .titulo-pagina, .fuente-display {
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+a { text-underline-offset: .18em; }
+
+.btn {
+    border-radius: .65rem;
+    font-weight: 600;
+}
+
 .btn-primary {
+    --bs-btn-color: var(--habita-texto-boton);
     --bs-btn-bg: var(--habita-accion);
     --bs-btn-border-color: var(--habita-accion);
+    --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--habita-accion-oscuro);
     --bs-btn-hover-border-color: var(--habita-accion-oscuro);
+    --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--habita-accion-oscuro);
     --bs-btn-active-border-color: var(--habita-accion-oscuro);
+    --bs-btn-disabled-color: var(--habita-texto-boton);
     --bs-btn-disabled-bg: var(--habita-accion);
     --bs-btn-disabled-border-color: var(--habita-accion);
-    --bs-btn-focus-shadow-rgb: 15, 118, 110;
+    --bs-btn-focus-shadow-rgb: 131, 148, 106;
 }
 
 .btn-outline-primary {
-    --bs-btn-color: var(--habita-accion);
-    --bs-btn-border-color: var(--habita-accion);
-    --bs-btn-hover-bg: var(--habita-accion);
-    --bs-btn-hover-border-color: var(--habita-accion);
+    --bs-btn-color: #8E402B;
+    --bs-btn-border-color: #A64F35;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--habita-accion-oscuro);
+    --bs-btn-hover-border-color: var(--habita-accion-oscuro);
+    --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--habita-accion-oscuro);
     --bs-btn-active-border-color: var(--habita-accion-oscuro);
-    --bs-btn-focus-shadow-rgb: 15, 118, 110;
+    --bs-btn-focus-shadow-rgb: 131, 148, 106;
 }
 
 .btn-marca {
-    --bs-btn-color: #fff;
+    --bs-btn-color: var(--color5);
     --bs-btn-bg: var(--habita-marca);
     --bs-btn-border-color: var(--habita-marca);
     --bs-btn-hover-color: #fff;
@@ -61,127 +97,258 @@ body {
     --bs-btn-hover-border-color: var(--habita-marca-oscuro);
     --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--habita-marca-oscuro);
-    --bs-btn-focus-shadow-rgb: 24, 59, 86;
+    --bs-btn-active-border-color: var(--habita-marca-oscuro);
+    --bs-btn-focus-shadow-rgb: 131, 148, 106;
+}
+
+.form-control,
+.form-select {
+    min-height: 44px;
+    border-color: var(--habita-borde);
+    border-radius: .65rem;
+    background-color: #fff;
 }
 
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
-    border-color: var(--habita-accion);
-    box-shadow: 0 0 0 .25rem rgba(15, 118, 110, .25);
+    border-color: var(--habita-acento);
+    box-shadow: 0 0 0 .25rem rgba(131, 148, 106, .28);
 }
 
 .form-check-input:checked {
-    background-color: var(--habita-accion);
-    border-color: var(--habita-accion);
+    background-color: var(--habita-marca);
+    border-color: var(--habita-marca);
 }
+
+.form-label { font-weight: 600; }
 
 .pagination {
-    --bs-pagination-color: var(--habita-accion);
-    --bs-pagination-hover-color: var(--habita-accion-oscuro);
-    --bs-pagination-focus-color: var(--habita-accion-oscuro);
-    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(15, 118, 110, .25);
-    --bs-pagination-active-bg: var(--habita-accion);
-    --bs-pagination-active-border-color: var(--habita-accion);
+    --bs-pagination-color: #8E402B;
+    --bs-pagination-hover-color: var(--habita-marca);
+    --bs-pagination-focus-color: var(--habita-marca);
+    --bs-pagination-focus-box-shadow: 0 0 0 .25rem rgba(131, 148, 106, .28);
+    --bs-pagination-active-bg: var(--habita-marca);
+    --bs-pagination-active-border-color: var(--habita-marca);
 }
 
-.bg-marca { background-color: var(--habita-marca) !important; }
+.bg-marca { background-color: var(--habita-marca) !important; color: var(--color5) !important; }
 .text-marca { color: var(--habita-marca) !important; }
 .text-suave { color: var(--habita-suave) !important; }
+.texto-acento { color: var(--habita-accion); }
 
-/* Foco visible para teclado en toda la aplicación. */
 a:focus-visible,
 button:focus-visible {
-    outline: 3px solid rgba(15, 118, 110, .55);
-    outline-offset: 2px;
+    outline: 3px solid rgba(232, 216, 196, .95);
+    outline-offset: 3px;
 }
 
-/* Cabecera */
+/* Navegación compartida */
 .navbar-habita {
+    min-height: 64px;
     background-color: var(--habita-marca);
+    box-shadow: 0 1px 0 rgba(247, 242, 232, .08);
 }
 
 .navbar-habita .navbar-brand {
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: .65rem;
+    color: var(--color5);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.35rem;
     font-weight: 700;
+    letter-spacing: -.02em;
 }
+
+.navbar-habita .navbar-brand:hover { color: #fff; }
 
 .navbar-habita .navbar-brand img {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
 }
+
+.navbar-habita .nav-link {
+    color: rgba(232, 216, 196, .82);
+    font-weight: 500;
+}
+
+.navbar-habita .nav-link:hover,
+.navbar-habita .nav-link:focus { color: #fff; }
 
 .navbar-habita .nav-link.active {
+    color: #fff;
     font-weight: 600;
-    border-bottom: 2px solid #5EC4B6;
+    border-bottom: 2px solid var(--habita-accion);
 }
 
-/* Contenido */
-.contenido {
-    flex: 1 0 auto;
-}
+/* Contenido común */
+.contenido { flex: 1 0 auto; }
 
 .titulo-pagina {
     color: var(--habita-marca);
     font-weight: 700;
+    letter-spacing: -.02em;
 }
 
-/* Panel con menú lateral */
+.card {
+    border-color: var(--habita-borde);
+    border-radius: 1rem;
+    background-color: var(--habita-superficie);
+}
+
+.shadow-sm { box-shadow: 0 .5rem 1.5rem rgba(36, 59, 50, .08) !important; }
+
+.alert { border-radius: .8rem; }
+
+.icono-estado-pagina { font-size: 3rem; }
+
+.foto-perfil {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+}
+
+/* Panel interno */
 .menu-lateral {
-    background-color: #fff;
+    background-color: var(--habita-superficie);
     border-right: 1px solid var(--habita-borde);
 }
 
 @media (min-width: 992px) {
     .menu-lateral {
-        min-height: calc(100vh - 56px);
-        width: 240px;
-        flex: 0 0 240px;
+        min-height: calc(100vh - 64px);
+        width: 252px;
+        flex: 0 0 252px;
     }
 }
 
 .menu-lateral .grupo-menu {
-    font-size: .75rem;
+    padding: 1.15rem 1rem .4rem;
+    color: var(--habita-acento);
+    font-size: .72rem;
     font-weight: 700;
-    letter-spacing: .06em;
+    letter-spacing: .11em;
     text-transform: uppercase;
-    color: var(--habita-suave);
-    padding: 1rem 1rem .35rem;
 }
 
 .menu-lateral .nav-link {
+    margin: 0 .65rem .18rem;
+    padding: .6rem .75rem;
     color: var(--habita-texto);
-    border-radius: .375rem;
-    padding: .5rem .75rem;
-    margin: 0 .5rem .15rem;
+    border-left: 3px solid transparent;
+    border-radius: .5rem;
 }
 
-.menu-lateral .nav-link:hover {
-    background-color: var(--habita-fondo);
-}
+.menu-lateral .nav-link:hover { background-color: var(--habita-fondo); }
 
 .menu-lateral .nav-link.active {
-    background-color: rgba(15, 118, 110, .12);
-    color: var(--habita-accion-oscuro);
-    font-weight: 600;
+    background-color: #EFE7D9;
+    color: var(--habita-marca);
+    border-left-color: var(--habita-accion);
+    font-weight: 700;
 }
 
-/* Tarjetas de propiedad: misma altura, imagen y precio alineados. */
+/* Portada pública inspirada en Figma */
+.portada {
+    background-color: var(--habita-marca);
+    color: var(--color5);
+}
+
+.portada-inicio {
+    min-height: 540px;
+    display: flex;
+    align-items: center;
+    background-image:
+        linear-gradient(90deg, rgba(36, 59, 50, .98) 0%, rgba(36, 59, 50, .90) 48%, rgba(36, 59, 50, .65) 100%),
+        url("../img/habita/01-hero-edificio.jpg");
+    background-position: center;
+    background-size: cover;
+}
+
+.portada-etiqueta {
+    color: var(--color3);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.portada-titulo {
+    max-width: 720px;
+    color: var(--color5);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 600;
+    line-height: .98;
+    letter-spacing: -.045em;
+}
+
+.portada-descripcion {
+    max-width: 610px;
+    color: rgba(247, 242, 232, .82);
+    font-size: 1.08rem;
+}
+
+.buscador-rapido {
+    max-width: 1040px;
+    padding: 1.15rem;
+    background-color: var(--habita-superficie);
+    border: 1px solid rgba(232, 216, 196, .55);
+    border-radius: 1rem;
+    box-shadow: 0 1.2rem 2.8rem rgba(24, 42, 35, .24);
+}
+
+.buscador-rapido .form-label {
+    color: var(--habita-suave);
+    font-size: .78rem;
+    letter-spacing: .03em;
+}
+
+.franja-estadisticas {
+    background-color: var(--color4);
+    border-bottom: 1px solid var(--habita-borde);
+}
+
+.estadistica { padding: 1.55rem .75rem; text-align: center; }
+.estadistica strong {
+    display: block;
+    color: var(--habita-marca);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.7rem;
+}
+.estadistica span { color: var(--habita-suave); font-size: .84rem; }
+
+.seccion-habita { padding: 5rem 0; }
+.seccion-habita-clara { background-color: var(--habita-superficie); }
+.seccion-encabezado { max-width: 720px; }
+.seccion-etiqueta {
+    color: var(--habita-accion-oscuro);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
 .tarjeta-propiedad {
     height: 100%;
-    border: 1px solid var(--habita-borde);
-    border-radius: .5rem;
     overflow: hidden;
-    background-color: #fff;
+    border: 1px solid var(--habita-borde);
+    border-radius: 1rem;
+    background-color: var(--habita-superficie);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.tarjeta-propiedad:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1rem 2rem rgba(36, 59, 50, .12);
 }
 
 .tarjeta-propiedad .foto {
-    aspect-ratio: 4 / 3;
     width: 100%;
+    aspect-ratio: 3 / 2;
     object-fit: cover;
-    background-color: #E7ECF2;
+    background-color: var(--color4);
 }
 
 .tarjeta-propiedad .card-body {
@@ -190,110 +357,150 @@ button:focus-visible {
 }
 
 .tarjeta-propiedad .precio {
+    margin-top: auto;
     color: var(--habita-marca);
+    font-family: Georgia, "Times New Roman", serif;
     font-size: 1.2rem;
     font-weight: 700;
-    margin-top: auto;
 }
 
 .tarjeta-propiedad .datos {
-    font-size: .875rem;
     color: var(--habita-suave);
+    font-size: .875rem;
 }
 
-/* Portada del inicio */
-.portada {
+.etiqueta-propiedad {
     background-color: var(--habita-marca);
-    color: #fff;
+    color: var(--color5);
 }
 
-.buscador-rapido {
-    background-color: #fff;
-    border-radius: .5rem;
-    padding: 1rem;
-    box-shadow: 0 .5rem 1.5rem rgba(16, 41, 61, .25);
+.llamado-publicar {
+    overflow: hidden;
+    color: var(--color5);
+    background-image:
+        linear-gradient(90deg, rgba(36, 59, 50, .97), rgba(36, 59, 50, .78)),
+        url("../img/habita/10-banner-publicar.jpg");
+    background-position: center;
+    background-size: cover;
+    border-radius: 1.25rem;
 }
 
-/* Tablas de administración */
+/* Acceso y registro */
+.pagina-acceso { padding: 3.5rem 0; }
+
+.acceso-tarjeta {
+    overflow: hidden;
+    border: 0;
+    border-radius: 1.25rem;
+    box-shadow: 0 1.2rem 3rem rgba(36, 59, 50, .14);
+}
+
+.acceso-imagen {
+    min-height: 620px;
+    padding: 2.5rem;
+    display: flex;
+    align-items: flex-end;
+    color: var(--color5);
+    background-image:
+        linear-gradient(0deg, rgba(36, 59, 50, .94), rgba(36, 59, 50, .14)),
+        url("../img/habita/01-hero-edificio.jpg");
+    background-position: center;
+    background-size: cover;
+}
+
+.acceso-imagen-registro {
+    background-image:
+        linear-gradient(0deg, rgba(36, 59, 50, .94), rgba(36, 59, 50, .12)),
+        url("../img/habita/03-casa-jardin.jpg");
+}
+
+.acceso-logo { width: 160px; height: 44px; }
+
+/* Tablas */
 .tabla-habita thead th {
+    padding-top: .85rem;
+    padding-bottom: .85rem;
     background-color: var(--habita-marca);
-    color: #fff;
+    color: var(--color5);
     font-weight: 600;
     white-space: nowrap;
 }
 
 .tabla-habita td {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
     vertical-align: middle;
 }
 
-.tabla-habita .acciones {
-    white-space: nowrap;
-    text-align: end;
-}
+.tabla-habita tbody tr:hover td { background-color: rgba(232, 216, 196, .24); }
+.tabla-habita .acciones { white-space: nowrap; text-align: end; }
 
-/* Estados: el texto siempre acompaña al color. */
+/* Estados */
 .estado {
     display: inline-block;
-    padding: .3em .65em;
-    border-radius: 999px;
-    font-size: .75rem;
-    font-weight: 600;
+    padding: .32em .7em;
     border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .015em;
     white-space: nowrap;
 }
 
 .estado-DISPONIBLE, .estado-APROBADA, .estado-APROBADO, .estado-CONFIRMADA, .estado-ACTIVA, .estado-ACTIVO {
-    background-color: #DDF3EF; color: #0B5E58; border-color: #A8DDD4;
+    background-color: #DDE5D3; color: var(--habita-marca); border-color: var(--habita-acento);
 }
 
 .estado-PENDIENTE {
-    background-color: #FFF3D2; color: #6A4A0A; border-color: #F1D78A;
+    background-color: #F4E2D8; color: #7E3827; border-color: var(--habita-accion);
 }
 
 .estado-VENDIDA, .estado-ARRENDADA, .estado-FINALIZADA, .estado-REALIZADA {
-    background-color: #E3EAF3; color: #183B56; border-color: #BCCADB;
+    background-color: var(--color4); color: var(--habita-marca); border-color: #BEA386;
 }
 
 .estado-RECHAZADA, .estado-RECHAZADO, .estado-CANCELADA, .estado-INACTIVA, .estado-INACTIVO {
-    background-color: #FBE3E3; color: #8A2323; border-color: #F0B9B9;
+    background-color: #ECE9E1; color: #4E514D; border-color: #BFC1BA;
 }
 
-/* Lista sin resultados */
 .vacio {
-    text-align: center;
-    color: var(--habita-suave);
     padding: 3rem 1rem;
+    color: var(--habita-suave);
+    text-align: center;
     border: 1px dashed var(--habita-borde);
-    border-radius: .5rem;
-    background-color: #fff;
+    border-radius: 1rem;
+    background-color: var(--habita-superficie);
 }
 
 .vacio .bi {
-    font-size: 2.5rem;
     display: block;
     margin-bottom: .5rem;
+    color: var(--habita-acento);
+    font-size: 2.5rem;
 }
 
-/* Pies */
+/* Pie */
 .pie-publico {
+    color: rgba(232, 216, 196, .78);
     background-color: var(--habita-marca);
-    color: #D5DEE8;
 }
 
-.pie-publico a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.pie-publico a:hover {
-    text-decoration: underline;
-}
+.pie-publico a { color: var(--color5); text-decoration: none; }
+.pie-publico a:hover { color: #fff; text-decoration: underline; }
 
 .pie-interno {
-    border-top: 1px solid var(--habita-borde);
-    background-color: #fff;
     color: var(--habita-suave);
+    background-color: var(--habita-superficie);
+    border-top: 1px solid var(--habita-borde);
     font-size: .85rem;
+}
+
+@media (max-width: 767.98px) {
+    .portada-inicio { min-height: auto; padding: 4rem 0; }
+    .portada-titulo { font-size: 2.65rem; }
+    .buscador-rapido { padding: 1rem; }
+    .seccion-habita { padding: 3.5rem 0; }
+    .pagina-acceso { padding: 2rem 0; }
 }
 
 @media print {
@@ -301,5 +508,6 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     * { transition: none !important; animation: none !important; }
 }

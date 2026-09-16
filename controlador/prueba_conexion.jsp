@@ -73,11 +73,11 @@
 <meta charset="utf-8">
 <title>Prueba de base B0</title>
 <style>
-  body{font-family:Arial,sans-serif;margin:32px;color:#223249}
+  body{font-family:Arial,sans-serif;margin:32px;color:#252525;background:#F7F2E8}
   table{border-collapse:collapse;margin-bottom:24px}
-  td,th{border-bottom:1px solid #dce2e9;padding:8px 12px;text-align:left;vertical-align:top}
+  td,th{border-bottom:1px solid #E8D8C4;padding:8px 12px;text-align:left;vertical-align:top}
   td:last-child{font-family:Consolas,monospace;font-size:13px;word-break:break-all;max-width:620px}
-  .OK{color:#1d7a4d;font-weight:bold}.FALLA{color:#a12d2d;font-weight:bold}
+  .OK{color:#47613B;font-weight:bold}.FALLA{color:#a12d2d;font-weight:bold}
 </style>
 </head>
 <body>

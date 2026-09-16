@@ -12,9 +12,9 @@
     boolean vistaPanel = false;
 
     String[][] propiedades = {
-        {"Apartamento en Cabecera", "Bucaramanga", "VENTA", "3", "2", "85", "320000000", "DISPONIBLE"},
-        {"Casa en conjunto cerrado", "Floridablanca", "ARRIENDO", "3", "2", "110", "1800000", "DISPONIBLE"},
-        {"Local comercial en el centro", "Girón", "VENTA", "0", "1", "60", "210000000", "VENDIDA"}
+        {"Apartamento en Cabecera", "Bucaramanga", "VENTA", "3", "2", "85", "320000000", "DISPONIBLE", "02-apartamento-chapinero.jpg"},
+        {"Casa en conjunto cerrado", "Floridablanca", "ARRIENDO", "3", "2", "110", "1800000", "DISPONIBLE", "03-casa-jardin.jpg"},
+        {"Local comercial en el centro", "Girón", "VENTA", "0", "1", "60", "210000000", "VENDIDA", "06-local-comercial.jpg"}
     };
     String[] estados = {"DISPONIBLE", "VENDIDA", "ARRENDADA", "PENDIENTE", "CONFIRMADA", "REALIZADA",
                         "CANCELADA", "RECHAZADA", "APROBADA", "FINALIZADA", "APROBADO", "RECHAZADO", "ACTIVA", "INACTIVA"};
@@ -69,7 +69,7 @@
     <% for (String[] p : propiedades) { %>
     <div class="col">
       <article class="card tarjeta-propiedad">
-        <img class="foto" src="<%= ctx %>/img/sin_foto.svg" alt="Fotografía de <%= escapar(p[0]) %>">
+        <img class="foto" src="<%= ctx %>/img/habita/<%= p[8] %>" alt="Fotografía de <%= escapar(p[0]) %>">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="badge bg-marca"><%= p[2] %></span>

@@ -12,15 +12,15 @@
     <div class="row g-4">
       <div class="col-md-6">
         <div class="d-flex align-items-center gap-2 mb-2">
-          <img src="<%= ctx %>/img/logo.svg" alt="" width="32" height="32">
-          <span class="h5 mb-0 text-white"><%= NOMBRE_APP %></span>
+          <img src="<%= ctx %>/img/habita/habita-icon.svg" alt="" width="36" height="36">
+          <span class="h5 mb-0 text-white fuente-display"><%= NOMBRE_APP %></span>
         </div>
         <p class="mb-0"><%= LEMA_APP %>. Casas, apartamentos, locales, oficinas y terrenos en venta y arriendo.</p>
       </div>
       <div class="col-6 col-md-3">
         <p class="fw-semibold text-white mb-2">Explorar</p>
         <ul class="list-unstyled mb-0">
-          <li><a href="<%= ctx %>/controlador/inicio.jsp">Inicio</a></li>
+          <li><a href="<%= ctx %>/">Inicio</a></li>
           <li><a href="<%= ctx %>/controlador/propiedad.jsp?accion=catalogo">Catálogo</a></li>
         </ul>
       </div>

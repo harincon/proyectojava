@@ -40,8 +40,8 @@
 <meta charset="utf-8">
 <title>Prueba de subida B0</title>
 <style>
-  body{font-family:Arial,sans-serif;margin:32px;color:#223249}
-  .OK{color:#1d7a4d;font-weight:bold}.FALLA{color:#a12d2d;font-weight:bold}
+  body{font-family:Arial,sans-serif;margin:32px;color:#252525;background:#F7F2E8}
+  .OK{color:#47613B;font-weight:bold}.FALLA{color:#a12d2d;font-weight:bold}
 </style>
 </head>
 <body>

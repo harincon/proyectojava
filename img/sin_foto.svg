@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Propiedad sin fotografía">
-  <rect width="400" height="300" fill="#E7ECF2"/>
-  <path d="M200 92 126 150h22v64h40v-42h24v42h40v-64h22Z" fill="#B7C3D0"/>
-  <text x="200" y="250" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#5B6B80">Sin fotografía</text>
+  <rect width="400" height="300" fill="#F7F2E8"/>
+  <path d="M200 92 126 150h22v64h40v-42h24v42h40v-64h22Z" fill="#83946A"/>
+  <text x="200" y="250" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#243B32">Sin fotografía</text>
 </svg>

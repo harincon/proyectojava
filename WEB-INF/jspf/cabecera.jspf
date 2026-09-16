@@ -39,8 +39,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#243B32">
 <title><%= escapar(tituloPagina) %> · <%= NOMBRE_APP %></title>
-<link rel="icon" href="<%= ctx %>/img/logo.svg" type="image/svg+xml">
+<link rel="icon" href="<%= ctx %>/img/habita/habita-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="<%= ctx %>/css/bootstrap.min.css">
 <link rel="stylesheet" href="<%= ctx %>/css/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<%= ctx %>/css/estilos.css">
@@ -48,8 +49,8 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark navbar-habita sticky-top">
   <div class="container-fluid px-3 px-lg-4">
-    <a class="navbar-brand" href="<%= ctx %>/controlador/inicio.jsp">
-      <img src="<%= ctx %>/img/logo.svg" alt=""> <%= NOMBRE_APP %>
+    <a class="navbar-brand" href="<%= ctx %>/">
+      <img src="<%= ctx %>/img/habita/habita-icon.svg" alt=""><span><%= NOMBRE_APP %></span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navegacion"
             aria-controls="navegacion" aria-expanded="false" aria-label="Abrir navegación">
@@ -57,7 +58,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navegacion">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="<%= claseMenu("inicio", menuActivo) %>" href="<%= ctx %>/controlador/inicio.jsp">Inicio</a></li>
+        <li class="nav-item"><a class="<%= claseMenu("inicio", menuActivo) %>" href="<%= ctx %>/">Inicio</a></li>
         <li class="nav-item"><a class="<%= claseMenu("catalogo", menuActivo) %>" href="<%= ctx %>/controlador/propiedad.jsp?accion=catalogo">Catálogo</a></li>
         <% if (haySesion) { %>
         <li class="nav-item"><a class="<%= claseMenu("panel", menuActivo) %>" href="<%= ctx %>/controlador/panel.jsp">Mi panel</a></li>

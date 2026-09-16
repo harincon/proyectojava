@@ -12,3 +12,6 @@ Thumbs.db
 desktop.ini
 *.log
 *.tmp
+
+# Exportaciones sueltas de Figma; las imagenes en uso estan en img/habita/
+img/*.png
