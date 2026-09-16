@@ -6,7 +6,7 @@
 <%--
   Perfil propio. Registrado en web.xml con multipart-config (foto hasta 2 MB).
   GET  ?accion=ver | foto[&id_usuario=N, solo administrador para otra cuenta]
-  POST ?accion=guardar (nombres, apellidos, documento, telefono, direccion) | subir_foto (foto)
+  POST ?accion=guardar (nombres, apellidos, documento, telefono, direccion) | subir_foto (foto) | quitar_foto
 --%>
 <%!
     // Reconoce JPG y PNG por sus primeros bytes, no por el nombre.
@@ -118,6 +118,37 @@
             }
         } catch (IllegalStateException e) {
             session.setAttribute("mensajeError", "La foto supera el tamaño máximo permitido (2 MB).");
+        }
+        response.sendRedirect(destinoVer);
+        return;
+    }
+
+    if ("quitar_foto".equals(accion) && esPost) {
+        if (!tokenValido(request)) {
+            session.setAttribute("mensajeError", "El formulario expiró. Vuelve a intentarlo.");
+        } else {
+            Connection conexion = null;
+            try {
+                conexion = abrirConexion();
+                conexion.setAutoCommit(false);
+                String anterior = reemplazarFotoPerfil(conexion, idUsuarioSesion, null);
+                conexion.commit();
+                if (anterior != null) {
+                    new File(carpetaArchivos(application), anterior).delete();
+                    session.setAttribute("mensaje", "Foto eliminada.");
+                } else {
+                    session.setAttribute("mensaje", "No tenías una foto de perfil.");
+                }
+            } catch (SQLException e) {
+                if (conexion != null) {
+                    try { conexion.rollback(); } catch (SQLException ignorada) { }
+                }
+                session.setAttribute("mensajeError", mensajeError(e));
+            } finally {
+                if (conexion != null) {
+                    try { conexion.close(); } catch (SQLException ignorada) { }
+                }
+            }
         }
         response.sendRedirect(destinoVer);
         return;

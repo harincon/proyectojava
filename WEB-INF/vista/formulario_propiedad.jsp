@@ -160,12 +160,12 @@
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body p-4">
         <h2 class="h5 titulo-pagina">Fotografías</h2>
-        <p class="text-suave small">La primera es la que aparece en el catálogo. Admite un enlace https o un archivo del proyecto, por ejemplo <code>img/habita/04-penthouse.jpg</code>.</p>
+        <p class="text-suave small">La primera es la que aparece en el catálogo. Pega el enlace https de la fotografía.</p>
         <form class="row g-2 mb-3" method="post" action="<%= ctx %>/controlador/imagen_propiedad.jsp?accion=agregar&id_propiedad=<%= propiedad.get("idPropiedad") %>">
           <%= campoToken(session) %>
           <div class="col-12">
             <label class="visually-hidden" for="ruta">Dirección de la fotografía</label>
-            <input class="form-control" id="ruta" name="ruta" maxlength="500" placeholder="https://… o img/habita/…" required>
+            <input class="form-control" id="ruta" name="ruta" maxlength="500" placeholder="https://…" required>
           </div>
           <div class="col-12 d-grid">
             <button type="submit" class="btn btn-outline-primary"><i class="bi bi-image me-1"></i>Agregar fotografía</button>

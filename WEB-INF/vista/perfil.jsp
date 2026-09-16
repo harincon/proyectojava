@@ -27,6 +27,13 @@
           <div class="form-text mb-3">Formatos JPG o PNG. Máximo 2 MB.</div>
           <button type="submit" class="btn btn-outline-primary btn-sm w-100">Subir foto</button>
         </form>
+        <% if (tieneFoto) { %>
+        <form method="post" action="<%= ctx %>/controlador/perfil.jsp?accion=quitar_foto" class="mt-2"
+              onsubmit="return confirm('¿Quitar tu foto de perfil?');">
+          <%= campoToken(session) %>
+          <button type="submit" class="btn btn-outline-danger btn-sm w-100">Quitar foto</button>
+        </form>
+        <% } %>
       </div>
     </div>
   </div>
