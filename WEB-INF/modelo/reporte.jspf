@@ -1,0 +1,128 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    private List<Map<String, Object>> listarReportePropiedades(Connection conexion, Integer idInmobiliaria)
+            throws SQLException {
+        String sql = "SELECT c.nombre AS ciudad, p.estado, p.matricula_inmobiliaria, p.titulo, "
+                + "tp.nombre AS tipo_propiedad, i.nombre AS inmobiliaria, p.tipo_operacion, p.precio "
+                + "FROM propiedad p "
+                + "INNER JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+                + "INNER JOIN tipo_propiedad tp ON tp.id_tipo_propiedad = p.id_tipo_propiedad "
+                + "INNER JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + (idInmobiliaria == null ? "" : "WHERE p.id_inmobiliaria = ? ")
+                + "ORDER BY c.nombre, p.estado, p.titulo";
+        List<Map<String, Object>> filas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                while (resultado.next()) {
+                    Map<String, Object> fila = new LinkedHashMap<String, Object>();
+                    fila.put("ciudad", resultado.getString("ciudad"));
+                    fila.put("estado", resultado.getString("estado"));
+                    fila.put("matricula", resultado.getString("matricula_inmobiliaria"));
+                    fila.put("titulo", resultado.getString("titulo"));
+                    fila.put("tipo", resultado.getString("tipo_propiedad"));
+                    fila.put("inmobiliaria", resultado.getString("inmobiliaria"));
+                    fila.put("operacion", resultado.getString("tipo_operacion"));
+                    fila.put("precio", resultado.getBigDecimal("precio"));
+                    filas.add(fila);
+                }
+            }
+        }
+        return filas;
+    }
+
+    private List<Map<String, Object>> listarReporteCitas(Connection conexion, Integer idInmobiliaria)
+            throws SQLException {
+        String sql = "SELECT ci.estado, ci.fecha_hora, p.matricula_inmobiliaria, p.titulo AS propiedad, "
+                + "c.nombre AS ciudad, concat_ws(' ', pe.nombres, pe.apellidos) AS cliente "
+                + "FROM cita ci "
+                + "INNER JOIN propiedad p ON p.id_propiedad = ci.id_propiedad "
+                + "INNER JOIN ciudad c ON c.id_ciudad = p.id_ciudad "
+                + "INNER JOIN usuario u ON u.id_usuario = ci.id_cliente "
+                + "INNER JOIN perfil pe ON pe.id_usuario = u.id_usuario "
+                + (idInmobiliaria == null ? "" : "WHERE p.id_inmobiliaria = ? ")
+                + "ORDER BY ci.estado, ci.fecha_hora";
+        List<Map<String, Object>> filas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                while (resultado.next()) {
+                    Map<String, Object> fila = new LinkedHashMap<String, Object>();
+                    fila.put("estado", resultado.getString("estado"));
+                    fila.put("fecha", resultado.getTimestamp("fecha_hora").toLocalDateTime());
+                    fila.put("matricula", resultado.getString("matricula_inmobiliaria"));
+                    fila.put("propiedad", resultado.getString("propiedad"));
+                    fila.put("ciudad", resultado.getString("ciudad"));
+                    fila.put("cliente", resultado.getString("cliente"));
+                    filas.add(fila);
+                }
+            }
+        }
+        return filas;
+    }
+
+    private List<Map<String, Object>> listarReporteSolicitudes(Connection conexion, Integer idInmobiliaria)
+            throws SQLException {
+        String sql = "SELECT i.nombre AS inmobiliaria, s.estado, count(*) AS total_solicitudes "
+                + "FROM solicitud s "
+                + "INNER JOIN propiedad p ON p.id_propiedad = s.id_propiedad "
+                + "INNER JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + (idInmobiliaria == null ? "" : "WHERE p.id_inmobiliaria = ? ")
+                + "GROUP BY i.id_inmobiliaria, i.nombre, s.estado ORDER BY i.nombre, s.estado";
+        List<Map<String, Object>> filas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                while (resultado.next()) {
+                    Map<String, Object> fila = new LinkedHashMap<String, Object>();
+                    fila.put("inmobiliaria", resultado.getString("inmobiliaria"));
+                    fila.put("estado", resultado.getString("estado"));
+                    fila.put("total", resultado.getInt("total_solicitudes"));
+                    filas.add(fila);
+                }
+            }
+        }
+        return filas;
+    }
+
+    private List<Map<String, Object>> listarReporteFinalizadas(Connection conexion, Integer idInmobiliaria)
+            throws SQLException {
+        String sql = "SELECT s.fecha AS fecha_solicitud, p.tipo_operacion, p.estado AS estado_propiedad, "
+                + "p.matricula_inmobiliaria, p.titulo AS propiedad, i.nombre AS inmobiliaria, "
+                + "concat_ws(' ', pe.nombres, pe.apellidos) AS cliente "
+                + "FROM solicitud s "
+                + "INNER JOIN propiedad p ON p.id_propiedad = s.id_propiedad "
+                + "INNER JOIN inmobiliaria i ON i.id_inmobiliaria = p.id_inmobiliaria "
+                + "INNER JOIN usuario u ON u.id_usuario = s.id_cliente "
+                + "INNER JOIN perfil pe ON pe.id_usuario = u.id_usuario "
+                + "WHERE s.estado = 'FINALIZADA' "
+                + (idInmobiliaria == null ? "" : "AND p.id_inmobiliaria = ? ")
+                + "ORDER BY s.fecha DESC";
+        List<Map<String, Object>> filas = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            if (idInmobiliaria != null) {
+                sentencia.setInt(1, idInmobiliaria);
+            }
+            try (ResultSet resultado = sentencia.executeQuery()) {
+                while (resultado.next()) {
+                    Map<String, Object> fila = new LinkedHashMap<String, Object>();
+                    fila.put("fecha", resultado.getTimestamp("fecha_solicitud").toLocalDateTime());
+                    fila.put("operacion", resultado.getString("tipo_operacion"));
+                    fila.put("estadoPropiedad", resultado.getString("estado_propiedad"));
+                    fila.put("matricula", resultado.getString("matricula_inmobiliaria"));
+                    fila.put("propiedad", resultado.getString("propiedad"));
+                    fila.put("inmobiliaria", resultado.getString("inmobiliaria"));
+                    fila.put("cliente", resultado.getString("cliente"));
+                    filas.add(fila);
+                }
+            }
+        }
+        return filas;
+    }
+%>
