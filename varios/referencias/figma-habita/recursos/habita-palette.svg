@@ -1,0 +1,33 @@
+<svg width="600" height="200" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="200" fill="#F7F2E8"/>
+
+  <!-- Swatches -->
+  <rect x="20"  y="30" width="90" height="90" rx="12" fill="#243B32"/>
+  <rect x="125" y="30" width="90" height="90" rx="12" fill="#C96E4B"/>
+  <rect x="230" y="30" width="90" height="90" rx="12" fill="#83946A"/>
+  <rect x="335" y="30" width="90" height="90" rx="12" fill="#E8D8C4" stroke="#d6c4ab" stroke-width="1"/>
+  <rect x="440" y="30" width="90" height="90" rx="12" fill="#F7F2E8" stroke="#ddd6c8" stroke-width="1"/>
+  <rect x="545" y="30" width="35" height="90" rx="12" fill="#252525"/>
+
+  <!-- Labels -->
+  <text x="65"  y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#243B32</text>
+  <text x="65"  y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Verde Bosque</text>
+
+  <text x="170" y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#C96E4B</text>
+  <text x="170" y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Terracota</text>
+
+  <text x="275" y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#83946A</text>
+  <text x="275" y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Verde Oliva</text>
+
+  <text x="380" y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#E8D8C4</text>
+  <text x="380" y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Arena</text>
+
+  <text x="485" y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#F7F2E8</text>
+  <text x="485" y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Crema</text>
+
+  <text x="562" y="142" font-family="monospace" font-size="9" fill="#6b7280" text-anchor="middle">#252525</text>
+  <text x="562" y="154" font-family="monospace" font-size="8" fill="#9ca3af" text-anchor="middle">Carbón</text>
+
+  <!-- Title -->
+  <text x="20" y="185" font-family="Georgia, serif" font-size="11" fill="#243B32" font-weight="600">Habita — Paleta de identidad visual 2026</text>
+</svg>
