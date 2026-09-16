@@ -5,6 +5,7 @@
 <%@ include file="/WEB-INF/modelo/solicitud.jspf" %>
 <%@ include file="/WEB-INF/modelo/documento_solicitud.jspf" %>
 <%@ include file="/WEB-INF/modelo/inmobiliaria.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%!
     private boolean esPdfB6(byte[] inicio, int leidos) {
         return leidos >= 5 && inicio[0] == '%' && inicio[1] == 'P' && inicio[2] == 'D'
@@ -142,7 +143,9 @@
                             session.setAttribute("mensajeError", "La solicitud está cerrada y no admite documentos.");
                         } else {
                             archivoParte.write(destino.getAbsolutePath());
-                            crearDocumentoSolicitud(conexion, idSolicitud, nombre, "solicitudes/" + nombreArchivo);
+                            int idNuevoDocumento = crearDocumentoSolicitud(conexion, idSolicitud, nombre, "solicitudes/" + nombreArchivo);
+                            registrarEvento(conexion, idUsuarioSesion, "DOCUMENTO_SUBIDO · documento " + idNuevoDocumento
+                                    + " · solicitud " + idSolicitud);
                             conexion.commit();
                             session.setAttribute("mensaje", "Documento cargado correctamente.");
                         }
@@ -230,6 +233,8 @@
                     session.setAttribute("mensajeError", "El documento ya no admite revisión.");
                 } else {
                     revisarDocumentoSolicitud(conexion, idDocumento, estado, observacion);
+                    registrarEvento(conexion, idUsuarioSesion, "DOCUMENTO_" + estado + " · documento " + idDocumento
+                            + " · solicitud " + documento.get("idSolicitud"));
                     conexion.commit();
                     session.setAttribute("mensaje", "Documento " + estado.toLowerCase() + ".");
                 }

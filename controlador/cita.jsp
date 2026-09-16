@@ -5,6 +5,7 @@
 <%@ include file="/WEB-INF/modelo/cita.jspf" %>
 <%@ include file="/WEB-INF/modelo/propiedad.jspf" %>
 <%@ include file="/WEB-INF/modelo/inmobiliaria.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%
     request.setAttribute("rolesPermitidos", new HashSet<String>(Arrays.asList("CLIENTE", "INMOBILIARIA")));
 %>
@@ -75,7 +76,9 @@
                         } else if (responsableTieneCitaActiva(conexion, idResponsable, fechaHora)) {
                             errores.put("fecha_hora", "La inmobiliaria ya tiene otra cita activa en esa fecha y hora.");
                         } else {
-                            crearCita(conexion, idUsuarioSesion, idPropiedad, fechaHora);
+                            int idNuevaCita = crearCita(conexion, idUsuarioSesion, idPropiedad, fechaHora);
+                            registrarEvento(conexion, idUsuarioSesion, "CITA_SOLICITADA · cita " + idNuevaCita
+                                    + " · propiedad " + idPropiedad + " · " + formatoFecha(fechaHora));
                         }
                     }
                     if (errores.isEmpty()) {
@@ -195,6 +198,7 @@
                 session.setAttribute("mensajeError", "La transición solicitada no está permitida.");
             } else {
                 cambiarEstadoCita(conexion, idCita, nuevo);
+                registrarEvento(conexion, idUsuarioSesion, "CITA_" + nuevo + " · cita " + idCita + " · " + cita.get("matricula"));
                 conexion.commit();
                 session.setAttribute("mensaje", mensaje);
             }

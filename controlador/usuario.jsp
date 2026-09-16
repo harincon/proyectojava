@@ -5,6 +5,7 @@
 <%@ include file="/WEB-INF/modelo/usuario.jspf" %>
 <%@ include file="/WEB-INF/modelo/perfil.jspf" %>
 <%@ include file="/WEB-INF/modelo/usuario_rol.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%--
   Administración de cuentas (solo ADMINISTRADOR).
   GET  ?accion=listar[&q=texto&pagina=N] | nuevo | editar&id_usuario=N
@@ -38,6 +39,8 @@
         } else {
             try (Connection conexion = abrirConexion()) {
                 if (cambiarEstadoUsuario(conexion, idObjetivo, activar)) {
+                    registrarEvento(conexion, idUsuarioSesion,
+                            (activar ? "USUARIO_ACTIVADO" : "USUARIO_DESACTIVADO") + " · cuenta " + idObjetivo);
                     session.setAttribute("mensaje", activar ? "Cuenta activada." : "Cuenta desactivada.");
                 } else {
                     session.setAttribute("mensajeError", "La cuenta no existe.");
@@ -123,6 +126,8 @@
                         actualizarClave(conexion, idGuardado, generarClave(clave));
                     }
                 }
+                registrarEvento(conexion, idUsuarioSesion, (creando ? "USUARIO_CREADO" : "USUARIO_ACTUALIZADO")
+                        + " · cuenta " + idGuardado + " · " + correo + (clave != null && !creando ? " · clave cambiada" : ""));
                 conexion.commit();
                 if (idGuardado == idUsuarioSesion) {
                     session.setAttribute("nombreUsuario", (nombres + " " + apellidos).trim());

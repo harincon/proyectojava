@@ -9,6 +9,7 @@
 <%@ include file="/WEB-INF/modelo/tipo_propiedad.jspf" %>
 <%@ include file="/WEB-INF/modelo/caracteristica.jspf" %>
 <%@ include file="/WEB-INF/modelo/inmobiliaria.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%--
   Publicaciones.
   Público:  GET ?accion=catalogo[&ciudad&tipo&operacion&precio_min&precio_max&caracteristica(varias)&q&orden&pagina]
@@ -249,6 +250,8 @@
         } else {
             try (Connection conexion = abrirConexion()) {
                 cambiarActivaPropiedad(conexion, idPropiedad, activar);
+                registrarEvento(conexion, idUsuarioSesion, (activar ? "PROPIEDAD_REACTIVADA" : "PROPIEDAD_RETIRADA")
+                        + " · propiedad " + idPropiedad + " · " + propiedadActual.get("matricula"));
                 session.setAttribute("mensaje", activar ? "Publicación activada." : "Publicación retirada del catálogo.");
             }
         }
@@ -289,6 +292,8 @@
                     actualizarPropiedad(conexion, idGuardada, datos);
                 }
                 reemplazarCaracteristicas(conexion, idGuardada, elegidas);
+                registrarEvento(conexion, idUsuarioSesion, (creando ? "PROPIEDAD_PUBLICADA" : "PROPIEDAD_EDITADA")
+                        + " · propiedad " + idGuardada + " · " + datos.get("matricula"));
                 conexion.commit();
                 session.setAttribute("mensaje", creando
                         ? "Propiedad publicada. Agrega sus fotografías." : "Propiedad actualizada.");

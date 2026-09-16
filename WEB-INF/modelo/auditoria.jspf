@@ -1,0 +1,139 @@
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.sql.SQLException,java.sql.Timestamp,java.sql.Types,java.util.ArrayList,java.util.LinkedHashMap,java.util.List,java.util.Map" %>
+<%!
+    private boolean registrarEvento(Connection conexion, Integer idUsuario, String accion) throws SQLException {
+        String texto = accion == null ? null : accion.trim();
+        if (texto == null || texto.length() == 0 || texto.length() > 255) {
+            throw new IllegalArgumentException("La acción de auditoría debe tener entre 1 y 255 caracteres.");
+        }
+        try (PreparedStatement sentencia = conexion.prepareStatement(
+                "INSERT INTO auditoria (id_usuario, accion) VALUES (?, ?)")) {
+            if (idUsuario == null) {
+                sentencia.setNull(1, Types.INTEGER);
+            } else {
+                sentencia.setInt(1, idUsuario);
+            }
+            sentencia.setString(2, texto);
+            return sentencia.executeUpdate() == 1;
+        }
+    }
+
+    /*
+      Bloqueo de ingreso por correo, a partir de los eventos de acceso:
+      INGRESO · correo | INGRESO_FALLIDO · correo[ · detalle] | INGRESO_BLOQUEO · correo · N minutos.
+      Se aplica al correo escrito, exista o no la cuenta, para no revelar qué cuentas existen.
+    */
+
+    // Segundos que faltan para terminar el último bloqueo de ese correo; 0 si no hay bloqueo vigente.
+    private int segundosBloqueoIngreso(Connection conexion, String correo, int minutos) throws SQLException {
+        String sql = "SELECT GREATEST(0, CEIL(EXTRACT(EPOCH FROM (max(fecha) + ? * INTERVAL '1 minute' - LOCALTIMESTAMP))))::int "
+                + "FROM auditoria WHERE starts_with(accion, ?)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setInt(1, minutos);
+            sentencia.setString(2, "INGRESO_BLOQUEO · " + correo + " · ");
+            try (ResultSet fila = sentencia.executeQuery()) {
+                return fila.next() ? fila.getInt(1) : 0;
+            }
+        }
+    }
+
+    // Intentos fallidos desde el último ingreso correcto o el último bloqueo de ese correo.
+    private int intentosFallidosSeguidos(Connection conexion, String correo) throws SQLException {
+        String sql = "SELECT count(*) FROM auditoria "
+                + "WHERE (accion = ? OR starts_with(accion, ?)) "
+                + "AND fecha > COALESCE((SELECT max(fecha) FROM auditoria WHERE accion = ? OR starts_with(accion, ?)), "
+                + "'-infinity'::timestamp)";
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, "INGRESO_FALLIDO · " + correo);
+            sentencia.setString(2, "INGRESO_FALLIDO · " + correo + " · ");
+            sentencia.setString(3, "INGRESO · " + correo);
+            sentencia.setString(4, "INGRESO_BLOQUEO · " + correo + " · ");
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private String filtrosAuditoriaB7(String usuario, String texto, Timestamp desde, Timestamp hastaExclusiva) {
+        StringBuilder sql = new StringBuilder();
+        if (usuario != null) {
+            sql.append(" AND (u.correo ILIKE ? ESCAPE E'\\\\' "
+                    + "OR concat_ws(' ', p.nombres, p.apellidos) ILIKE ? ESCAPE E'\\\\')");
+        }
+        if (texto != null) {
+            sql.append(" AND a.accion ILIKE ? ESCAPE E'\\\\'");
+        }
+        if (desde != null) {
+            sql.append(" AND a.fecha >= ?");
+        }
+        if (hastaExclusiva != null) {
+            sql.append(" AND a.fecha < ?");
+        }
+        return sql.toString();
+    }
+
+    private int parametrosAuditoriaB7(PreparedStatement sentencia, String usuario, String texto,
+            Timestamp desde, Timestamp hastaExclusiva) throws SQLException {
+        int indice = 1;
+        if (usuario != null) {
+            String patron = patronBusqueda(usuario);
+            sentencia.setString(indice++, patron);
+            sentencia.setString(indice++, patron);
+        }
+        if (texto != null) {
+            sentencia.setString(indice++, patronBusqueda(texto));
+        }
+        if (desde != null) {
+            sentencia.setTimestamp(indice++, desde);
+        }
+        if (hastaExclusiva != null) {
+            sentencia.setTimestamp(indice++, hastaExclusiva);
+        }
+        return indice;
+    }
+
+    private int contarAuditoria(Connection conexion, String usuario, String texto,
+            Timestamp desde, Timestamp hastaExclusiva) throws SQLException {
+        String sql = "SELECT count(*) FROM auditoria a "
+                + "LEFT JOIN usuario u ON u.id_usuario = a.id_usuario "
+                + "LEFT JOIN perfil p ON p.id_usuario = u.id_usuario WHERE 1=1"
+                + filtrosAuditoriaB7(usuario, texto, desde, hastaExclusiva);
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            parametrosAuditoriaB7(sentencia, usuario, texto, desde, hastaExclusiva);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                fila.next();
+                return fila.getInt(1);
+            }
+        }
+    }
+
+    private List<Map<String, Object>> listarAuditoria(Connection conexion, String usuario, String texto,
+            Timestamp desde, Timestamp hastaExclusiva, int limite, int desplazamiento) throws SQLException {
+        String sql = "SELECT a.id_auditoria, a.id_usuario, a.accion, a.fecha, u.correo, "
+                + "concat_ws(' ', p.nombres, p.apellidos) AS nombre_usuario "
+                + "FROM auditoria a LEFT JOIN usuario u ON u.id_usuario = a.id_usuario "
+                + "LEFT JOIN perfil p ON p.id_usuario = u.id_usuario WHERE 1=1"
+                + filtrosAuditoriaB7(usuario, texto, desde, hastaExclusiva)
+                + " ORDER BY a.fecha DESC, a.id_auditoria DESC LIMIT ? OFFSET ?";
+        List<Map<String, Object>> registros = new ArrayList<Map<String, Object>>();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            int indice = parametrosAuditoriaB7(sentencia, usuario, texto, desde, hastaExclusiva);
+            sentencia.setInt(indice++, limite);
+            sentencia.setInt(indice, desplazamiento);
+            try (ResultSet fila = sentencia.executeQuery()) {
+                while (fila.next()) {
+                    Map<String, Object> registro = new LinkedHashMap<String, Object>();
+                    registro.put("idAuditoria", fila.getInt("id_auditoria"));
+                    Object idUsuario = fila.getObject("id_usuario");
+                    registro.put("idUsuario", idUsuario == null ? null : Integer.valueOf(fila.getInt("id_usuario")));
+                    registro.put("accion", fila.getString("accion"));
+                    registro.put("fecha", fila.getTimestamp("fecha").toLocalDateTime());
+                    registro.put("correo", fila.getString("correo"));
+                    registro.put("usuario", fila.getString("nombre_usuario"));
+                    registros.add(registro);
+                }
+            }
+        }
+        return registros;
+    }
+%>

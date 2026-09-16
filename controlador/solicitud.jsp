@@ -6,6 +6,7 @@
 <%@ include file="/WEB-INF/modelo/documento_solicitud.jspf" %>
 <%@ include file="/WEB-INF/modelo/propiedad.jspf" %>
 <%@ include file="/WEB-INF/modelo/inmobiliaria.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%
     request.setAttribute("rolesPermitidos", new HashSet<String>(Arrays.asList("CLIENTE", "INMOBILIARIA")));
 %>
@@ -66,6 +67,8 @@
                         errores.put("general", "Ya tienes una solicitud abierta para esta propiedad.");
                     } else {
                         int nueva = crearSolicitud(conexion, idUsuarioSesion, idPropiedad, observacion);
+                        registrarEvento(conexion, idUsuarioSesion, "SOLICITUD_RADICADA · solicitud " + nueva
+                                + " · propiedad " + idPropiedad);
                         conexion.commit();
                         session.setAttribute("mensaje", "Solicitud radicada correctamente.");
                         response.sendRedirect(ctx + "/controlador/solicitud.jsp?accion=detalle&id_solicitud=" + nueva);
@@ -182,6 +185,8 @@
                     session.setAttribute("mensajeError", "La propiedad ya no está disponible.");
                 } else {
                     cambiarEstadoSolicitud(conexion, idSolicitud, nuevoEstado, observacionRevision);
+                    registrarEvento(conexion, idUsuarioSesion, "SOLICITUD_" + nuevoEstado + " · solicitud " + idSolicitud
+                            + " · " + solicitudBloqueada.get("matricula"));
                     conexion.commit();
                     session.setAttribute("mensaje", "APROBADA".equals(nuevoEstado)
                             ? "Solicitud aprobada." : "Solicitud rechazada.");
@@ -198,7 +203,10 @@
                 if (!actualizarDisponibilidad(conexion, propiedadSolicitud, estadoPropiedad)) {
                     throw new SQLException("No se pudo actualizar la propiedad.", "P0002");
                 }
-                rechazarOtrasSolicitudesAbiertas(conexion, propiedadSolicitud, idSolicitud);
+                int rechazadas = rechazarOtrasSolicitudesAbiertas(conexion, propiedadSolicitud, idSolicitud);
+                registrarEvento(conexion, idUsuarioSesion, "SOLICITUD_FINALIZADA · solicitud " + idSolicitud + " · "
+                        + solicitudBloqueada.get("matricula") + " · propiedad " + estadoPropiedad
+                        + (rechazadas > 0 ? " · " + rechazadas + " solicitudes rechazadas" : ""));
                 conexion.commit();
                 session.setAttribute("mensaje", "Solicitud finalizada y propiedad marcada como " + estadoPropiedad + ".");
             }

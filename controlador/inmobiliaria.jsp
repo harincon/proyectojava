@@ -5,6 +5,7 @@
 <%@ include file="/WEB-INF/modelo/usuario.jspf" %>
 <%@ include file="/WEB-INF/modelo/usuario_rol.jspf" %>
 <%@ include file="/WEB-INF/modelo/inmobiliaria.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%--
   Empresas inmobiliarias.
   ADMINISTRADOR: GET ?accion=listar[&q&pagina] | vincular[&id_usuario=N] | editar&id_inmobiliaria=N
@@ -102,6 +103,8 @@
                 asignarRol(conexion, idCuenta, "INMOBILIARIA");
                 int idNueva = crearInmobiliaria(conexion, idCuenta, valores.get("nombre"), valores.get("identificacion"),
                         valores.get("telefono"), valores.get("correo_contacto"), valores.get("direccion"));
+                registrarEvento(conexion, idUsuarioSesion, "EMPRESA_VINCULADA · empresa " + idNueva + " · "
+                        + valores.get("identificacion") + " · cuenta " + idCuenta);
                 conexion.commit();
                 session.setAttribute("mensaje", "Empresa vinculada. La cuenta ahora tiene el rol INMOBILIARIA.");
                 response.sendRedirect(ctx + "/controlador/inmobiliaria.jsp?accion=editar&id_inmobiliaria=" + idNueva);
@@ -141,6 +144,8 @@
             try (Connection conexion = abrirConexion()) {
                 if (actualizarInmobiliaria(conexion, idInmobiliaria, valores.get("nombre"), valores.get("identificacion"),
                         valores.get("telefono"), valores.get("correo_contacto"), valores.get("direccion"))) {
+                    registrarEvento(conexion, idUsuarioSesion, "EMPRESA_ACTUALIZADA · empresa " + idInmobiliaria
+                            + " · " + valores.get("identificacion"));
                     session.setAttribute("mensaje", "Empresa actualizada.");
                     response.sendRedirect(ctx + "/controlador/inmobiliaria.jsp?accion=editar&id_inmobiliaria=" + idInmobiliaria);
                 } else {
@@ -174,6 +179,8 @@
                     actualizarInmobiliaria(conexion, (Integer) propia.get("idInmobiliaria"), valores.get("nombre"),
                             (String) propia.get("identificacion"), valores.get("telefono"),
                             valores.get("correo_contacto"), valores.get("direccion"));
+                    registrarEvento(conexion, idUsuarioSesion, "EMPRESA_ACTUALIZADA · empresa " + propia.get("idInmobiliaria")
+                            + " · " + propia.get("identificacion"));
                     session.setAttribute("mensaje", "Datos de la empresa actualizados.");
                 }
                 response.sendRedirect(ctx + "/controlador/inmobiliaria.jsp?accion=empresa");

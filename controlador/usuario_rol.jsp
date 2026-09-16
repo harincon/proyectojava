@@ -3,6 +3,7 @@
 <%@ include file="/WEB-INF/jspf/utilidades.jspf" %>
 <%@ include file="/WEB-INF/jspf/conexion.jspf" %>
 <%@ include file="/WEB-INF/modelo/usuario_rol.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%--
   Asignación de roles (solo ADMINISTRADOR).
   POST ?accion=asignar | revocar (id_usuario, rol). Solo ADMINISTRADOR y CLIENTE;
@@ -31,8 +32,12 @@
         session.setAttribute("mensajeError", "Rol no válido.");
     } else if ("asignar".equals(accion)) {
         try (Connection conexion = abrirConexion()) {
-            session.setAttribute("mensaje", asignarRol(conexion, idObjetivo, rol)
-                    ? "Rol " + rol + " asignado." : "La cuenta ya tenía el rol " + rol + ".");
+            if (asignarRol(conexion, idObjetivo, rol)) {
+                registrarEvento(conexion, idUsuarioSesion, "ROL_ASIGNADO · cuenta " + idObjetivo + " · " + rol);
+                session.setAttribute("mensaje", "Rol " + rol + " asignado.");
+            } else {
+                session.setAttribute("mensaje", "La cuenta ya tenía el rol " + rol + ".");
+            }
         }
     } else if ("revocar".equals(accion)) {
         if ("ADMINISTRADOR".equals(rol) && idObjetivo.equals(idUsuarioSesion)) {
@@ -43,6 +48,7 @@
                 if (actuales.contains(rol) && actuales.size() == 1) {
                     session.setAttribute("mensajeError", "La cuenta debe conservar al menos un rol.");
                 } else if (revocarRol(conexion, idObjetivo, rol)) {
+                    registrarEvento(conexion, idUsuarioSesion, "ROL_REVOCADO · cuenta " + idObjetivo + " · " + rol);
                     session.setAttribute("mensaje", "Rol " + rol + " revocado.");
                 } else {
                     session.setAttribute("mensajeError", "La cuenta no tenía el rol " + rol + ".");
