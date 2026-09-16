@@ -5,6 +5,7 @@
 <%@ include file="/WEB-INF/modelo/usuario.jspf" %>
 <%@ include file="/WEB-INF/modelo/perfil.jspf" %>
 <%@ include file="/WEB-INF/modelo/usuario_rol.jspf" %>
+<%@ include file="/WEB-INF/modelo/auditoria.jspf" %>
 <%--
   Controlador público de acceso.
   GET  ?accion=ingresar | registro
@@ -14,6 +15,16 @@
     // Hash de relleno: iguala el tiempo de respuesta cuando el correo no existe.
     private static final String HASH_RELLENO =
             "pbkdf2-sha256$120000$RiPdkp+xz3VYK4N6iVRXHQ==$/VY7HGSXXcnqm0r8aqaGUbHVIYulwl30Vid2IGcjl0g=";
+
+    // Tras 5 intentos fallidos seguidos, el correo queda bloqueado 5 minutos.
+    private static final int INTENTOS_PERMITIDOS = 5;
+    private static final int MINUTOS_BLOQUEO = 5;
+
+    private String mensajeBloqueo(int segundos) {
+        int minutos = Math.max(1, (segundos + 59) / 60);
+        return "Demasiados intentos fallidos. Por seguridad, espera " + minutos
+                + (minutos == 1 ? " minuto" : " minutos") + " antes de volver a intentarlo.";
+    }
 %>
 <%
     String ctx = request.getContextPath();
@@ -24,6 +35,13 @@
 
     if ("salir".equals(accion)) {
         if (esPost && tokenValido(request)) {
+            Object idSaliente = session.getAttribute("idUsuario");
+            if (idSaliente instanceof Integer) {
+                // La auditoría no debe impedir que la persona cierre sesión.
+                try (Connection conexion = abrirConexion()) {
+                    registrarEvento(conexion, (Integer) idSaliente, "CIERRE_SESION");
+                } catch (Exception ignorada) { }
+            }
             session.invalidate();
             request.getSession(true).setAttribute("mensaje", "Cerraste sesión correctamente.");
         }
@@ -78,6 +96,7 @@
                     if (!asignarRol(conexion, idNuevo, "CLIENTE")) {
                         throw new SQLException("No existe el rol CLIENTE.", "P0001");
                     }
+                    registrarEvento(conexion, idNuevo, "REGISTRO · " + correo);
                     conexion.commit();
                     session.setAttribute("mensaje", "Tu cuenta fue creada. Ya puedes iniciar sesión.");
                     response.sendRedirect(ctx + "/controlador/acceso.jsp?accion=ingresar");
@@ -121,18 +140,36 @@
         } else {
             try (Connection conexion = abrirConexion()) {
                 Map<String, Object> cuenta = buscarCuentaPorCorreo(conexion, correo);
+                String correoAuditado = correo.length() > 150 ? correo.substring(0, 150) : correo;
+                Integer idCuenta = cuenta == null ? null : (Integer) cuenta.get("idUsuario");
+                // Durante el bloqueo no se revisa la clave: ni la correcta permite entrar.
+                int segundosBloqueo = segundosBloqueoIngreso(conexion, correoAuditado, MINUTOS_BLOQUEO);
                 boolean claveCorrecta = false;
-                if (cuenta == null) {
-                    verificarClave(clave, HASH_RELLENO);
-                } else {
-                    claveCorrecta = verificarClave(clave, (String) cuenta.get("contrasenaHash"));
+                if (segundosBloqueo == 0) {
+                    if (cuenta == null) {
+                        verificarClave(clave, HASH_RELLENO);
+                    } else {
+                        claveCorrecta = verificarClave(clave, (String) cuenta.get("contrasenaHash"));
+                    }
                 }
-                if (!claveCorrecta) {
-                    errores.put("general", "Correo o contraseña incorrectos.");
+                if (segundosBloqueo > 0) {
+                    registrarEvento(conexion, idCuenta, "INGRESO_BLOQUEADO · " + correoAuditado);
+                    errores.put("general", mensajeBloqueo(segundosBloqueo));
+                } else if (!claveCorrecta) {
+                    registrarEvento(conexion, idCuenta, "INGRESO_FALLIDO · " + correoAuditado);
+                    if (intentosFallidosSeguidos(conexion, correoAuditado) >= INTENTOS_PERMITIDOS) {
+                        registrarEvento(conexion, idCuenta,
+                                "INGRESO_BLOQUEO · " + correoAuditado + " · " + MINUTOS_BLOQUEO + " minutos");
+                        errores.put("general", mensajeBloqueo(MINUTOS_BLOQUEO * 60));
+                    } else {
+                        errores.put("general", "Correo o contraseña incorrectos.");
+                    }
                 } else if (!(Boolean) cuenta.get("activo")) {
+                    registrarEvento(conexion, idCuenta, "INGRESO_FALLIDO · " + correoAuditado + " · cuenta desactivada");
                     errores.put("general", "Tu cuenta está desactivada. Comunícate con el administrador.");
                 } else {
                     int idUsuario = (Integer) cuenta.get("idUsuario");
+                    registrarEvento(conexion, idUsuario, "INGRESO · " + correoAuditado);
                     Set<String> roles = rolesDeUsuario(conexion, idUsuario);
                     Map<String, Object> usuario = buscarUsuario(conexion, idUsuario);
                     request.changeSessionId();
