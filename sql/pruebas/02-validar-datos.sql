@@ -17,7 +17,7 @@ BEGIN
             ('tipo_propiedad', 5),
             ('caracteristica', 10),
             ('propiedad', 20),
-            ('imagen_propiedad', 20),
+            ('imagen_propiedad', 27),
             ('propiedad_caracteristica', 30),
             ('cita', 15),
             ('solicitud', 15),
@@ -174,9 +174,25 @@ BEGIN
     FROM propiedad p
     JOIN imagen_propiedad ip ON ip.id_propiedad = p.id_propiedad
     WHERE p.matricula_inmobiliaria LIKE 'HAB-2026-%'
-      AND ip.ruta <> 'img/sin_foto.svg';
+      AND ip.ruta NOT LIKE 'img/habita/%';
     IF total > 0 THEN
-        RAISE EXCEPTION 'Hay % imágenes de prueba con una ruta diferente a img/sin_foto.svg.', total;
+        RAISE EXCEPTION 'Hay % imágenes de prueba fuera de img/habita/.', total;
+    END IF;
+
+    SELECT count(*) INTO total
+    FROM propiedad p
+    WHERE p.matricula_inmobiliaria LIKE 'HAB-2026-%'
+      AND NOT EXISTS (SELECT 1 FROM imagen_propiedad ip WHERE ip.id_propiedad = p.id_propiedad);
+    IF total > 0 THEN
+        RAISE EXCEPTION 'Hay % propiedades de prueba sin fotografía.', total;
+    END IF;
+
+    SELECT count(*) INTO total
+    FROM (
+        SELECT id_propiedad FROM imagen_propiedad GROUP BY id_propiedad HAVING count(*) >= 2
+    ) con_galeria;
+    IF total < 5 THEN
+        RAISE EXCEPTION 'Se requieren al menos cinco propiedades con dos fotografías; hay %.', total;
     END IF;
 
     RAISE NOTICE 'Datos de B8 verificados correctamente.';

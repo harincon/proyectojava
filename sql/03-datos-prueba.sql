@@ -144,16 +144,39 @@ FROM (VALUES
 ) AS datos(matricula, nit, ciudad, tipo, titulo, descripcion, direccion, precio, area,
            habitaciones, banos, operacion, estado, activa, destacada);
 
+-- Fotografías locales de img/habita/ (referencia de Unsplash). Seis propiedades tienen dos para probar la galería.
 INSERT INTO imagen_propiedad (id_propiedad, ruta)
 SELECT (SELECT id_propiedad FROM propiedad WHERE matricula_inmobiliaria = datos.matricula),
-       'img/sin_foto.svg'
+       datos.ruta
 FROM (VALUES
-    ('HAB-2026-001'), ('HAB-2026-002'), ('HAB-2026-003'), ('HAB-2026-004'),
-    ('HAB-2026-005'), ('HAB-2026-006'), ('HAB-2026-007'), ('HAB-2026-008'),
-    ('HAB-2026-009'), ('HAB-2026-010'), ('HAB-2026-011'), ('HAB-2026-012'),
-    ('HAB-2026-013'), ('HAB-2026-014'), ('HAB-2026-015'), ('HAB-2026-016'),
-    ('HAB-2026-017'), ('HAB-2026-018'), ('HAB-2026-019'), ('HAB-2026-020')
-) AS datos(matricula);
+    ('HAB-2026-001', 'img/habita/03-casa-jardin.jpg'),
+    ('HAB-2026-001', 'img/habita/13-casa-campestre-piscina.jpg'),
+    ('HAB-2026-002', 'img/habita/02-apartamento-chapinero.jpg'),
+    ('HAB-2026-002', 'img/habita/04-penthouse.jpg'),
+    ('HAB-2026-003', 'img/habita/13-casa-campestre-piscina.jpg'),
+    ('HAB-2026-003', 'img/habita/03-casa-jardin.jpg'),
+    ('HAB-2026-004', 'img/habita/07-apartaestudio.jpg'),
+    ('HAB-2026-005', 'img/habita/06-local-comercial.jpg'),
+    ('HAB-2026-006', 'img/habita/03-casa-jardin.jpg'),
+    ('HAB-2026-007', 'img/habita/11-ciudad-cali.jpg'),
+    ('HAB-2026-008', 'img/habita/13-casa-campestre-piscina.jpg'),
+    ('HAB-2026-008', 'img/habita/03-casa-jardin.jpg'),
+    ('HAB-2026-009', 'img/habita/04-penthouse.jpg'),
+    ('HAB-2026-009', 'img/habita/01-hero-edificio.jpg'),
+    ('HAB-2026-010', 'img/habita/05-oficina.jpg'),
+    ('HAB-2026-011', 'img/habita/02-apartamento-chapinero.jpg'),
+    ('HAB-2026-012', 'img/habita/06-local-comercial.jpg'),
+    ('HAB-2026-013', 'img/habita/03-casa-jardin.jpg'),
+    ('HAB-2026-014', 'img/habita/05-oficina.jpg'),
+    ('HAB-2026-015', 'img/habita/04-penthouse.jpg'),
+    ('HAB-2026-015', 'img/habita/09-apartamento-mar-cartagena.jpg'),
+    ('HAB-2026-016', 'img/habita/08-bodega-bucaramanga.jpg'),
+    ('HAB-2026-017', 'img/habita/09-apartamento-mar-cartagena.jpg'),
+    ('HAB-2026-017', 'img/habita/10-banner-publicar.jpg'),
+    ('HAB-2026-018', 'img/habita/12-ciudad-barranquilla.jpg'),
+    ('HAB-2026-019', 'img/habita/05-oficina.jpg'),
+    ('HAB-2026-020', 'img/habita/07-apartaestudio.jpg')
+) AS datos(matricula, ruta);
 
 INSERT INTO propiedad_caracteristica (id_propiedad, id_caracteristica)
 SELECT (SELECT id_propiedad FROM propiedad WHERE matricula_inmobiliaria = datos.matricula),

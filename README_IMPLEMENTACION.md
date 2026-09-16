@@ -48,7 +48,7 @@ Verificado en Tomcat (58 comprobaciones por HTTP, con los datos de B8):
 
 Capturas revisadas a 1366 y 390 px. Corregido: aviso correcto en propiedades no disponibles para visitantes, precio y empresa apilados en las tarjetas, y campos de precio y área sin decimales sobrantes.
 
-Pendiente: las propiedades de B8 usan la imagen de reemplazo, así que el catálogo se ve sin fotos. En el cierre de B8 conviene asignarles las fotografías de `img/habita/`.
+Después de B4 se asignaron las fotografías de `img/habita/` a las 20 propiedades de prueba (27 filas en `imagen_propiedad`; seis propiedades tienen dos para probar la galería). El cambio quedó en `sql/03-datos-prueba.sql`, en su validación y cargado en la base.
 
 ## B3 — 15 de septiembre de 2026
 

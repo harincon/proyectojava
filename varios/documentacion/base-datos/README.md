@@ -31,7 +31,7 @@ scripts.
 | tipo_propiedad | Catálogo | 5 |
 | caracteristica | Catálogo | 10 |
 | propiedad | Principal | 20 |
-| imagen_propiedad | Soporte | 20 |
+| imagen_propiedad | Soporte | 27 |
 | propiedad_caracteristica | Asociación | 30 |
 | cita | Principal | 15 |
 | solicitud | Principal | 15 |
@@ -39,7 +39,9 @@ scripts.
 | favorito | Asociación | 10 |
 | auditoria | Soporte | 0 |
 
-`auditoria` queda vacía porque sus eventos se implementan en B7. Las rutas de
+`auditoria` queda vacía porque sus eventos se implementan en B7. Las fotografías de
+`imagen_propiedad` apuntan a los archivos del proyecto en `img/habita/`, y seis
+propiedades tienen dos para mostrar la galería del detalle. Las rutas de
 `documento_solicitud`, por ejemplo `solicitudes/001/cedula.pdf`, representan dónde
 se guardarán los archivos. Los PDF físicos todavía no existen; B6 se encarga de
 crearlos, protegerlos y servirlos.
