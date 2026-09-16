@@ -17,7 +17,7 @@ BEGIN
             ('tipo_propiedad', 5),
             ('caracteristica', 10),
             ('propiedad', 20),
-            ('imagen_propiedad', 27),
+            ('imagen_propiedad', 30),
             ('propiedad_caracteristica', 30),
             ('cita', 15),
             ('solicitud', 15),
@@ -193,6 +193,18 @@ BEGIN
     ) con_galeria;
     IF total < 5 THEN
         RAISE EXCEPTION 'Se requieren al menos cinco propiedades con dos fotografías; hay %.', total;
+    END IF;
+
+    -- En el catálogo público cada propiedad debe mostrar una fotografía principal distinta.
+    SELECT count(*) - count(DISTINCT principal) INTO total
+    FROM (
+        SELECT (SELECT ip.ruta FROM imagen_propiedad ip
+                WHERE ip.id_propiedad = p.id_propiedad ORDER BY ip.id_imagen LIMIT 1) AS principal
+        FROM propiedad p
+        WHERE p.matricula_inmobiliaria LIKE 'HAB-2026-%' AND p.activa AND p.estado = 'DISPONIBLE'
+    ) catalogo;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'Hay % fotografías principales repetidas en el catálogo público.', total;
     END IF;
 
     RAISE NOTICE 'Datos de B8 verificados correctamente.';

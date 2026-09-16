@@ -142,7 +142,13 @@ Verificado en Tomcat (58 comprobaciones por HTTP, con los datos de B8):
 
 Capturas revisadas a 1366 y 390 px. Corregido: aviso correcto en propiedades no disponibles para visitantes, precio y empresa apilados en las tarjetas, y campos de precio y área sin decimales sobrantes.
 
-Después de B4 se asignaron las fotografías de `img/habita/` a las 20 propiedades de prueba (27 filas en `imagen_propiedad`; seis propiedades tienen dos para probar la galería). El cambio quedó en `sql/03-datos-prueba.sql`, en su validación y cargado en la base.
+Después de B4 se asignaron fotografías de `img/habita/` a las 20 propiedades de prueba. El 16 de septiembre el estudiante agregó 16 fotos de Unsplash:
+- **Preparación:** se recortaron a 3:2 y se redujeron a 1200 × 800 px (de 37 MB a unos 2,7 MB); los originales quedan fuera de Git.
+- **Reparto:** con 29 fotos, las 14 propiedades publicadas tienen cada una una foto principal distinta y acorde a su tipo. Hay 30 filas en `imagen_propiedad`, y nueve propiedades tienen galería.
+- **Validación:** comprueba que las principales del catálogo no se repitan.
+- **Créditos:** en `varios/referencias/fotografias.md`.
+
+Todo quedó en `sql/03-datos-prueba.sql`, en su validación y cargado en la base.
 
 ## B3 — 15 de septiembre de 2026
 

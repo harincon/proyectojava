@@ -31,7 +31,7 @@ scripts.
 | tipo_propiedad | Catálogo | 5 |
 | caracteristica | Catálogo | 10 |
 | propiedad | Principal | 20 |
-| imagen_propiedad | Soporte | 27 |
+| imagen_propiedad | Soporte | 30 |
 | propiedad_caracteristica | Asociación | 30 |
 | cita | Principal | 15 |
 | solicitud | Principal | 15 |
@@ -39,9 +39,11 @@ scripts.
 | favorito | Asociación | 10 |
 | auditoria | Soporte | 0 |
 
-`auditoria` queda vacía porque sus eventos se implementan en B7. Las fotografías de
-`imagen_propiedad` apuntan a los archivos del proyecto en `img/habita/`, y seis
-propiedades tienen dos para mostrar la galería del detalle. Las rutas de
+`auditoria` queda vacía después de la carga: sus eventos los registra la aplicación
+desde el primer uso (ingresos, cambios y trámites) y no se inventan eventos anteriores. Las fotografías de
+`imagen_propiedad` apuntan a los 29 archivos del proyecto en `img/habita/`. La primera de
+cada propiedad es la del catálogo y no se repite entre las publicadas; nueve propiedades
+tienen una segunda para la galería del detalle (créditos en `varios/referencias/fotografias.md`). Las rutas de
 `documento_solicitud`, por ejemplo `solicitudes/001/cedula.pdf`, son relativas a la
 carpeta privada `WEB-INF/archivos/`. Esos PDF de ejemplo no se guardan en Git: se crean
 con `varios/herramientas/generar-pdf-ejemplo.ps1` después de cargar los datos de prueba,

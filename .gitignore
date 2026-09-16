@@ -15,3 +15,6 @@ desktop.ini
 
 # Exportaciones sueltas de Figma; las imagenes en uso estan en img/habita/
 img/*.png
+
+# Originales pesados de las fotos del catálogo; en img/habita/ están las versiones reducidas.
+varios/referencias/fotos-originales/
