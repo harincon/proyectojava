@@ -43,11 +43,10 @@ Este README es la entrada general. Para un tema puntual, va directo al documento
 | Para esto | Ir a |
 | --- | --- |
 | Entregar o sustentar el proyecto (informe, pruebas, casos de uso, guía de ejecución, capturas, presentación) | [Entrega final B9](varios/documentacion/entrega/README.md) |
-| Ver qué se hizo en cada bloque, con fecha y comprobaciones | [Registro de cambios](README_IMPLEMENTACION.md) |
 | Consultar las reglas técnicas y los contratos entre módulos (sesión, seguridad, funciones de modelo, rutas) | [Acuerdos para los bloques](varios/planificacion/CONTRATOS.md) |
 | Entender el modelo de datos, el diccionario y la 3FN | [Documentación de la base de datos](varios/documentacion/base-datos/README.md) |
 | Ver cómo se repartió el trabajo por bloques (B0–B9) y su estado | [Plan de delegación](varios/planificacion/PLAN_DELEGACION.md) |
-| Ver el plan técnico original y el plano visual con paletas | [Plan de implementación](varios/planificacion/PLAN_IMPLEMENTACION.md) · [Plano y paletas](varios/planificacion/PLANO.html) |
+| Ver el plan técnico original | [Plan de implementación](varios/planificacion/PLAN_IMPLEMENTACION.md) |
 | Ver el material de referencia (parcial, simulacro, Figma, créditos de fotos) | [varios/referencias/](varios/referencias/) |
 
 Los PDF, diagramas y documentación se agrupan en varios/. La BD no se modifica por el cambio de organización de la aplicación.

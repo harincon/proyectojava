@@ -1,6 +1,6 @@
 # Acuerdos para la versión JSP/JSPF
 
-Revisión del 14 de septiembre de 2026. Sustituye los contratos base-B0-v1. B0 está implementado y verificado en Tomcat 8.5.96 (15 de septiembre de 2026): conexion.jspf, utilidades.jspf, plantilla de conexión y pruebas de conexión y subida. B1 (diseño) también está implementado y verificado (15 de septiembre de 2026). B2 (acceso y usuarios), B3 (empresas y catálogos), B4 (inicio y publicaciones), B5 (favoritos y citas), B6 (solicitudes y documentos) y B7 (reportes y auditoría) están implementados y verificados, y los datos de B8 están cargados (16 de septiembre de 2026). Queda habilitado B9.
+
 
 [Plan general](PLAN_IMPLEMENTACION.md) · [Delegación](PLAN_DELEGACION.md) · [SQL](../../sql/01-esquema.sql).
 

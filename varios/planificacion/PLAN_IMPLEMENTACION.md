@@ -1,6 +1,5 @@
 # Plan de estructura MVC con JSP y JSPF
 
-Estado: planificación revisada el 14 de septiembre de 2026 por instrucción del estudiante. Sustituye la estructura anterior de clases Java propias; B0 debe rehacerse antes de continuar.
 
 ## 1. Criterio de trabajo
 

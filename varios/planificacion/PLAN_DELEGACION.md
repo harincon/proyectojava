@@ -1,6 +1,6 @@
 # Delegación — estructura MVC con JSP/JSPF
 
-Revisión: 14 de septiembre de 2026. Organización por modelo, vista y controlador, no por roles. Solo se están preparando carpetas; no se autoriza implementar módulos con esta revisión. Mantener JSP/JSPF sin clases Java propias.
+
 
 ## Reglas comunes
 

@@ -4,8 +4,8 @@ Esta carpeta reúne material de apoyo que no forma parte de la aplicación despl
 
 | Carpeta | Contenido |
 | --- | --- |
-| referencias/ | PDF del parcial y del simulacro |
-| planificacion/ | Plan de implementación, plano y paletas |
+| referencias/ | PDF del diseño de Figma y créditos de fotografías |
+| planificacion/ | Plan de implementación, plan de delegación y acuerdos entre bloques |
 | documentacion/base-datos/ | Diagrama aportado por el estudiante y documentación de BD |
 
-[Volver al proyecto](../README.md) · [Abrir el plano](planificacion/PLANO.html).
+[Volver al proyecto](../README.md).
