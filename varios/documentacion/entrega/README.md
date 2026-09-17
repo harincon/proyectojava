@@ -8,15 +8,7 @@ Esta carpeta reúne la evidencia de B9 sin modificar la funcionalidad de la apli
 - [Guía de ejecución](GUIA_EJECUCION.md): creación de la base, scripts, conexión JDBC y despliegue en Tomcat.
 - [Índice de capturas](CAPTURAS.md): 17 imágenes reales de la aplicación.
 
-El informe técnico en PDF, el informe de pruebas, la evidencia Scrum, el historial de Git, los pendientes de entrega y la presentación de sustentación se comparten con el profesor por separado; no forman parte de este repositorio.
-
-## Evidencia técnica
-
-- `evidencia/resultado_pruebas_b9.json`: resultado estructurado de 30 comprobaciones.
-- `evidencia/resultado_responsive_b9.json`: mediciones reales del navegador.
-- `evidencia/pruebas_b9_temporal.ps1`: recorrido automatizado con datos temporales y verificación en PostgreSQL.
-- `evidencia/capturar_pantallas_b9.ps1`: captura de las vistas públicas y autenticadas con Edge headless.
-- `evidencia/generar_presentacion_b9.ps1`: generación reproducible de la presentación con las capturas reales.
+El informe técnico en PDF, el informe de pruebas, la evidencia Scrum, el historial de Git, los pendientes de entrega, la presentación de sustentación y los scripts y resultados técnicos de la carpeta `evidencia/` se comparten con el profesor por separado; no forman parte de este repositorio.
 
 ## Resultado
 
