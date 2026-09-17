@@ -34,7 +34,7 @@ La carpeta proyectojava/ ya es la raíz pública de Tomcat. controlador/ contien
 
 El PDF de Figma se encuentra junto a los demás PDF en varios/referencias/. `index.jsp` sirve la portada pública vigente.
 
-La auditoría y la revisión global se completaron en B7 y B9. El detalle de las pruebas finales se comparte con el profesor por separado (informe de pruebas de B9).
+La auditoría y la revisión global se completaron en B7 y B9.
 
 ## Documentos
 

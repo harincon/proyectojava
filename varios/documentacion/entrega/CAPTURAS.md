@@ -31,4 +31,4 @@ Las imágenes se tomaron contra `http://localhost:8080/proyectojava` con Edge he
 - `16-reportes-admin.png`
 - `17-auditoria-admin.png`
 
-Las mediciones del navegador confirman que las páginas revisadas no superaron el ancho de su viewport (detalle en la evidencia técnica compartida con el profesor por separado).
+Las mediciones del navegador confirman que las páginas revisadas no superaron el ancho de su viewport.

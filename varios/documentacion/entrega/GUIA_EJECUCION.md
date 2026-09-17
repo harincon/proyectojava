@@ -91,4 +91,4 @@ Las páginas `controlador/prueba_conexion.jsp`, `controlador/prueba_subida.jsp` 
 
 ## 8. Limitaciones de la entrega
 
-La conexión remota, el despliegue público y el Filter exigido literalmente por el parcial no forman parte de la configuración actual. La aplicación protege cada controlador privado mediante `WEB-INF/jspf/seguridad.jspf`. Consultar el documento de pendientes de entrega (compartido con el profesor por separado) antes de sustentar o publicar.
+La conexión remota, el despliegue público y el Filter exigido literalmente por el parcial no forman parte de la configuración actual. La aplicación protege cada controlador privado mediante `WEB-INF/jspf/seguridad.jspf`.
