@@ -4,15 +4,11 @@ Esta carpeta reúne la evidencia de B9 sin modificar la funcionalidad de la apli
 
 ## Documentos
 
-- [Informe técnico final en PDF](INFORME_TECNICO_HABITA.pdf): documento principal de entrega con arquitectura, seguridad, base de datos, módulos, pruebas y capturas reales.
-- [Informe de pruebas](INFORME_PRUEBAS.md): recorrido completo, permisos, concurrencia, documentos privados, validaciones y diseño responsivo.
 - [Casos de uso](CASOS_DE_USO.md): actores, alcance y flujos principales del sistema.
 - [Guía de ejecución](GUIA_EJECUCION.md): creación de la base, scripts, conexión JDBC y despliegue en Tomcat.
-- [Evidencia Scrum](SCRUM_EVIDENCIA.md): backlog, distribución propuesta en tres sprints y evidencia que realmente existe.
-- [Historial de Git](HISTORIAL_GIT.md): commits y merges leídos del reflog sin usar comandos de Git.
-- [Pendientes de entrega](PENDIENTES.md): decisiones y correcciones que B9 no aplicó.
 - [Índice de capturas](CAPTURAS.md): 17 imágenes reales de la aplicación.
-- [Presentación de sustentación](PRESENTACION_HABITA.pptx): material auxiliar anterior; la entrega principal es el informe PDF.
+
+El informe técnico en PDF, el informe de pruebas, la evidencia Scrum, el historial de Git, los pendientes de entrega y la presentación de sustentación se comparten con el profesor por separado; no forman parte de este repositorio.
 
 ## Evidencia técnica
 

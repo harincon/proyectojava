@@ -18,3 +18,11 @@ img/*.png
 
 # Originales pesados de las fotos del catálogo; en img/habita/ están las versiones reducidas.
 varios/referencias/fotos-originales/
+
+# Documentos de entrega que se comparten con el profesor por otro medio, no en el repositorio.
+varios/documentacion/entrega/HISTORIAL_GIT.md
+varios/documentacion/entrega/INFORME_PRUEBAS.md
+varios/documentacion/entrega/INFORME_TECNICO_HABITA.pdf
+varios/documentacion/entrega/PENDIENTES.md
+varios/documentacion/entrega/PRESENTACION_HABITA.pptx
+varios/documentacion/entrega/SCRUM_EVIDENCIA.md
