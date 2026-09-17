@@ -19,7 +19,24 @@ La comprobación técnica /estado y los contratos de base-B0-v1 ya no están dis
 
 ## Próximo paso
 
-Confirmar B7 y la integración de la auditoría en Git. Después, B9: recorrido completo, evidencias, casos de uso, guía de ejecución y sustentación.
+Resolver con el profesor y el coordinador los pendientes documentados por B9 antes de publicar: Filter de servlet, contraseña inicial, páginas de diagnóstico, instancia remota y evidencia Scrum.
+
+## B9 — 16 de septiembre de 2026
+
+Integración, pruebas finales y documentación de entrega.
+
+- Se ejecutaron 30 comprobaciones con los tres roles. Registro, perfil, publicación, catálogo, favorito, cita, solicitud, PDF, revisión, cierre, reportes y auditoría pasaron.
+- Dos clientes compitieron por el mismo horario. Quedó una sola cita activa y la otra respuesta informó que el horario estaba reservado.
+- Dos POST simultáneos intentaron cerrar la misma solicitud. Quedó una solicitud `FINALIZADA`, una propiedad `VENDIDA` y un solo evento de finalización.
+- Los documentos se descargaron para el cliente dueño, la empresa propietaria y el administrador. Los usuarios ajenos recibieron 403 y la ruta física bajo `WEB-INF` devolvió 404.
+- Se comprobaron `%PDF-`, límite de 5 MB, token, fecha futura, duplicados, IDs ajenos y validación de precio.
+- El catálogo se revisó a 390, 768 y 1366 px sin desbordamiento horizontal. Se conservaron 17 capturas reales.
+- `02-validar-datos.sql` pasó y `04-consultas.sql` devolvió 20, 15, 15, 30, 5, 4 y 4 filas dentro de una transacción de solo lectura.
+- La cuenta, propiedad, trámites, eventos y PDF de prueba se eliminaron. Los conteos volvieron a 21 usuarios, 20 propiedades, 15 citas, 15 solicitudes, 20 documentos y 10 favoritos.
+
+Documentos creados en `varios/documentacion/entrega/`: informe de pruebas, casos de uso, guía de ejecución, evidencia Scrum, historial Git, pendientes, índice de capturas y presentación PowerPoint.
+
+No se inventaron ceremonias Scrum. El reflog evidencia 28 commits o merges entre el 14 y el 16 de septiembre de 2026, pero no actas suficientes de tres sprints reales de siete días.
 
 ## B7 — 16 de septiembre de 2026
 
@@ -217,7 +234,7 @@ Capturas revisadas a 1366 px: ingreso, panel, usuarios, edición y perfil. Las c
 
 Corregido durante la prueba: la foto se enviaba como `image/png;charset=UTF-8`; ahora se limpia la respuesta antes de fijar el tipo.
 
-Pendiente: B3 implementa `inmobiliaria.jsp?accion=vincular`, destino del botón «Empresa». Para B9: el requisito Filter del parcial sigue sin resolver (seguridad.jspf no es un Filter) y hay que decidirlo con el profesor.
+La vinculación de empresa quedó implementada por B3. B9 confirmó que el requisito literal de un Filter sigue sin resolverse: `seguridad.jspf` controla sesión y roles, pero no es una implementación de `javax.servlet.Filter`. La decisión está documentada para el profesor y el coordinador.
 
 ## Datos base — 15 de septiembre de 2026
 
@@ -261,11 +278,11 @@ Base común en JSP/JSPF sobre Tomcat 8.5.96, con web.xml 3.1.
 
 Verificado por HTTP en Tomcat: conexión a PostgreSQL 18.6, esquema con 16 tablas, columnas con ñ, hash (confirmado también con .NET), escape, validaciones, fechas, token aceptado y rechazado, texto POST con ñ intacto, y subida de archivos (nombre con ñ, 3 MB aceptado, 12 MB rechazado con mensaje, token falso rechazado, sin archivos residuales). La base de datos no se modificó.
 
-Pendiente para B9: retirar o proteger las dos páginas de prueba antes de publicar.
+Pendiente de publicación: retirar o exigir rol ADMINISTRADOR en `prueba_conexion.jsp`, `prueba_subida.jsp` y `prueba_diseno.jsp`. Actualmente las tres solo responden desde loopback.
 
 Se retiraron los dos archivos de propiedades y su carpeta config. conexion.jspf conserva los datos de conexión, fija currentSchema=inmobiliaria y está excluido de Git por contener credenciales. La prueba ejecutó su función por JDBC y confirmó 16 tablas; no fue una prueba HTTP de JSP en Tomcat.
 
-Se trasladó el PDF Figma a varios/referencias/ y se usa index.jsp como entrada temporal. Por la última instrucción del estudiante, se retiraron las carpetas vacías por rol y se crearon controlador/, WEB-INF/modelo/ y WEB-INF/vista/. Se conservan recursos y fragmentos comunes. Esta modificación solo organiza carpetas y documentación; no implementa lógica.
+Se trasladó el PDF Figma a varios/referencias/ y `index.jsp` quedó como portada pública. Por la última instrucción del estudiante, se retiraron las carpetas vacías por rol y se crearon controlador/, WEB-INF/modelo/ y WEB-INF/vista/. Se conservan recursos y fragmentos comunes.
 
 La auditoría se aplaza a B7, después de los módulos principales. La revisión global y las evidencias se preparan al final; durante el desarrollo solo se comprueba el cambio y se registra un resumen breve por bloque.
 

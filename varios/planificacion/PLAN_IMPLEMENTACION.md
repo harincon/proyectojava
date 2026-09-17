@@ -4,7 +4,7 @@ Estado: planificación revisada el 14 de septiembre de 2026 por instrucción del
 
 ## 1. Criterio de trabajo
 
-Usar JSP/JSPF y la sencillez del [simulacro del restaurante](../referencias/SIMULACRO_PARCIAL_PRACTICO_Aplicacion_Web_JSP_Restaurante.pdf), pero organizar el proyecto por modelo, vista y controlador, según la última instrucción del estudiante. No organizar carpetas por roles.
+Usar JSP/JSPF y la sencillez del simulacro del restaurante entregado por el profesor, pero organizar el proyecto por modelo, vista y controlador, según la última instrucción del estudiante. No organizar carpetas por roles.
 
 No crear paquetes de modelos, DAO, controladores Java ni clases Filter propias. El código Java necesario se escribe dentro de JSP/JSPF y Tomcat compila las páginas internamente. No se mantiene un paso manual de javac. La conexión ya está implementada en conexion.jspf; los demás componentes están pendientes.
 
@@ -18,7 +18,7 @@ El controlador JSP recibe la petición, valida sesión/roles y parámetros, llam
 
 Los fragmentos comunes permanecen en WEB-INF/jspf. El SQL de negocio va en WEB-INF/modelo; conexion.jspf sigue centralizando JDBC. Los fragmentos del modelo se incluyen en los controladores, no en las vistas.
 
-Esta es una estructura MVC propuesta, todavía sin lógica implementada. El [parcial](../referencias/PARCIAL_JAVA_1_CORTE_PRACTICO_V2.pdf) también pide un Filter de servlet; esa parte sigue pendiente y no queda satisfecha por crear carpetas ni por incluir seguridad.jspf. No se crearán clases Java propias durante esta fase de estructura.
+Esta es una estructura MVC propuesta, todavía sin lógica implementada. El parcial también pide un Filter de servlet; esa parte sigue pendiente y no queda satisfecha por crear carpetas ni por incluir seguridad.jspf. No se crearán clases Java propias durante esta fase de estructura.
 
 ## 3. Estructura prevista
 
@@ -91,7 +91,7 @@ seguridad.jspf, el token, el hash y la subida de fotos están implementados desd
 
 ## 7. Ajustes visuales respecto a Figma
 
-La referencia vigente está en `varios/referencias/figma-habita/`. Se conserva el nombre Habita y el lema «Encuentra tu próximo espacio». La paleta aplicada es verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`. Los recursos usados por la aplicación están en `img/habita/` y los estilos comunes en `css/estilos.css`.
+La referencia vigente es el diseño de Figma en `varios/referencias/figmatemplate.pdf`. Se conserva el nombre Habita y el lema «Encuentra tu próximo espacio». La paleta aplicada es verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`. Los recursos usados por la aplicación están en `img/habita/` y los estilos comunes en `css/estilos.css`.
 
 El código React, TypeScript y Tailwind entregado por Figma es solo una referencia visual. Las pantallas del proyecto se construyen con JSP/JSPF, HTML, CSS y Bootstrap local, conservando la arquitectura y los contratos del parcial.
 

@@ -2,13 +2,26 @@
 
 Las fotos de `img/habita/` son imágenes gratuitas de [Unsplash](https://unsplash.com/license), usadas como datos de prueba del proyecto académico. La licencia de Unsplash no exige atribución, pero se conserva por buena práctica.
 
-- **01 a 13:** vienen del prototipo de Figma (ver `figma-habita/IMAGENES.md`).
+- **01 a 13:** vienen del prototipo de Figma que definió el diseño de Habita (ver `figmatemplate.pdf`, en esta misma carpeta). La paleta adoptada en B1 fue verde bosque `#243B32`, terracota `#C96E4B`, oliva `#83946A`, arena `#E8D8C4`, crema `#F7F2E8` y carbón `#252525`.
 - **14 a 29:** las agregó el estudiante el 16 de septiembre de 2026.
 
 Para que el catálogo cargue rápido, se recortaron al centro en proporción 3:2 y se redujeron a 1200 × 800 px: pasaron de 37 MB a unos 2,7 MB. Los originales quedan en `varios/referencias/fotos-originales/`, excluidos de Git.
 
 | Archivo | Muestra | Autor | Foto original |
 | --- | --- | --- | --- |
+| 01-hero-edificio.jpg | Portada de inicio, acceso y tarjeta de Bogotá | — | (prototipo de Figma) |
+| 02-apartamento-chapinero.jpg | Apartamento en Chapinero y primera imagen de galería | — | (prototipo de Figma) |
+| 03-casa-jardin.jpg | Casa familiar con jardín y segunda imagen de galería | — | (prototipo de Figma) |
+| 04-penthouse.jpg | Penthouse y tercera imagen de galería | — | (prototipo de Figma) |
+| 05-oficina.jpg | Oficina corporativa y cuarta imagen de galería | — | (prototipo de Figma) |
+| 06-local-comercial.jpg | Local comercial | — | (prototipo de Figma) |
+| 07-apartaestudio.jpg | Apartaestudio amoblado | — | (prototipo de Figma) |
+| 08-bodega-bucaramanga.jpg | Bodega industrial y tarjeta de Bucaramanga | — | (prototipo de Figma) |
+| 09-apartamento-mar-cartagena.jpg | Apartamento frente al mar y tarjeta de Cartagena | — | (prototipo de Figma) |
+| 10-banner-publicar.jpg | Banner para publicar y tarjeta de Medellín | — | (prototipo de Figma) |
+| 11-ciudad-cali.jpg | Tarjeta de Cali | — | (prototipo de Figma) |
+| 12-ciudad-barranquilla.jpg | Tarjeta de Barranquilla | — | (prototipo de Figma) |
+| 13-casa-campestre-piscina.jpg | Casa campestre con piscina, ambiente de concepto abierto | — | (prototipo de Figma) |
 | 14-casa-moderna-blanca.jpg | Fachada de casa moderna blanca | Bilal Mansuri | https://unsplash.com/photos/R8F3tLZUWRs |
 | 15-casa-campestre-bosque.jpg | Casa de campo en el bosque al atardecer | Clay Banks | https://unsplash.com/photos/obnpdOXBaU8 |
 | 16-loft-doble-altura.jpg | Sala de loft con doble altura | Davide Colonna | https://unsplash.com/photos/DZrZhVd_wR0 |

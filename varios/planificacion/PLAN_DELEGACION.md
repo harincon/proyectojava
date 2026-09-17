@@ -4,8 +4,8 @@ Revisión: 14 de septiembre de 2026. Organización por modelo, vista y controlad
 
 ## Reglas comunes
 
-- Leer [plan general](PLAN_IMPLEMENTACION.md), [acuerdos](CONTRATOS.md), [SQL](../../sql/01-esquema.sql) y [simulacro](../referencias/SIMULACRO_PARCIAL_PRACTICO_Aplicacion_Web_JSP_Restaurante.pdf).
-- El [PDF de Figma](../referencias/Sin%20título.pdf) orienta lo visual con los ajustes del plan; no agregar campos o funciones solo por la plantilla.
+- Leer [plan general](PLAN_IMPLEMENTACION.md), [acuerdos](CONTRATOS.md) y [SQL](../../sql/01-esquema.sql).
+- El [PDF de Figma](../referencias/figmatemplate.pdf) orienta lo visual con los ajustes del plan; no agregar campos o funciones solo por la plantilla.
 - proyectojava/ ya es la raíz pública de Tomcat. No anidar otra carpeta web/.
 - Un dueño por archivo mientras se trabaja. El coordinador integra; no sustituir todo el proyecto con la copia de otra IA.
 - Priorizar JSP/JSPF frente a JavaScript: formularios GET/POST, filtros, paginación, validación y decisiones en servidor. B1 solo incorpora JavaScript indispensable para interacción del navegador y para el requisito del parcial; no añadir validaciones.js, AJAX ni lógica de negocio cliente por defecto.
@@ -30,7 +30,7 @@ M = WEB-INF/modelo; C = controlador; V = WEB-INF/vista. Los archivos de M usan .
 | B6 | Solicitudes/documentos — **terminado** | M y C: solicitud, documento_solicitud. V/solicitudes.jsp, formulario_solicitud.jsp y solicitud.jsp |
 | B7 | Reportes y auditoría final — **terminado** (auditoría integrada por el coordinador) | M y C: reporte, auditoria. V/reportes.jsp y auditoria.jsp; sql/04-consultas.sql |
 | B8 | Datos y documentación BD — **terminado** (ajustes finales con B4–B7) | sql/03-datos-prueba.sql; sql/pruebas/02-validar-datos.sql; varios/documentacion/base-datos/ |
-| B9 | Integración y cierre | Documentación, pruebas finales, Scrum y README mediante el coordinador |
+| B9 | Integración y cierre — **terminado** | Documentación, pruebas finales, Scrum, capturas y presentación mediante el coordinador |
 
 Cabecera reúne menú y avisos; no crear fragmentos visuales adicionales por cada rol. Auditoría se implementa en B7; el coordinador integra las llamadas en operaciones ya terminadas, sin edición simultánea de esos archivos.
 
